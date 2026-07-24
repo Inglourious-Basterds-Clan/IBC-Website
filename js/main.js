@@ -17,16 +17,19 @@ function initMobileMenu() {
   if (toggle && navList) {
     toggle.addEventListener('click', () => {
       navList.classList.toggle('active');
-      // Simple rotation of menu bars if needed, or toggle aria
+      toggle.classList.toggle('open');
       const isActive = navList.classList.contains('active');
       toggle.setAttribute('aria-expanded', isActive ? 'true' : 'false');
+      document.body.style.overflow = isActive ? 'hidden' : '';
     });
 
     // Close menu when a link is clicked
     navLinks.forEach(link => {
       link.addEventListener('click', () => {
         navList.classList.remove('active');
+        toggle.classList.remove('open');
         toggle.setAttribute('aria-expanded', 'false');
+        document.body.style.overflow = '';
       });
     });
   }
@@ -83,9 +86,15 @@ function initLightbox() {
     updateLightboxContent();
   }
 
-  // Attach click to items
+  // Attach click and keyboard events to items
   items.forEach((item, index) => {
     item.addEventListener('click', () => openLightbox(index));
+    item.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        openLightbox(index);
+      }
+    });
   });
 
   // Controls
@@ -115,6 +124,21 @@ function initRecruitmentTerminal() {
   const consoleEl = document.getElementById('terminal-console');
   if (!consoleEl) return;
 
+  let booted = false;
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting && !booted) {
+        booted = true;
+        runBootSequence(consoleEl);
+      }
+    });
+  }, { threshold: 0.3 });
+
+  const recSection = document.getElementById('recruitment');
+  if (recSection) observer.observe(recSection);
+}
+
+function runBootSequence(consoleEl) {
   function writeToConsole(message, status = 'info') {
     const line = document.createElement('div');
     line.className = 'terminal-line';
@@ -163,27 +187,22 @@ function initScrollSpy() {
   
   if (navLinks.length === 0) return;
 
-  window.addEventListener('scroll', () => {
-    let current = '';
-    const scrollPos = window.scrollY + 120; // Offset for header height
-    
-    sections.forEach(section => {
-      const sectionTop = section.offsetTop;
-      const sectionHeight = section.offsetHeight;
-      
-      if (scrollPos >= sectionTop && scrollPos < sectionTop + sectionHeight) {
-        current = section.getAttribute('id') || '';
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.getAttribute('id') || (entry.target.tagName === 'HEADER' ? 'hero' : '');
+        if (id) {
+          navLinks.forEach(link => {
+            link.classList.remove('active-nav');
+            const href = link.getAttribute('href');
+            if (href === `#${id}`) link.classList.add('active-nav');
+          });
+        }
       }
     });
+  }, { rootMargin: '-30% 0px -60% 0px' });
 
-    navLinks.forEach(link => {
-      link.classList.remove('active-nav');
-      const href = link.getAttribute('href');
-      if (href === `#${current}` || (current === 'hero' && href === '#hero')) {
-        link.classList.add('active-nav');
-      }
-    });
-  });
+  sections.forEach(section => observer.observe(section));
 }
 
 /* --- EASTER EGG DECRYPTION CONSOLE --- */
@@ -194,7 +213,7 @@ function initEasterEgg() {
   
   if (!trigger || !overlay || !closeBtn) return;
 
-  trigger.addEventListener('click', () => {
+  const openEasterEgg = () => {
     overlay.style.display = 'flex';
     document.body.style.overflow = 'hidden'; // Lock scrolling
     
@@ -214,6 +233,14 @@ function initEasterEgg() {
       `;
       consoleEl.appendChild(line);
       consoleEl.scrollTop = consoleEl.scrollHeight;
+    }
+  };
+
+  trigger.addEventListener('click', openEasterEgg);
+  trigger.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      openEasterEgg();
     }
   });
 
