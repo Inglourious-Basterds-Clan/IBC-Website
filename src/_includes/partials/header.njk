@@ -1,0 +1,27 @@
+  <header>
+    <div class="nav-container">
+      <div class="logo">
+        <a href="/#hero">
+          <img src="/assets/logo.png" alt="IBC Logo" class="logo-img" width="48" height="48" decoding="async">
+          <div class="logo-text">
+            <span>Inglourious</span>
+            <span>Basterds</span>
+            <span>Clan</span>
+          </div>
+        </a>
+      </div>
+      <button class="menu-toggle" aria-label="Przełącz menu" aria-expanded="false" aria-controls="mobile-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <nav>
+        <ul id="mobile-nav">
+          <li><a href="/#hero"{% if page.url == "/" %} class="active-nav"{% endif %}>System</a></li>
+          <li><a href="/#about">O nas</a></li>
+          <li><a href="/#gallery">Galeria</a></li>
+          <li><a href="/#recruitment">Rekrutacja</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>

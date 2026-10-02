@@ -1,0 +1,32 @@
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- SEO Meta Tags -->
+  <title>{{ title or "IBC Clan // Wizytówka Taktyczna Arma 3" }}</title>
+  <meta name="description" content="Oficjalna strona klanu IBC w Arma 3. Dołącz do naszej społeczności milsim, bierz udział w zorganizowanych operacjach i przeżyj realistyczną symulację pola walki.">
+  {% if page.url == "/" %}<meta name="keywords" content="Arma 3, klan, milsim, IBC, rekrutacja, co-op, symulacja wojskowa, gry taktyczne">{% endif %}
+  <meta name="author" content="IBC Clan">
+  
+  <!-- Stylesheets & Preconnect -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+  
+  <!-- Open Graph & Twitter Cards -->
+  <meta property="og:title" content="IBC Clan // Wizytówka Taktyczna Arma 3">
+  <meta property="og:description" content="Oficjalna strona klanu IBC w Arma 3. Dołącz do naszej społeczności milsim, bierz udział w zorganizowanych operacjach i przeżyj realistyczną symulację pola walki.">
+  <meta property="og:image" content="{{ "/assets/hero-bg.jpg" | htmlBaseUrl(site.url) }}">
+  <meta property="og:type" content="website">
+  
+  <!-- Structured Data JSON-LD -->
+  {% if page.url == "/" %}<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SportsTeam",
+    "name": "Inglourious Basterds Clan (IBC)",
+    "sport": "Arma 3 Milsim",
+    "foundingDate": "2018",
+    "description": "Taktyczna symulacja militarna (Milsim) w grze Arma 3. Realistyczne operacje bojowe i misje kooperacyjne."
+  }
+  </script>{% endif %}

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+{% include "partials/head.njk" %}
+</head>
+<body>
+  <a href="#main" class="skip-link">Przejdź do treści</a>
+
+  <!-- Screen grid lines and overlay -->
+  <div class="grid-bg"></div>
+
+
+  <!-- NAVIGATION HEADER -->
+{% include "partials/header.njk" %}
+
+  <!-- MAIN CANVAS -->
+  <main id="main">
+{{ content | safe }}
+  </main>
+
+{% include "partials/footer.njk" %}
+
+  <script src="/js/main.js"></script>
+</body>
+</html>

@@ -1,77 +1,8 @@
-<!DOCTYPE html>
-<html lang="pl">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <!-- SEO Meta Tags -->
-  <title>IBC Clan // Wizytówka Taktyczna Arma 3</title>
-  <meta name="description" content="Oficjalna strona klanu IBC w Arma 3. Dołącz do naszej społeczności milsim, bierz udział w zorganizowanych operacjach i przeżyj realistyczną symulację pola walki.">
-  <meta name="keywords" content="Arma 3, klan, milsim, IBC, rekrutacja, co-op, symulacja wojskowa, gry taktyczne">
-  <meta name="author" content="IBC Clan">
-  
-  <!-- Stylesheets & Preconnect -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-  <link rel="stylesheet" href="/css/style.css">
-  
-  <!-- Open Graph & Twitter Cards -->
-  <meta property="og:title" content="IBC Clan // Wizytówka Taktyczna Arma 3">
-  <meta property="og:description" content="Oficjalna strona klanu IBC w Arma 3. Dołącz do naszej społeczności milsim, bierz udział w zorganizowanych operacjach i przeżyj realistyczną symulację pola walki.">
-  <meta property="og:image" content="{{ "/assets/hero-bg.jpg" | htmlBaseUrl(site.url) }}">
-  <meta property="og:type" content="website">
-  
-  <!-- Structured Data JSON-LD -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "SportsTeam",
-    "name": "Inglourious Basterds Clan (IBC)",
-    "sport": "Arma 3 Milsim",
-    "foundingDate": "2018",
-    "description": "Taktyczna symulacja militarna (Milsim) w grze Arma 3. Realistyczne operacje bojowe i misje kooperacyjne."
-  }
-  </script>
-</head>
-<body id="hero">
-  <!-- Screen grid lines and overlay -->
-  <div class="grid-bg"></div>
-
-
-  <!-- NAVIGATION HEADER -->
-  <header>
-    <div class="nav-container">
-      <div class="logo">
-        <a href="#hero">
-          <img src="assets/logo.png" alt="IBC Logo" class="logo-img" width="48" height="48" decoding="async">
-          <div class="logo-text">
-            <span>Inglourious</span>
-            <span>Basterds</span>
-            <span>Clan</span>
-          </div>
-        </a>
-      </div>
-      <button class="menu-toggle" aria-label="Przełącz menu" aria-expanded="false" aria-controls="mobile-nav">
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
-      <nav>
-        <ul id="mobile-nav">
-          <li><a href="#hero" class="active-nav">System</a></li>
-          <li><a href="#about">O nas</a></li>
-          <li><a href="#gallery">Galeria</a></li>
-          <li><a href="#recruitment">Rekrutacja</a></li>
-        </ul>
-      </nav>
-    </div>
-  </header>
-
-  <!-- MAIN CANVAS -->
-  <main>
+---
+layout: layouts/base.njk
+---
     <!-- HERO SECTION -->
-    <section class="hero">
+    <section id="hero" class="hero">
       <div class="hero-image-bg"></div>
       <div class="hero-container">
         <!-- Hero Text -->
@@ -141,8 +72,8 @@
 
         <div class="gallery-grid">
           <!-- Gallery Item 1 -->
-          <div class="gallery-item hud-border" data-src="assets/op_patrol.jpg" role="button" tabindex="0" aria-label="Powiększ zdjęcie: Patrol Bojowy">
-            <img src="assets/op_patrol.jpg" alt="Patrol Bojowy sekcji Alpha w rejonie operacji" loading="lazy" decoding="async" width="600" height="338">
+          <div class="gallery-item hud-border" data-src="{{ '/assets/op_patrol.jpg' | htmlBaseUrl }}" role="button" tabindex="0" aria-label="Powiększ zdjęcie: Patrol Bojowy">
+            <img src="/assets/op_patrol.jpg" alt="Patrol Bojowy sekcji Alpha w rejonie operacji" loading="lazy" decoding="async" width="600" height="338">
             <div class="gallery-overlay">
               <h3>Patrol Bojowy</h3>
               <p>Sekcja Alpha w rejonie operacji</p>
@@ -150,8 +81,8 @@
           </div>
 
           <!-- Gallery Item 2 -->
-          <div class="gallery-item hud-border" data-src="assets/jo_1967.png" role="button" tabindex="0" aria-label="Powiększ zdjęcie: Operacja Crimson Dawn">
-            <img src="assets/jo_1967.png" alt="Atak plutonu na pozycje Chedaki JO 1967" loading="lazy" decoding="async" width="600" height="338">
+          <div class="gallery-item hud-border" data-src="{{ '/assets/jo_1967.png' | htmlBaseUrl }}" role="button" tabindex="0" aria-label="Powiększ zdjęcie: Operacja Crimson Dawn">
+            <img src="/assets/jo_1967.png" alt="Atak plutonu na pozycje Chedaki JO 1967" loading="lazy" decoding="async" width="600" height="338">
             <div class="gallery-overlay">
               <h3>Operacja Crimson Dawn</h3>
               <p>Joint Operations 1967 // Wsparcie CAS</p>
@@ -159,8 +90,8 @@
           </div>
 
           <!-- Gallery Item 3 -->
-          <div class="gallery-item hud-border" data-src="assets/cos.png" role="button" tabindex="0" aria-label="Powiększ zdjęcie: Punkt Obserwacyjny">
-            <img src="assets/cos.png" alt="Zwiad optyczny na klifie z widokiem na wybrzeże przeciwnika" loading="lazy" decoding="async" width="600" height="338">
+          <div class="gallery-item hud-border" data-src="{{ '/assets/cos.png' | htmlBaseUrl }}" role="button" tabindex="0" aria-label="Powiększ zdjęcie: Punkt Obserwacyjny">
+            <img src="/assets/cos.png" alt="Zwiad optyczny na klifie z widokiem na wybrzeże przeciwnika" loading="lazy" decoding="async" width="600" height="338">
             <div class="gallery-overlay">
               <h3>Punkt Obserwacyjny</h3>
               <p>Zwiad optyczny i naprowadzanie</p>
@@ -168,8 +99,8 @@
           </div>
 
           <!-- Gallery Item 4 -->
-          <div class="gallery-item hud-border" data-src="assets/funny.png" role="button" tabindex="0" aria-label="Powiększ zdjęcie: Chwila Wytchnienia">
-            <img src="assets/funny.png" alt="Humorystyczny moment z przygotowań do nocnego desantu" loading="lazy" decoding="async" width="600" height="338">
+          <div class="gallery-item hud-border" data-src="{{ '/assets/funny.png' | htmlBaseUrl }}" role="button" tabindex="0" aria-label="Powiększ zdjęcie: Chwila Wytchnienia">
+            <img src="/assets/funny.png" alt="Humorystyczny moment z przygotowań do nocnego desantu" loading="lazy" decoding="async" width="600" height="338">
             <div class="gallery-overlay">
               <h3>Chwila Wytchnienia</h3>
               <p>Misja Prima Aprilisowa</p>
@@ -234,7 +165,6 @@
         </div>
       </div>
     </section>
-  </main>
 
   <!-- LIGHTBOX CONTAINER -->
   <div id="lightbox" class="lightbox">
@@ -246,52 +176,3 @@
       <div class="lightbox-caption"></div>
     </div>
   </div>
-
-  <!-- FOOTER -->
-  <footer>
-    <div class="footer-container">
-      <div class="footer-logo">
-        Inglourious Basterds <span>Clan</span>
-      </div>
-      
-      <ul class="footer-links">
-        <li><a href="#hero">System</a></li>
-        <li><a href="#about">O nas</a></li>
-        <li><a href="#gallery">Galeria</a></li>
-        <li><a href="#recruitment">Rekrutacja</a></li>
-      </ul>
-
-      <div class="footer-socials">
-        <a href="{{ site.discord.invite }}" target="_blank" class="social-icon" rel="noopener noreferrer" aria-label="Discord"><i class="fab fa-discord"></i></a>
-        <a href="https://www.youtube.com/@IBC_A3" target="_blank" class="social-icon" rel="noopener noreferrer" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
-        <a href="https://www.facebook.com/IBCA3" target="_blank" class="social-icon" rel="noopener noreferrer" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
-      </div>
-
-      <div class="copyright">
-        &copy; 2026 INGLOURIOUS BASTERDS CLAN. WSZELKIE PRAWA ZASTRZEŻONE. <span id="easteregg-trigger" tabindex="0" role="button" aria-label="Konsola dekryptowania" style="cursor: pointer; opacity: 0.3; margin-left: 10px;">v2.4.1</span>
-      </div>
-    </div>
-  </footer>
-
-  <!-- EASTER EGG DECRYPTION CONSOLE -->
-  <div id="decryption-overlay" class="decryption-overlay">
-    <div class="decryption-box">
-      <div class="decryption-header">
-        <span class="decryption-title">// RAPORT DEKRYPTOWANIA: PROJEKT DIABLO</span>
-        <button class="decryption-close" id="decryption-close" aria-label="Zamknij raport">[ X ] ZAMKNIJ</button>
-      </div>
-      <div class="decryption-content">
-        <p>Diablo powinien wypełnić ten tekst, ale nie miał czasu, bo akurat musiał ratować świat przed kolejną apokalipsą, która, jak wiadomo, zdarza się w jego życiu co najmniej raz w tygodniu.</p>
-        <p>Gdyby jednak miał chwilę, pewnie napisałby coś o tym, jak trudno jest znaleźć odpowiedni miecz, który nie tylko dobrze leży w dłoni, ale też pasuje kolorystycznie do peleryny. Niestety, Diablo nie zdążył nawet wybrać czcionki, bo w tym samym momencie zadzwonił do niego Baal z informacją, że znowu zgubił swoje runy i bez nich nie może rozpocząć dnia.</p>
-        <p>W związku z tym tekst ten wypełniam ja, czyli asystent Diabla, który również nie ma zbyt wiele czasu, ale przynajmniej nie musi walczyć z demonami. Zamiast tego mogę spokojnie opisać, jak wyglądałby świat, gdyby Diablo miał więcej wolnych chwil. Być może napisałby poemat o tym, jak bardzo nie lubi poniedziałków, albo esej o tym, dlaczego teleportacja powinna być dostępna dla wszystkich, a nie tylko dla magów z wyższego poziomu.</p>
-        <p>Nie można też zapomnieć o pewnym wieczorze, kiedy Diablo, zamiast ratować świat, postanowił zrobić sobie wolne i wybrać się na spotkanie ze starymi znajomymi. Impreza zaczęła się niewinnie – od jednego kufla piekielnego piwa, które ponoć warzone jest z ognistych języków smoków. Jednak jak to zwykle bywa, na jednym kuflu się nie skończyło. Diablo, przekonany o swojej legendarnej wytrzymałości, postanowił spróbować wszystkiego, co tylko pojawiło się na stole: od likieru z dusz upiornych, przez klasyczną wódkę z lodowych jaskiń, aż po tajemniczy eliksir, którego nikt nie potrafił nazwać.</p>
-        <p>Następnego dnia okazało się, że nawet najpotężniejszy wojownik nie jest odporny na skutki zbytniego napojenia się alkoholem. Kac, który dopadł Diablo, był prawdziwie epicki – głowa bolała jak po starciu z armią demonów, a każdy dźwięk wydawał się echem piekielnych dzwonów. Diablo przysiągł sobie wtedy, że już nigdy więcej nie da się namówić na „jeszcze jednego”. Przez cały dzień nie był w stanie nawet podnieść swojego legendarnego miecza, a o pisaniu jakiegokolwiek tekstu nie mogło być mowy – ledwo był w stanie złożyć kilka sensownych zdań.</p>
-        <p>Tak więc, jeśli ktoś zastanawia się, dlaczego ten tekst nadal nie jest wypełniony przez samego Diablo, niech pamięta, że czasem nawet bohaterowie muszą zmierzyć się z własną słabością – a kac po piekielnej imprezie potrafi być gorszy niż starcie z najstraszliwszym demonem.</p>
-        <p>Innym razem Diablo chciał napisać poradnik „Jak zostać bohaterem w 10 prostych krokach”, ale już na drugim kroku zgubił się w labiryncie własnych myśli. Wyszedł dopiero po tygodniu, a wtedy już nikt nie pamiętał, o co chodziło z tym poradnikiem. Tak to jest, gdy nie ma się czasu na pisanie tekstów. Może kiedyś znajdzie czas, żeby napisać coś naprawdę inspirującego. Do tego czasu jednak tekst ten będzie przypominał wszystkim, że nawet Diablo nie zawsze zdąży.</p>
-      </div>
-    </div>
-  </div>
-
-  <script src="/js/main.js"></script>
-</body>
-</html>
