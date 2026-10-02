@@ -123,13 +123,14 @@ function initLightbox() {
 function initRecruitmentTerminal() {
   const consoleEl = document.getElementById('terminal-console');
   if (!consoleEl) return;
+  const discordUrl = consoleEl.getAttribute('data-discord-url') || '';
 
   let booted = false;
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting && !booted) {
         booted = true;
-        runBootSequence(consoleEl);
+        runBootSequence(consoleEl, discordUrl);
       }
     });
   }, { threshold: 0.3 });
@@ -138,7 +139,7 @@ function initRecruitmentTerminal() {
   if (recSection) observer.observe(recSection);
 }
 
-function runBootSequence(consoleEl) {
+function runBootSequence(consoleEl, discordUrl) {
   function writeToConsole(message, status = 'info') {
     const line = document.createElement('div');
     line.className = 'terminal-line';
@@ -153,12 +154,21 @@ function runBootSequence(consoleEl) {
     if (status === 'error') tag = '[ERR ]';
     if (status === 'warn') tag = '[WARN]';
     
-    line.innerHTML = `
-      <span class="time">${timeStr}</span>
-      <span class="tag" style="color: ${status === 'success' ? 'var(--accent-color)' : status === 'error' ? '#ef4444' : 'var(--accent-color)'}">${tag}</span>
-      <span class="message">${message}</span>
-    `;
-    
+    const timeSpan = document.createElement('span');
+    timeSpan.className = 'time';
+    timeSpan.textContent = timeStr;
+
+    const tagSpan = document.createElement('span');
+    tagSpan.className = 'tag';
+    tagSpan.style.color = status === 'success' ? 'var(--accent-color)' : status === 'error' ? '#ef4444' : 'var(--accent-color)';
+    tagSpan.textContent = tag;
+
+    const messageSpan = document.createElement('span');
+    messageSpan.className = 'message';
+    messageSpan.textContent = message;
+
+    line.append(timeSpan, tagSpan, messageSpan);
+
     consoleEl.appendChild(line);
     consoleEl.scrollTop = consoleEl.scrollHeight; // Autoscroll
   }
@@ -171,7 +181,7 @@ function runBootSequence(consoleEl) {
   }, 600);
 
   setTimeout(() => {
-    writeToConsole('Połączenie nawiązane: discord.gg/DhJwkeehJK', 'success');
+    writeToConsole('Połączenie nawiązane: ' + discordUrl.replace(/^https?:\/\//, ''), 'success');
   }, 1400);
 
   setTimeout(() => {
