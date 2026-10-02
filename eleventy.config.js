@@ -10,6 +10,11 @@ export default function (eleventyConfig) {
     "src/js": "js",
     "src/assets": "assets",
   });
+
+  // Dev-only pages (D-12): dropped from production builds, kept in serve/watch and when INCLUDE_DEV_PAGES=1.
+  eleventyConfig.addPreprocessor("devOnly", "*", (data) => {
+    if (data.devOnly && !site.includeDevPages) return false;
+  });
 }
 
 export const config = {
