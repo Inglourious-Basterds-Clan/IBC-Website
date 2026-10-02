@@ -604,16 +604,16 @@ for vp in "390,844:mobile" "1440,900:desktop"; do size=${vp%%:*}; name=${vp##*:}
 | A4 | Making `og:image` absolute in Phase 1 fits D-05/D-08. It is not on the D-08 "leave as is" list, and a relative value is broken on subpages and under the prefix | Pattern 3 | If the user wants the head untouched, the SITE_URL mutation test has no absolute URL to check until Phase 2 |
 | A5 | No host other than (future) GitHub Pages serves the repo root today | Runtime State Inventory | An existing deploy would break when `index.html` moves to `src/` |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Should the header CTA be icon-only on narrow phones?**
+1. **Should the header CTA be icon-only on narrow phones?** — RESOLVED (planning, 01-02 Task 2): text+icon `.hud-btn.header-cta`, icon-only (label visually hidden, still the accessible name) at ≤480 px; the user reviews it in the end-of-phase human-check at 320/390/768/1440 px. If rejected, only the 480 px rule changes.
    - What we know: `.hud-btn` goes full-width at ≤480 px, and header space is tight.
    - Unclear: whether the user accepts icon-only below 480 px.
    - Recommendation: build text+icon with an icon-only fallback ≤480 px. Show the screenshots in the end-of-phase human verify.
-2. **Is the current site deployed anywhere from the repo root?**
+2. **Is the current site deployed anywhere from the repo root?** — RESOLVED (planning, 01-04 Task 2 + 01-06 Task 2): the README states `_site/` is the deploy folder regardless; the question is asked in `baseline/parity.md` and answered by the user during end-of-phase UAT.
    - What we know: GitHub Pages is off.
    - Recommendation: one-line confirmation in the human checkpoint. The README states the new deploy folder `_site/` either way.
-3. **Should baseline artifacts be committed?**
+3. **Should baseline artifacts be committed?** — RESOLVED (planning, 01-01 Task 1): commit the PNG screenshots, `scores.md` and `parity.md`; Lighthouse JSON reports go to the gitignored `baseline/lh/`.
    - Recommendation: commit the PNG screenshots and a small `scores.md` (median scores). Do not commit the multi-MB Lighthouse HTML/JSON reports. Gitignore them or delete them after extracting the scores.
 
 ## Environment Availability
