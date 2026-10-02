@@ -32,7 +32,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. A new page that has only front matter and body content renders with the same header, nav, footer and Discord CTA as the home page.
   5. The built site works both at a domain root and under a subpath prefix (e.g. GitHub Pages `/IBC-Website/`). Every internal link, stylesheet, script and image resolves in both setups.
 
-**Plans**: 5/6 plans executed
+**Plans**: 6/6 plans executed
 
 Plans:
 **Wave 1**
@@ -47,7 +47,7 @@ Plans:
 - [x] 01-05-PLAN.md — Dev-only layout test pages + clean-before-build production output (wave 3)
 
 **Wave 4** *(blocked on Wave 3 completion)*
-- [ ] 01-06-PLAN.md — Dual-variant link/config/invite audit + after-migration parity capture and checklist (wave 4)
+- [x] 01-06-PLAN.md — Dual-variant link/config/invite audit + after-migration parity capture and checklist (wave 4)
 
 ### Phase 2: Technical SEO
 
@@ -114,7 +114,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5. Phases 2 and 3 both 
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Eleventy Foundation | 5/6 | In Progress|  |
+| 1. Eleventy Foundation | 6/6 | In Progress|  |
 | 2. Technical SEO | 0/TBD | Not started | - |
 | 3. Performance & Assets | 0/TBD | Not started | - |
 | 4. Join & Operations Pages | 0/TBD | Not started | - |

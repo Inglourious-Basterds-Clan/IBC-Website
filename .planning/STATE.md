@@ -2,17 +2,17 @@
 gsd_state_version: "1.0"
 current_phase: 01
 current_phase_name: Eleventy Foundation
-status: executing
-stopped_at: Completed 01-05-PLAN.md
-last_updated: "2026-10-02T22:32:11.996Z"
+status: verifying
+stopped_at: Completed 01-06-PLAN.md
+last_updated: "2026-10-02T22:42:32.968Z"
 last_activity: 2026-10-02
 last_activity_desc: Phase 01 execution started
-state_head: 5c0619754f86f4fddc355025b508072ddd78039d
+state_head: 32c5a1c61cd1e02a11087b46c16d7cecc7513bb9
 progress:
   total_phases: 5
   completed_phases: 0
   total_plans: 6
-  completed_plans: 5
+  completed_plans: 6
   percent: 0
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-10-02)
 
 Phase: 01 (Eleventy Foundation) — EXECUTING
 Plan: 6 of 6
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-10-02 — Phase 01 execution started
 
 Progress: [░░░░░░░░░░] 0%
@@ -61,6 +61,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 01 P03 | 3min | 2 tasks | 2 files |
 | Phase 01 P04 | 5min | 2 tasks | 4 files |
 | Phase 01 P05 | 3min | 2 tasks | 6 files |
+| Phase 01 P06 | 9 min | 2 tasks | 24 files |
 
 ## Accumulated Context
 
@@ -83,6 +84,8 @@ Recent decisions affecting current work:
 - [Phase 01]: README (Polish) references the Discord invite only by location (src/_data/site.js); _site/ replaces the repo root as deploy folder
 - [Phase 01]: 01-05: dev-only pages use devOnly preprocessor (returns false unless site.includeDevPages) plus eleventyExcludeFromCollections
 - [Phase 01]: 01-05: npm run build = node scripts/clean.js && eleventy; clean.js refuses repo root, parents and other drives
+- [Phase 01]: 01-06: After-migration screenshots use the baseline CDP method; the missing header in baseline scrolled mobile shots is an artifact of the pre-existing 498px layout-viewport overflow, not a parity target
+- [Phase 01]: 01-06: favicon.ico 404 (only console error before and after) is pre-existing; deferred to Phase 2
 
 ### Pending Todos
 
@@ -107,6 +110,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-10-02T22:32:11.954Z
-Stopped at: Completed 01-05-PLAN.md
+Last session: 2026-10-02T22:42:32.926Z
+Stopped at: Completed 01-06-PLAN.md
 Resume file: None
