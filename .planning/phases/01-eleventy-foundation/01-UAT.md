@@ -1,9 +1,9 @@
 ---
-status: complete
+status: diagnosed
 phase: 01-eleventy-foundation
 source: [01-VERIFICATION.md]
 started: 2026-10-03T00:00:00Z
-updated: 2026-10-02T23:12:31Z
+updated: 2026-10-02T23:12:50Z
 ---
 
 ## Current Test
@@ -61,5 +61,18 @@ blocked: 0
   reason: "User reported: fix (decided to fix CR-01 in Phase 1 rather than defer to Phase 2)"
   severity: major
   test: 5
-  artifacts: []  # Filled by diagnosis
-  missing: []    # Filled by diagnosis
+  root_cause: "src/_data/site.js:6-7 falls back to http://localhost:8080 whenever SITE_URL is unset and nothing guards a production build (ELEVENTY_RUN_MODE === 'build') against it; README.md:24 ('Dowolny hosting statyczny') tells self-hosters to run plain `npm run build` without mentioning SITE_URL. Reproduced in 01-REVIEW.md CR-01: output contains og:image=http://localhost:8080/assets/hero-bg.jpg"
+  artifacts:
+    - path: "src/_data/site.js"
+      issue: "Silent localhost fallback for SITE_URL in production builds"
+    - path: "README.md"
+      issue: "Line 24 static-host deploy instructions omit SITE_URL"
+    - path: "test/helpers.js"
+      issue: "build() strips SITE_URL; variants relying on the default would fail once the guard exists unless they opt out"
+  missing:
+    - "Throw in src/_data/site.js when ELEVENTY_RUN_MODE === 'build' and SITE_URL is empty, unless ALLOW_LOCAL_SITE_URL=1 (fix sketch in 01-REVIEW.md CR-01)"
+    - "Add ALLOW_LOCAL_SITE_URL to test/helpers.js buildEnvKeys and pass ALLOW_LOCAL_SITE_URL=1 for variants that rely on the default URL"
+    - "Test: build without SITE_URL fails with the guard message; with ALLOW_LOCAL_SITE_URL=1 it succeeds"
+    - "README 'Dowolny hosting statyczny': document SITE_URL=https://<domena> npm run build with PowerShell and Git Bash variants; note the new guard"
+    - "Confirm .github/workflows/pages.yml build still sets SITE_URL (deploy unaffected) and npm run dev is unaffected (serve mode)"
+  debug_session: "01-REVIEW.md#cr-01 (diagnosis reused from code review; no separate debug session)"
