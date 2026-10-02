@@ -25,7 +25,7 @@ A Polish player searching for an Arma 3 milsim clan (or for "IBC" by name) finds
 
 ### Active
 
-- [ ] Technical SEO is complete: canonical URLs, sitemap.xml, robots.txt, full OG/Twitter cards with absolute image URLs, favicons/manifest, richer structured data (Organization, FAQPage, Event, BreadcrumbList)
+- [ ] Technical SEO is complete: canonical URLs, sitemap.xml, robots.txt, full OG/Twitter cards with absolute image URLs, favicons/manifest, structured data (Organization + WebSite + BreadcrumbList; no Event markup — Google doesn't support online/members-only events or show them in Poland; FAQPage gives no rich result since 2026-05)
 - [ ] Site URL is configured in one place so it can be switched once a domain is purchased
 - [ ] Lighthouse scores are high (target ≥ 90 in Performance, Accessibility, Best Practices, SEO on mobile)
 - [ ] Images optimized (WebP/AVIF, responsive sizes, explicit dimensions, lazy-loading)
@@ -35,7 +35,11 @@ A Polish player searching for an Arma 3 milsim clan (or for "IBC" by name) finds
 - [ ] New indexable page: How to join / FAQ (requirements, mods, schedule, recruitment steps)
 - [ ] New indexable page: Operations / events (when IBC plays, mission types, op recaps)
 - [ ] Multi-page structure with shared header/footer and consistent internal linking
-- [ ] Units / roster page fed by member data from the Discord bot a friend is building — LAST phase
+- [ ] Live Discord member/online badge (public invite endpoint) with static fallback
+
+### Deferred (v2)
+
+- Units / roster page (`/sklad/`) fed by member data from the Discord bot a friend is building — next milestone, once the bot exists
 
 ### Out of Scope
 
@@ -70,7 +74,10 @@ A Polish player searching for an Arma 3 milsim clan (or for "IBC" by name) finds
 | Expand from single page to multi-page | Generic recruitment queries need more indexable content than one landing page | — Pending |
 | Open to a light build tool / SSG | Shared layouts and image optimization across pages are painful by hand | — Pending |
 | Visual refresh allowed, tactical identity kept | Goal is better first impression, not a rebrand | — Pending |
-| Roster page last, fed by Discord bot | Data source being built by a friend; avoid blocking other work | — Pending |
+| Roster deferred to v2 | Bot not ready yet; avoid blocking v1 | — Pending |
+| Eleventy 3.1 + Nunjucks | Least-rewrite SSG, zero client JS, official image/icon plugins (research) | — Pending |
+| No Event JSON-LD | Google ineligibility for online/members-only events in PL | — Pending |
+| Slugs /jak-dolaczyc/, /operacje/, /sklad/ | Match Polish search phrasing; fixed forever | — Pending |
 | Polish only | Target audience is Polish players | — Pending |
 
 ## Evolution
