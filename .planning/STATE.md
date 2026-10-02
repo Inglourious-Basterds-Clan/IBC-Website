@@ -1,17 +1,18 @@
 ---
 gsd_state_version: "1.0"
-current_phase: 1
+current_phase: 01
 current_phase_name: Eleventy Foundation
 status: executing
-stopped_at: Phase 1 context gathered
-last_updated: "2026-10-02T18:50:12.460Z"
-last_activity: "2026-10-02: Roadmap created (5 phases, 38/38 v1 requirements mapped)"
-state_head: 7e84be1544ba45eee03d2d0c04583a8cee4b98ab
+stopped_at: Completed 01-01-PLAN.md
+last_updated: "2026-10-02T22:04:11.167Z"
+last_activity: 2026-10-02
+last_activity_desc: Phase 01 execution started
+state_head: 810627842ad1e7b10f7f2463ef8f21656783b72f
 progress:
   total_phases: 5
   completed_phases: 0
   total_plans: 6
-  completed_plans: 0
+  completed_plans: 1
   percent: 0
 ---
 
@@ -22,14 +23,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-10-02)
 
 **Core value:** A Polish player searching for an Arma 3 milsim clan (or for "IBC" by name) finds this site, understands what IBC is and how to join, and clicks through to Discord.
-**Current focus:** Phase 1: Eleventy Foundation
+**Current focus:** Phase 01 — Eleventy Foundation
 
 ## Current Position
 
-Phase: 1 (Eleventy Foundation) — READY TO EXECUTE
-Plan: 0 of TBD in current phase
+Phase: 01 (Eleventy Foundation) — EXECUTING
+Plan: 2 of 6
 Status: Ready to execute
-Last activity: 2026-10-02: Roadmap created (5 phases, 38/38 v1 requirements mapped)
+Last activity: 2026-10-02 — Phase 01 execution started
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -51,6 +52,11 @@ Progress: [░░░░░░░░░░] 0%
 - Trend: -
 
 *Updated after each plan completion*
+**Per-Plan Metrics:**
+
+| Plan | Duration | Tasks | Files |
+|------|----------|-------|-------|
+| Phase 01 P01 | 8 min | 2 tasks | 31 files |
 
 ## Accumulated Context
 
@@ -63,6 +69,8 @@ Recent decisions affecting current work:
 - [Roadmap]: PERF-08 (Lighthouse ≥ 90 on every page) is verified in Phase 5, after the visual refresh.
 - [Roadmap]: SEO-06 (breadcrumbs) is delivered in Phase 4, when subpages first exist.
 - [Roadmap]: Roster (`/sklad/`, ROST-*) is v2 and not in this roadmap.
+- [Phase 01]: Baseline section screenshots use Chrome DevTools protocol (scrollIntoView + capture); headless --screenshot ignores #hash scrolling
+- [Phase 01]: test/helpers.js build() strips SITE_URL/PATH_PREFIX/INCLUDE_DEV_PAGES/ELEVENTY_RUN_MODE case-insensitively before merging the variant env
 
 ### Pending Todos
 
@@ -87,6 +95,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-10-02T18:06:03.278Z
-Stopped at: Phase 1 context gathered
-Resume file: .planning/phases/01-eleventy-foundation/01-CONTEXT.md
+Last session: 2026-10-02T22:04:11.131Z
+Stopped at: Completed 01-01-PLAN.md
+Resume file: None
