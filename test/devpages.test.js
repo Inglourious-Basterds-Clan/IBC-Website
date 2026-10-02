@@ -3,9 +3,10 @@
 // (INCLUDE_DEV_PAGES=1). A plain production build emits no _dev/ directory.
 import { before, test } from "node:test";
 import assert from "node:assert/strict";
-import { existsSync } from "node:fs";
+import { spawnSync } from "node:child_process";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { build, read, attrValues, block } from "./helpers.js";
+import { build, read, attrValues, block, repoRoot } from "./helpers.js";
 import site from "../src/_data/site.js";
 
 const defaultTitle = "IBC Clan // Wizytówka Taktyczna Arma 3";
@@ -100,4 +101,34 @@ test("(f) layout-test nav matches the home page: same labels in order, same href
     navLabels,
   );
   assert.deepEqual(devNav, homeNav);
+});
+
+// FOUND-01 / Pitfall 2: `npm run build` empties the output folder first through
+// scripts/clean.js, which refuses to delete the repo root or anything outside it.
+function runClean(target) {
+  return spawnSync(process.execPath, ["scripts/clean.js", target], { cwd: repoRoot, encoding: "utf8" });
+}
+
+test("(g) clean.js removes a stale output folder inside the repo", () => {
+  const staleDir = join(repoRoot, "_test", "devpages-stale");
+  mkdirSync(join(staleDir, "_dev", "old"), { recursive: true });
+  writeFileSync(join(staleDir, "_dev", "old", "index.html"), "<p>stale</p>");
+
+  const result = runClean("_test/devpages-stale");
+  assert.equal(result.status, 0, `clean.js failed:\n${result.stderr || result.error}`);
+  assert.ok(!existsSync(staleDir), "_test/devpages-stale still exists");
+});
+
+test("(h) clean.js refuses the repo root and paths outside it", () => {
+  for (const target of [".", ".."]) {
+    const result = runClean(target);
+    assert.equal(result.status, 1, `clean.js ${target} should exit 1`);
+    assert.match(result.stderr, /refusing/, `clean.js ${target} should explain the refusal`);
+  }
+  assert.ok(existsSync(join(repoRoot, "package.json")), "package.json was deleted");
+});
+
+test("(i) the build script cleans _site/ before Eleventy runs", () => {
+  const pkg = JSON.parse(readFileSync(join(repoRoot, "package.json"), "utf8"));
+  assert.equal(pkg.scripts.build, "node scripts/clean.js && eleventy");
 });
