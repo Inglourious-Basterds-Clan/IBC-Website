@@ -47,9 +47,27 @@ function createSection(tagName, id) {
   };
 }
 
-function loadMain({ discordUrl, withTerminal = true, pathname = "/" } = {}) {
+// A nav anchor as the browser resolves it: .hash and .pathname come from the absolute URL.
+function createLink(href, pathname) {
+  const resolved = new URL(href, `http://localhost${pathname}`);
+  const classes = new Set();
+  return {
+    hash: resolved.hash,
+    pathname: resolved.pathname,
+    getAttribute: (name) => (name === "href" ? href : null),
+    addEventListener() {},
+    classList: {
+      add: (name) => classes.add(name),
+      remove: (name) => classes.delete(name),
+      contains: (name) => classes.has(name),
+    },
+  };
+}
+
+function loadMain({ discordUrl, withTerminal = true, pathname = "/", links = [], sections = [] } = {}) {
   const consoleEl = withTerminal ? createConsoleEl(discordUrl) : null;
-  const recruitment = createSection("SECTION", "recruitment");
+  const recruitment = sections.find((section) => section.getAttribute("id") === "recruitment") ||
+    createSection("SECTION", "recruitment");
   const observers = [];
   let domReady = null;
 
@@ -76,7 +94,11 @@ function loadMain({ discordUrl, withTerminal = true, pathname = "/" } = {}) {
       return null;
     },
     querySelector: () => null,
-    querySelectorAll: () => [],
+    querySelectorAll(selector) {
+      if (selector === "nav ul li a") return links;
+      if (selector === "section, header") return sections;
+      return [];
+    },
     createElement,
     body: { style: {} },
   };
@@ -160,4 +182,56 @@ test("main.js has no invite literal and writeToConsole uses textContent", () => 
 test("main.js is a valid classic script (node --check)", () => {
   const result = spawnSync(process.execPath, ["--check", mainPath], { encoding: "utf8" });
   assert.equal(result.status, 0, result.stderr);
+});
+
+/* --- SCROLL-SPY (FOUND-06) --- */
+const sectionIds = ["hero", "about", "gallery", "recruitment"];
+
+function homeSections() {
+  return [createSection("HEADER", null), ...sectionIds.map((id) => createSection("SECTION", id))];
+}
+
+function navLinks(prefix, pathname = prefix) {
+  return sectionIds.map((id) => createLink(`${prefix}#${id}`, pathname));
+}
+
+function activeHashes(links) {
+  return links.filter((link) => link.classList.contains("active-nav")).map((link) => link.hash);
+}
+
+function loadScrollSpy({ pathname, links, sections = homeSections() }) {
+  // No terminal, so every IntersectionObserver in the run belongs to scroll-spy.
+  return { ...loadMain({ withTerminal: false, pathname, links, sections }), links, sections };
+}
+
+test("scroll-spy highlights the intersecting section's link under /IBC-Website/", () => {
+  const env = loadScrollSpy({ pathname: "/IBC-Website/", links: navLinks("/IBC-Website/") });
+  const about = env.sections.find((section) => section.getAttribute("id") === "about");
+  env.intersect(about);
+  assert.deepEqual(activeHashes(env.links), ["#about"]);
+});
+
+test("scroll-spy maps the fixed header to #hero", () => {
+  const env = loadScrollSpy({ pathname: "/", links: navLinks("/") });
+  // Highlight another section first, so the header has to move the highlight back.
+  env.intersect(env.sections.find((section) => section.getAttribute("id") === "gallery"));
+  env.intersect(env.sections.find((section) => section.tagName === "HEADER"));
+  assert.deepEqual(activeHashes(env.links), ["#hero"]);
+});
+
+test("scroll-spy is inert on a page the nav links do not point at", () => {
+  // Prefixed and root-form hrefs both resolve to a path other than the dev page's.
+  const links = [...navLinks("/IBC-Website/").slice(0, 2), ...navLinks("/").slice(2)];
+  const env = loadScrollSpy({ pathname: "/_dev/layout-test/", links });
+  assert.equal(env.observers.length, 0, "scroll-spy created an IntersectionObserver");
+  assert.deepEqual(activeHashes(env.links), []);
+});
+
+test("scroll-spy ignores nav links without a hash", () => {
+  const plain = createLink("/IBC-Website/", "/IBC-Website/");
+  const links = [plain, ...navLinks("/IBC-Website/")];
+  const env = loadScrollSpy({ pathname: "/IBC-Website/", links });
+  env.intersect(env.sections.find((section) => section.getAttribute("id") === "about"));
+  assert.equal(plain.classList.contains("active-nav"), false, "hash-less link was highlighted");
+  assert.deepEqual(activeHashes(env.links), ["#about"]);
 });
