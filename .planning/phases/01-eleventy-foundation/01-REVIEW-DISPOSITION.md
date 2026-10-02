@@ -64,7 +64,7 @@ recorded: 2026-10-02T22:49:37.594Z
 
 | Finding | Severity | Disposition | Source |
 |---------|----------|-------------|--------|
-| CR-01 | critical | open | - |
+| CR-01 | critical | open | UAT 2026-10-03: user decided fix now in Phase 1 (gap G-01-5) |
 | WR-01 | warning | open | - |
 | WR-02 | warning | open | - |
 | WR-03 | warning | open | - |

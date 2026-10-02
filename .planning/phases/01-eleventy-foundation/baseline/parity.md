@@ -91,6 +91,6 @@ Run `npm run dev` and work through the list at http://localhost:8080/. Then run 
 
 ### Question for the user
 
-- [ ] Is the old repository root currently served by any host other than GitHub Pages? (RESEARCH Open Question 2 / assumption A5.) If yes, that host must now deploy `_site/` (see README, "Wdrożenie").
+- [x] Is the old repository root currently served by any host other than GitHub Pages? (RESEARCH Open Question 2 / assumption A5.) If yes, that host must now deploy `_site/` (see README, "Wdrożenie").
 
-Answer: _____
+Answer: No — only GitHub Pages serves this repository (confirmed by user in UAT, 2026-10-03).
