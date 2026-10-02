@@ -3,10 +3,13 @@
 // root-relative so HtmlBasePlugin prefixes it under /IBC-Website/.
 import { before, test } from "node:test";
 import assert from "node:assert/strict";
-import { build, read, attrValues } from "./helpers.js";
+import { build, read, attrValues, block } from "./helpers.js";
 import site from "../src/_data/site.js";
 
 const prefix = "/IBC-Website/";
+const navLabels = ["System", "O nas", "Galeria", "Rekrutacja"];
+const navHrefs = ["/#hero", "/#about", "/#gallery", "/#recruitment"];
+const inviteDomainPattern = /https?:\/\/(?:www\.)?discord(?:\.gg|(?:app)?\.com\/invite)\/[A-Za-z0-9-]+/g;
 const galleryFiles = ["op_patrol.jpg", "jo_1967.png", "cos.png", "funny.png"];
 
 const polishCopy = [
@@ -37,6 +40,27 @@ before(() => {
 
 function count(html, needle) {
   return html.split(needle).length - 1;
+}
+
+// The substring from the opening tag that contains marker up to the next closing </ul>.
+function list(html, marker) {
+  const start = html.indexOf(marker);
+  assert.ok(start !== -1, `missing ${marker}`);
+  const end = html.indexOf("</ul>", start);
+  assert.ok(end !== -1, `${marker} is not closed`);
+  return html.slice(start, end + "</ul>".length);
+}
+
+// [{ href, label }] for every <a> in the fragment, in document order.
+function anchors(fragment) {
+  return Array.from(fragment.matchAll(/<a\s[^>]*href="([^"]*)"[^>]*>([\s\S]*?)<\/a>/g), (match) => ({
+    href: match[1],
+    label: match[2].trim(),
+  }));
+}
+
+function anchorTags(html) {
+  return html.match(/<a\s[^>]*>/g) || [];
 }
 
 test("home page keeps its structure and ids", () => {
@@ -103,4 +127,51 @@ test("prefix build puts every internal URL under the prefix", () => {
       if (value.startsWith("/")) assert.ok(value.startsWith(prefix), `${attr}="${value}" is not under ${prefix}`);
     }
   }
+});
+
+test("header and footer nav follow navigation.js order (FOUND-05)", () => {
+  const header = block(rootHtml, "header");
+  const headerLinks = anchors(list(header, '<ul id="mobile-nav">'));
+  assert.deepEqual(headerLinks.map((link) => link.label), navLabels, "header nav labels/order");
+  assert.deepEqual(headerLinks.map((link) => link.href), navHrefs, "header nav hrefs/order");
+
+  const footerLinks = anchors(list(block(rootHtml, "footer"), '<ul class="footer-links">'));
+  assert.deepEqual(footerLinks.map((link) => link.label), navLabels, "footer nav labels/order");
+  assert.deepEqual(footerLinks.map((link) => link.href), navHrefs, "footer nav hrefs/order");
+
+  assert.equal(count(rootHtml, 'class="active-nav"'), 1, "expected exactly one active-nav on home");
+});
+
+test("header carries the Discord CTA outside the nav list (D-10, D-11)", () => {
+  const header = block(rootHtml, "header");
+  const cta = anchorTags(header).filter((tag) => tag.includes('class="hud-btn header-cta"'));
+  assert.equal(cta.length, 1, "expected one header CTA");
+  assert.ok(cta[0].includes(`href="${site.discord.invite}"`), "CTA href is not site.discord.invite");
+  assert.ok(cta[0].includes('target="_blank"'), "CTA must open in a new tab");
+  assert.ok(cta[0].includes('rel="noopener noreferrer"'), "CTA must carry rel=noopener noreferrer");
+  assert.ok(!list(header, '<ul id="mobile-nav">').includes("header-cta"), "CTA must stay outside the nav list");
+});
+
+test("external links are safe and the invite has one source", () => {
+  for (const tag of anchorTags(rootHtml)) {
+    if (tag.includes('target="_blank"')) {
+      assert.ok(tag.includes('rel="noopener noreferrer"'), `target=_blank without rel: ${tag}`);
+    }
+  }
+
+  const inviteHrefs = attrValues(rootHtml, "href").filter((value) => value === site.discord.invite);
+  assert.ok(inviteHrefs.length >= 3, `expected header CTA, terminal button and footer icon, found ${inviteHrefs.length}`);
+  for (const invite of rootHtml.match(inviteDomainPattern) || []) assert.equal(invite, site.discord.invite);
+});
+
+test("prefix build prefixes nav hrefs and leaves the CTA alone", () => {
+  const header = block(prefixHtml, "header");
+  const headerLinks = anchors(list(header, '<ul id="mobile-nav">'));
+  assert.deepEqual(
+    headerLinks.map((link) => link.href),
+    navHrefs.map((href) => prefix + href.slice(1)),
+    "prefixed nav hrefs",
+  );
+  const cta = anchorTags(header).find((tag) => tag.includes("header-cta"));
+  assert.ok(cta && cta.includes(`href="${site.discord.invite}"`), "CTA href changed under the prefix");
 });

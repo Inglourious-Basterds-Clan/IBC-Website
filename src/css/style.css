@@ -362,6 +362,46 @@ nav ul li a:hover::after, nav ul li a.active-nav::after {
   transform: translateY(-8px) rotate(-45deg);
 }
 
+/* --- SKIP LINK & HEADER CTA --- */
+/* Pre-existing content overflow on narrow phones must not widen the layout
+   viewport, or the fixed header (and its Discord button and menu toggle)
+   grows past the screen edge. clip hides the same overflow html already hides. */
+body {
+  overflow-x: clip;
+}
+
+.skip-link {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 150;
+  padding: 10px 16px;
+  background: var(--bg-primary);
+  color: var(--accent-color);
+  border: 1px solid var(--accent-color);
+  font-family: var(--font-hud);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transform: translateY(-120%);
+  transition: transform var(--transition-speed) ease;
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+}
+
+.header-cta {
+  padding: 6px 14px;
+  font-size: 0.8rem;
+  letter-spacing: 1.5px;
+}
+
 /* --- HERO SECTION --- */
 .hero {
   min-height: 100vh;
@@ -1396,6 +1436,16 @@ footer {
   .menu-toggle {
     display: flex;
   }
+
+  .menu-toggle {
+    order: 3;
+  }
+
+  .header-actions {
+    order: 2;
+    margin-left: auto;
+    gap: 12px;
+  }
   
   nav ul {
     position: fixed;
@@ -1440,6 +1490,21 @@ footer {
   .hud-btn {
     width: 100%;
     justify-content: center;
+  }
+
+  .hud-btn.header-cta {
+    width: auto;
+    padding: 8px 10px;
+  }
+
+  .header-cta-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
   }
   
   .timer {
