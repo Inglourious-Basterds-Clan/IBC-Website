@@ -193,8 +193,10 @@ function runBootSequence(consoleEl, discordUrl) {
 /* --- ACTIVE NAVIGATION HIGH-LIGHT ON SCROLL --- */
 function initScrollSpy() {
   const sections = document.querySelectorAll('section, header');
-  const navLinks = document.querySelectorAll('nav ul li a');
-  
+  // Only links that point at this same document (home); on other pages scroll-spy is a no-op.
+  const navLinks = Array.from(document.querySelectorAll('nav ul li a'))
+    .filter(link => link.hash && link.pathname === window.location.pathname);
+
   if (navLinks.length === 0) return;
 
   const observer = new IntersectionObserver((entries) => {
@@ -204,8 +206,7 @@ function initScrollSpy() {
         if (id) {
           navLinks.forEach(link => {
             link.classList.remove('active-nav');
-            const href = link.getAttribute('href');
-            if (href === `#${id}`) link.classList.add('active-nav');
+            if (link.hash === '#' + id) link.classList.add('active-nav');
           });
         }
       }
