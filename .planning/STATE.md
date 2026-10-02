@@ -3,16 +3,16 @@ gsd_state_version: "1.0"
 current_phase: 01
 current_phase_name: Eleventy Foundation
 status: executing
-stopped_at: Completed 01-02-PLAN.md
-last_updated: "2026-10-02T22:18:19.562Z"
+stopped_at: Completed 01-03-PLAN.md
+last_updated: "2026-10-02T22:23:43.716Z"
 last_activity: 2026-10-02
 last_activity_desc: Phase 01 execution started
-state_head: 6f256ad41e0e65aa35f63e6a7f68a02ec576e909
+state_head: ee493d5adc4c6da3dfbce7d4ef07e7963f2230d7
 progress:
   total_phases: 5
   completed_phases: 0
   total_plans: 6
-  completed_plans: 2
+  completed_plans: 3
   percent: 0
 ---
 
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-10-02)
 ## Current Position
 
 Phase: 01 (Eleventy Foundation) — EXECUTING
-Plan: 3 of 6
+Plan: 4 of 6
 Status: Ready to execute
 Last activity: 2026-10-02 — Phase 01 execution started
 
@@ -58,6 +58,7 @@ Progress: [░░░░░░░░░░] 0%
 |------|----------|-------|-------|
 | Phase 01 P01 | 8 min | 2 tasks | 31 files |
 | Phase 01 P02 | 11 min | 2 tasks | 10 files |
+| Phase 01 P03 | 3min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -74,6 +75,8 @@ Recent decisions affecting current work:
 - [Phase 01]: test/helpers.js build() strips SITE_URL/PATH_PREFIX/INCLUDE_DEV_PAGES/ELEVENTY_RUN_MODE case-insensitively before merging the variant env
 - [Phase 01]: 01-02: body { overflow-x: clip } keeps pre-existing mobile content overflow from widening the layout viewport, so the header Discord CTA and hamburger stay on screen at 320/390 px; overflow root cause (.about-stats, hero h1) deferred in deferred-items.md
 - [Phase 01]: 01-02: mobile header row is logo | outline hud-btn Discord CTA | hamburger; CTA icon-only at 480px and below; CTA sits in .header-actions outside nav ul
+- [Phase 01]: Client JS reads build-time config (Discord invite) from data-* attributes; terminal lines are textContent spans (no innerHTML)
+- [Phase 01]: Scroll-spy matches by resolved link.hash and only same-pathname links; /IBC-Website/index.html leaves it inactive (accepted, Pitfall 7)
 
 ### Pending Todos
 
@@ -98,6 +101,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-10-02T22:18:10.039Z
-Stopped at: Completed 01-02-PLAN.md
+Last session: 2026-10-02T22:23:43.677Z
+Stopped at: Completed 01-03-PLAN.md
 Resume file: None
