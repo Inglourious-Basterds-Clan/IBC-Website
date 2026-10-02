@@ -3,16 +3,16 @@ gsd_state_version: "1.0"
 current_phase: 01
 current_phase_name: Eleventy Foundation
 status: executing
-stopped_at: Completed 01-04-PLAN.md
-last_updated: "2026-10-02T22:27:25.718Z"
+stopped_at: Completed 01-05-PLAN.md
+last_updated: "2026-10-02T22:32:11.996Z"
 last_activity: 2026-10-02
 last_activity_desc: Phase 01 execution started
-state_head: 8694b68dbd58c84de4772b68f060e7d0c8dc517d
+state_head: 5c0619754f86f4fddc355025b508072ddd78039d
 progress:
   total_phases: 5
   completed_phases: 0
   total_plans: 6
-  completed_plans: 4
+  completed_plans: 5
   percent: 0
 ---
 
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-10-02)
 ## Current Position
 
 Phase: 01 (Eleventy Foundation) — EXECUTING
-Plan: 5 of 6
+Plan: 6 of 6
 Status: Ready to execute
 Last activity: 2026-10-02 — Phase 01 execution started
 
@@ -60,6 +60,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 01 P02 | 11 min | 2 tasks | 10 files |
 | Phase 01 P03 | 3min | 2 tasks | 2 files |
 | Phase 01 P04 | 5min | 2 tasks | 4 files |
+| Phase 01 P05 | 3min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -80,6 +81,8 @@ Recent decisions affecting current work:
 - [Phase 01]: Scroll-spy matches by resolved link.hash and only same-pathname links; /IBC-Website/index.html leaves it inactive (accepted, Pitfall 7)
 - [Phase 01]: Pages workflow: production SITE_URL/PATH_PREFIX live only in the build job env of .github/workflows/pages.yml; deploy job (pages/id-token write) runs no npm
 - [Phase 01]: README (Polish) references the Discord invite only by location (src/_data/site.js); _site/ replaces the repo root as deploy folder
+- [Phase 01]: 01-05: dev-only pages use devOnly preprocessor (returns false unless site.includeDevPages) plus eleventyExcludeFromCollections
+- [Phase 01]: 01-05: npm run build = node scripts/clean.js && eleventy; clean.js refuses repo root, parents and other drives
 
 ### Pending Todos
 
@@ -104,6 +107,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-10-02T22:27:25.676Z
-Stopped at: Completed 01-04-PLAN.md
+Last session: 2026-10-02T22:32:11.954Z
+Stopped at: Completed 01-05-PLAN.md
 Resume file: None

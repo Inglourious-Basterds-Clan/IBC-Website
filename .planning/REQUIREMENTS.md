@@ -9,11 +9,11 @@ Requirements for this milestone. Each maps to a roadmap phase.
 
 ### Foundation
 
-- [ ] **FOUND-01**: Site builds with Eleventy 3.1.x into static files in `_site/`, and the deploy steps are documented
+- [x] **FOUND-01**: Site builds with Eleventy 3.1.x into static files in `_site/`, and the deploy steps are documented
 - [ ] **FOUND-02**: Home page renders with the same content and look as before the migration
 - [ ] **FOUND-03**: Site URL is set in one value (`SITE_URL`), and every absolute URL comes from it
 - [ ] **FOUND-04**: Discord invite link is defined once and used everywhere
-- [ ] **FOUND-05**: All pages share one layout: header, nav, footer and Discord CTA
+- [x] **FOUND-05**: All pages share one layout: header, nav, footer and Discord CTA
 - [ ] **FOUND-06**: Internal links work both at a domain root and under a subpath (pathPrefix, e.g. GitHub Pages)
 
 ### SEO
@@ -101,11 +101,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| FOUND-01 | Phase 1 | Pending |
+| FOUND-01 | Phase 1 | Complete |
 | FOUND-02 | Phase 1 | Pending |
 | FOUND-03 | Phase 1 | Pending |
 | FOUND-04 | Phase 1 | Pending |
-| FOUND-05 | Phase 1 | Pending |
+| FOUND-05 | Phase 1 | Complete |
 | FOUND-06 | Phase 1 | Pending |
 | SEO-01 | Phase 2 | Pending |
 | SEO-02 | Phase 2 | Pending |
