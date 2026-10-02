@@ -7,7 +7,7 @@
   },
   "scripts": {
     "dev": "eleventy --serve",
-    "build": "eleventy",
+    "build": "node scripts/clean.js && eleventy",
     "test": "node --test \"test/*.test.js\""
   },
   "devDependencies": {
