@@ -1,0 +1,16 @@
+{
+  "name": "ibc-website",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.19"
+  },
+  "scripts": {
+    "dev": "eleventy --serve",
+    "build": "eleventy",
+    "test": "node --test \"test/*.test.js\""
+  },
+  "devDependencies": {
+    "@11ty/eleventy": "~3.1.6"
+  }
+}

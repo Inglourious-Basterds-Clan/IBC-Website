@@ -14,12 +14,12 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="/css/style.css">
   
   <!-- Open Graph & Twitter Cards -->
   <meta property="og:title" content="IBC Clan // Wizytówka Taktyczna Arma 3">
   <meta property="og:description" content="Oficjalna strona klanu IBC w Arma 3. Dołącz do naszej społeczności milsim, bierz udział w zorganizowanych operacjach i przeżyj realistyczną symulację pola walki.">
-  <meta property="og:image" content="assets/hero-bg.jpg">
+  <meta property="og:image" content="{{ "/assets/hero-bg.jpg" | htmlBaseUrl(site.url) }}">
   <meta property="og:type" content="website">
   
   <!-- Structured Data JSON-LD -->
@@ -207,7 +207,7 @@
                 <span>TERMINAL REKRUTACYJNY v1.0.0</span>
                 <span>STATUS: ACTIVE</span>
               </div>
-              <div class="terminal-body" id="terminal-console">
+              <div class="terminal-body" id="terminal-console" data-discord-url="{{ site.discord.invite }}">
                 <!-- Log output goes here via JavaScript -->
               </div>
             </div>
@@ -227,7 +227,7 @@
               </ul>
             </div>
             
-            <a href="https://discord.gg/DhJwkeehJK" target="_blank" rel="noopener noreferrer" class="hud-btn active" style="width: 100%; justify-content: center; font-size: 1.1rem; padding: 15px 0; display: inline-flex; align-items: center; gap: 10px;">
+            <a href="{{ site.discord.invite }}" target="_blank" rel="noopener noreferrer" class="hud-btn active" style="width: 100%; justify-content: center; font-size: 1.1rem; padding: 15px 0; display: inline-flex; align-items: center; gap: 10px;">
               <i class="fab fa-discord" style="font-size: 1.3rem;"></i> Wejdź na Discord
             </a>
           </div>
@@ -241,7 +241,7 @@
     <div class="lightbox-content">
       <button class="lightbox-close" aria-label="Zamknij podgląd">[ X ] ZAMKNIJ</button>
       <button class="lightbox-nav lightbox-prev" aria-label="Poprzednie zdjęcie">&lt;</button>
-      <img src="" alt="Lightbox image">
+      <img alt="Lightbox image">
       <button class="lightbox-nav lightbox-next" aria-label="Następne zdjęcie">&gt;</button>
       <div class="lightbox-caption"></div>
     </div>
@@ -262,7 +262,7 @@
       </ul>
 
       <div class="footer-socials">
-        <a href="https://discord.gg/DhJwkeehJK" target="_blank" class="social-icon" rel="noopener noreferrer" aria-label="Discord"><i class="fab fa-discord"></i></a>
+        <a href="{{ site.discord.invite }}" target="_blank" class="social-icon" rel="noopener noreferrer" aria-label="Discord"><i class="fab fa-discord"></i></a>
         <a href="https://www.youtube.com/@IBC_A3" target="_blank" class="social-icon" rel="noopener noreferrer" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
         <a href="https://www.facebook.com/IBCA3" target="_blank" class="social-icon" rel="noopener noreferrer" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
       </div>
@@ -292,6 +292,6 @@
     </div>
   </div>
 
-  <script src="js/main.js"></script>
+  <script src="/js/main.js"></script>
 </body>
 </html>
