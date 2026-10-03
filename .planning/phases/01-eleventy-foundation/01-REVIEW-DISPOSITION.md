@@ -5,7 +5,7 @@ titles: json
 findings:
   - id: CR-01
     severity: critical
-    disposition: open
+    disposition: fixed
     title: "Documented \"any static host\" build ships `http://localhost:8080` absolute URLs"
   - id: WR-01
     severity: warning
@@ -55,7 +55,7 @@ findings:
     severity: info
     disposition: open
     title: "Copyright year hardcoded"
-open: 13
+open: 12
 total: 13
 recorded: 2026-10-02T22:49:37.594Z
 ---
@@ -64,7 +64,7 @@ recorded: 2026-10-02T22:49:37.594Z
 
 | Finding | Severity | Disposition | Source |
 |---------|----------|-------------|--------|
-| CR-01 | critical | open | UAT 2026-10-03: user decided fix now in Phase 1 (gap G-01-5) |
+| CR-01 | critical | fixed | UAT 2026-10-03: user decided fix now in Phase 1 (gap G-01-5); fixed by 01-07 (build guard + README SITE_URL docs) |
 | WR-01 | warning | open | - |
 | WR-02 | warning | open | - |
 | WR-03 | warning | open | - |
