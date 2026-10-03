@@ -1,6 +1,7 @@
 ---
 phase: 01
 review: 01-REVIEW.md
+review_note: "Rows CR-01..IN-07 come from the full-phase review (superseded in git at 18efc6c); R2-* rows map to WR-*/IN-* in the incremental 01-07 review now in 01-REVIEW.md (d1c923f). IDs were prefixed by hand to avoid id reuse dropping the earlier open rows."
 titles: json
 findings:
   - id: CR-01
@@ -55,8 +56,40 @@ findings:
     severity: info
     disposition: open
     title: "Copyright year hardcoded"
-open: 12
-total: 13
+  - id: R2-WR-01
+    severity: warning
+    disposition: open
+    title: "The guard rejects only empty `SITE_URL`; a malformed value still ships broken `og:image` and exits 0"
+  - id: R2-WR-02
+    severity: warning
+    disposition: open
+    title: "Following the README \"Zmiana domeny\" steps now fails `npm test` in CI and blocks the deploy"
+  - id: R2-WR-03
+    severity: warning
+    disposition: open
+    title: "The opt-out gives no signal and stays set in PowerShell, so a forgotten `Remove-Item` brings CR-01 back"
+  - id: R2-IN-01
+    severity: info
+    disposition: open
+    title: "The \"inherited opt-out\" build assertion passes on any failure"
+  - id: R2-IN-02
+    severity: info
+    disposition: open
+    title: "\"empty env falls back to defaults\" now passes only because of a hidden opt-out; empty-string guard case untested"
+  - id: R2-IN-03
+    severity: info
+    disposition: open
+    title: "Comments that are inaccurate or repeated"
+  - id: R2-IN-04
+    severity: info
+    disposition: open
+    title: "The README still says `site.js` is the only configuration place"
+  - id: R2-IN-05
+    severity: info
+    disposition: open
+    title: "`site.js` now throws on import, and the test-runner processes import it unprotected"
+open: 20
+total: 21
 recorded: 2026-10-02T22:49:37.594Z
 ---
 
@@ -77,6 +110,14 @@ recorded: 2026-10-02T22:49:37.594Z
 | IN-05 | info | open | - |
 | IN-06 | info | open | - |
 | IN-07 | info | open | - |
+| R2-WR-01 | warning | open | 01-REVIEW.md (incremental, plan 01-07) WR-01; same root cause as WR-01 |
+| R2-WR-02 | warning | open | 01-REVIEW.md (incremental, plan 01-07) WR-02 |
+| R2-WR-03 | warning | open | 01-REVIEW.md (incremental, plan 01-07) WR-03 |
+| R2-IN-01 | info | open | 01-REVIEW.md (incremental, plan 01-07) IN-01 |
+| R2-IN-02 | info | open | 01-REVIEW.md (incremental, plan 01-07) IN-02 |
+| R2-IN-03 | info | open | 01-REVIEW.md (incremental, plan 01-07) IN-03 |
+| R2-IN-04 | info | open | 01-REVIEW.md (incremental, plan 01-07) IN-04 |
+| R2-IN-05 | info | open | 01-REVIEW.md (incremental, plan 01-07) IN-05 |
 
 Dispositions: `open` (recorded, not yet triaged), `fixed`, `skipped`, `deferred`.
 Set `deferred` by hand and put the reason in the Source cell; both are preserved. A `|` in the reason is kept as prose and escaped on the next run.
