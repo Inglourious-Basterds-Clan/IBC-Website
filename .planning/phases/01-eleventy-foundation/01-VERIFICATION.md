@@ -1,8 +1,8 @@
 ---
 phase: 01-eleventy-foundation
-verified: 2026-10-03T12:00:00Z
+verified: 2026-10-03T14:00:00Z
 status: human_needed
-score: 39/43 must-haves verified
+score: 50/50 must-haves verified
 covered_files:
   - .github/workflows/pages.yml
   - .gitignore
@@ -19,6 +19,8 @@ covered_files:
   - .planning/phases/01-eleventy-foundation/01-05-SUMMARY.md
   - .planning/phases/01-eleventy-foundation/01-06-PLAN.md
   - .planning/phases/01-eleventy-foundation/01-06-SUMMARY.md
+  - .planning/phases/01-eleventy-foundation/01-07-PLAN.md
+  - .planning/phases/01-eleventy-foundation/01-07-SUMMARY.md
   - README.md
   - eleventy.config.js
   - package.json
@@ -42,179 +44,147 @@ covered_files:
   - test/layout.test.js
   - test/links.test.js
   - test/workflow.test.js
-covered_digest: "v2:sha256:9e9f2ea890839b9a53ddbaa4a97c5ee5d3d63051e823e9abe23e7e00bf864f4a"
-behavior_unverified: 4
+covered_digest: "v2:sha256:2d7c3ca26291f439ef93bee7b647ebb61e24c24f09d98585b52e06b046d631bf"
+behavior_unverified: 0
 overrides_applied: 0
-behavior_unverified_items:
-  - truth: "SC2: The built home page looks and behaves the same as the old index.html side by side (hero, about, gallery lightbox, recruitment terminal, mobile menu, scroll-spy, footer easter egg)"
-    test: "Walk the baseline/parity.md D-07 checklist at http://localhost:8080/ and at http://localhost:8080/IBC-Website/ and compare the 10 baseline PNGs with their root-/sub- counterparts"
-    expected: "Every checklist item works at both addresses; pages look like the baseline apart from the header Discord button and focus-only skip link"
-    why_human: "Lightbox, mobile menu and easter-egg have no behavioural test; visual parity is a human judgment (D-07 rules out automated visual diffing). Terminal and scroll-spy are covered by node:vm tests only, not a real browser."
-  - truth: "01-02: At 320, 390, 768 and 1440 px the header keeps logo, Discord CTA and (<=768 px) the hamburger on one row with the baseline header height"
-    test: "DevTools device mode at 320/390/768/1440, compare with baseline/w320-top.png, mobile-top.png, w768-top.png, desktop-top.png; Tab once to reveal the skip link"
-    expected: "One header row, no wrap/overlap, icon-only CTA at <=480 px, skip link 'Przejdź do treści' visible on first Tab"
-    why_human: "Layout fit is visual; after/ screenshots look right at 320 px but no assertion can prove it"
-  - truth: "01-04: A push to main runs npm ci, npm test, npm run build with the production env and deploys _site/ to GitHub Pages"
-    test: "Enable Settings -> Pages -> Source: GitHub Actions (01-USER-SETUP.md, still Incomplete), push or re-run on main, then curl -sI https://inglourious-basterds-clan.github.io/IBC-Website/"
-    expected: "Build and deploy run green; the URL returns 200"
-    why_human: "Only the workflow file's structure is tested statically; Pages is not yet enabled on the repo, so no deploy has ever run"
-  - truth: "01-06: The user has walked the D-07 checklist at / and /IBC-Website/ and confirmed visual and behavioural parity"
-    test: "Tick the checklist in baseline/parity.md and answer the repo-root hosting question (A5)"
-    expected: "All boxes checked; A5 answered"
-    why_human: "Every checklist box in parity.md is still unchecked and the A5 answer is blank; this is a human sign-off by definition"
+re_verification:
+  previous_status: human_needed
+  previous_score: 39/43
+  gaps_closed:
+    - "G-01-5 (CR-01): a production build never silently emits http://localhost:8080 absolute URLs; npm run build without SITE_URL fails loudly, ALLOW_LOCAL_SITE_URL=1 opts out, README documents SITE_URL"
+    - "SC2 / FOUND-02 visual+behavioural parity at / and /IBC-Website/ (UAT tests 1-3 passed, human-attested)"
+    - "01-02 header fit at 320/390/768/1440 + skip link (UAT test 1)"
+    - "01-04 GitHub Pages deploy (UAT test 7 passed; live URL independently fetched: 200, Eleventy build with /IBC-Website/ prefix)"
+    - "01-06 D-07 parity sign-off and A5 hosting question (UAT tests 1-4)"
+    - "01-02 judgment-tier prohibition: Polish copy unchanged (UAT test 6)"
+  gaps_remaining: []
+  regressions: []
 human_verification:
-  - test: "D-07 parity walk-through at / (npm run dev, http://localhost:8080/): hero, about, gallery lightbox (click, Enter, Space, arrows, Esc, outside click), recruitment terminal line 'Połączenie nawiązane: discord.gg/DhJwkeehJK', mobile menu + aria-expanded, scroll-spy incl. 'System' at top, footer easter egg open/close, header Discord button at 320/390/768/1440, skip link on first Tab, no console errors except /favicon.ico"
-    expected: "Everything behaves as on the old index.html; only the header Discord button and skip link are new"
-    why_human: "Real-browser interaction and visual comparison; no automated test covers lightbox, menu or easter egg"
-  - test: "Same walk-through at /IBC-Website/ (PowerShell: $env:PATH_PREFIX=\"/IBC-Website/\"; npm run dev, then Remove-Item Env:PATH_PREFIX), incl. full-size lightbox image loading under the prefix and the hero background image"
-    expected: "Identical behaviour and look under the subpath"
-    why_human: "Subpath rendering in a browser (CSS url(), lightbox data-src) is only asserted at the file-resolution level"
-  - test: "Compare baseline/*.png with baseline/after/root-*.png and sub-*.png (10 pairs each)"
-    expected: "Same look apart from the header Discord button; the scrolled mobile shots now show the fixed header (explained in parity.md)"
-    why_human: "Visual judgment"
-  - test: "Answer parity.md question A5: is the old repo root served by any host other than GitHub Pages?"
-    expected: "If yes, that host must switch to deploying _site/ (and set SITE_URL, see next item)"
-    why_human: "Only the user knows the current hosting"
-  - test: "Decide on review finding CR-01: README 'Dowolny hosting statyczny' says just `npm run build`, which emits og:image=http://localhost:8080/assets/hero-bg.jpg (reproduced). Either fix now (document SITE_URL=https://<domena> npm run build in README and/or fail a production build without SITE_URL) or accept it as Phase 2 scope (Phase 2 SC5: build gate on canonical/og:image, noindex for non-final hosts, domain cutover checklist)"
-    expected: "Explicit decision recorded in 01-REVIEW-DISPOSITION.md (fixed or deferred to Phase 2)"
-    why_human: "Does not falsify SC1/SC3 as worded (the value comes from the single config location and the GitHub Pages path sets it), but it is a real defect on a documented deploy path; scope call belongs to the developer"
-  - test: "Judgment-tier prohibition (01-02, FOUND-02 transparency): confirm no existing Polish copy or factual claim changed and new visible text is only 'Przejdź do treści' and 'Discord'"
-    expected: "Confirmed"
-    why_human: "Judgment-tier prohibition; LLM-judge verdict below is non-authoritative (unverified-prohibition, human review recommended)"
-  - test: "GitHub Pages first deploy (01-USER-SETUP.md): enable Settings -> Pages -> Source: GitHub Actions, re-run the workflow on main"
-    expected: "Build and deploy jobs green; https://inglourious-basterds-clan.github.io/IBC-Website/ serves the site with all assets"
-    why_human: "Requires repo admin access and a real GitHub Actions run"
+  - test: "Read README.md section 'Wdrożenie' (and the SITE_URL bullet in 'Konfiguracja') once, in Polish"
+    expected: "The Polish reads naturally, and the PowerShell and Git Bash commands copy-paste and run as written (SITE_URL build succeeds; plain build stops with 'SITE_URL is not set'; opt-out build succeeds)"
+    why_human: "Planner-deferred <human-check> from 01-07 Task 3; natural-language quality and copy-paste ergonomics are a human judgment"
 ---
 
 # Phase 1: Eleventy Foundation Verification Report
 
 **Phase Goal:** The current site builds with Eleventy into plain static files and looks and behaves exactly as before. The site URL and Discord invite each live in one place, and new pages can reuse a shared layout.
 **Verified:** 2026-10-03
-**Status:** human_needed
-**Re-verification:** No — initial verification
+**Status:** human_needed (one planner-deferred README readability check; no gaps)
+**Re-verification:** Yes. This follows UAT (6 passed, 1 issue: G-01-5) and gap-closure plan 01-07.
+
+## What changed since the previous verification
+
+The previous report (`c5ae6c3`) was `human_needed` at 39/43. Since then, `git diff c5ae6c3..HEAD` outside `.planning/` touches exactly five files:
+- `README.md`
+- `src/_data/site.js`
+- `test/build.test.js`
+- `test/helpers.js`
+- `test/workflow.test.js`
+
+No template, CSS, JS, `eleventy.config.js`, `package.json` or `pages.yml` changed. The `site.js` change can only alter behaviour when SITE_URL is blank and the run mode is `build`. So the earlier human parity sign-off (UAT tests 1-3) still applies to the current code.
 
 ## Goal Achievement
 
-Everything that can be checked automatically holds, and I checked it independently rather than relying on the SUMMARYs: the full test suite (47/47 pass), my own scratch builds at root and `/IBC-Website/`, a scratch-copy mutation of both the invite and SITE_URL, a real `npm run build` with a stale `_site/_dev/` page planted, a diff of the built home page against `git show ef0d894:index.html`, and the raw Lighthouse JSONs. What is left is the D-07 human parity sign-off. Every box in `parity.md` is still unchecked.
+I checked the following myself. I did not rely on the 01-07 SUMMARY.
+- **Test suite:** `npm test`, run once in a clean env: 56/56 pass.
+- **Real `npm run build`:**
+  - with no SITE_URL: exit 1, guard message, no `_site/`;
+  - with `ALLOW_LOCAL_SITE_URL=true`: exit 1;
+  - with `SITE_URL=https://verify.example`: exit 0, absolute og:image, 0 localhost hits, 12 files.
+- **Scratch builds:**
+  - `SITE_URL=""`: exit 1, no output;
+  - the CI env (`SITE_URL=https://inglourious-basterds-clan.github.io PATH_PREFIX=/IBC-Website/`): exit 0, every href/src/data-src prefixed or a fragment/external;
+  - the opt-out: localhost og:image;
+  - a malformed SITE_URL (R2-WR-01 reproduced).
+- **Eleventy run-mode mapping:** confirmed in `node_modules/@11ty/eleventy` (`cmd.cjs:86`, `Eleventy.js:636`).
+- **Live site:** fetched https://inglourious-basterds-clan.github.io/IBC-Website/. It returns 200 and is the Eleventy build: `/IBC-Website/css/style.css`, the skip link, `data-discord-url`, absolute og:image.
 
-### Observable Truths — Roadmap Success Criteria (contract)
+### Observable Truths: Roadmap Success Criteria (contract)
 
 | # | Truth | Status | Evidence |
 |---|-------|--------|----------|
-| SC1 | One documented build command produces a complete static site in `_site/`; docs say which folder to deploy | ✓ VERIFIED (see CR-01 warning) | Planted `_site/_dev/stale/index.html`, ran `npm run build` → output is exactly index.html, css/style.css, js/main.js, 9 assets; stale page gone. README "Wdrożenie" says deploy `_site/`, not the repo root. Caveat: the same command without SITE_URL emits `og:image=http://localhost:8080/...` (CR-01) |
-| SC2 | Built home page looks and behaves like old index.html (hero, about, lightbox, terminal, menu, scroll-spy, easter egg) | ⚠️ PRESENT_BEHAVIOR_UNVERIFIED | `diff -w old index.html built index.html`: only intended changes (root-relative URLs, skip link, header-actions + CTA, `section id="hero"` instead of `body id="hero"`, lightbox moved inside `<main>`, `data-discord-url`, og:image absolute). No Polish copy changed. CSS diff is additive only; JS diff is limited to the terminal invite source, textContent spans and the hash-based scroll-spy. Terminal and scroll-spy have passing node:vm tests. Lightbox, menu and easter egg have no behavioural test, and the parity checklist is unchecked |
-| SC3 | Changing SITE_URL or the invite in its single config location and rebuilding updates every absolute URL / Discord link; no hardcoded host, no second invite | ✓ VERIFIED | Scratch copy with the invite changed to `discord.gg/MUTATED123` in `site.js` and `SITE_URL=https://mutated.example`: 0 old-invite hits in output (incl. js/main.js), 8 new-invite hits; hosts in output are only mutated.example + the allowlisted CDNs/socials. `links.test.js (f)(g)(h)` pass: invite literal once under src/, host literals only in site.js |
-| SC4 | A new page with only front matter + body renders the same header, nav, footer, Discord CTA | ✓ VERIFIED | `src/_dev/layout-test.njk` (front matter + body) and `layout-empty.njk` (front matter only); `devpages.test.js (b)` asserts byte-equal `<header>`/`<footer>` vs home (minus active-nav); (d) empty page gets full chrome + default title |
-| SC5 | Built site works at domain root and under `/IBC-Website/`; every internal link, stylesheet, script, image resolves in both | ✓ VERIFIED | Own `/IBC-Website/` build: every href/src/data-src is `/IBC-Website/...` or a same-page fragment; CSS `url('../assets/hero-bg.jpg')` is relative and resolves from css/. `links.test.js (a)(b)` resolve every URL to a file in both variants. after/sub-w320-top.png shows the hero background loading under the prefix |
+| SC1 | One documented build command produces a complete static site in `_site/`; docs say which folder to deploy | ✓ VERIFIED | `SITE_URL=https://verify.example npm run build` gives index.html, css/style.css, js/main.js and 9 assets, with og:image `https://verify.example/assets/hero-bg.jpg`. README "Wdrożenie" names `_site/` and now documents SITE_URL for PowerShell and Git Bash. CR-01 is closed: a plain `npm run build` exits 1 with `SITE_URL is not set…` and leaves no `_site/`, so it cannot silently ship localhost URLs |
+| SC2 | Built home page looks and behaves like the old index.html | ✓ VERIFIED (human-attested) | UAT tests 1, 2 and 3 passed: the D-07 walk-through at `/` and `/IBC-Website/`, and the screenshot pairs. Earlier structural diff vs `ef0d894:index.html` is clean. No template, CSS or JS changed after the UAT |
+| SC3 | Changing SITE_URL or the invite in its single config location updates every absolute URL / Discord link; no hardcoded host or second invite in `_site/` | ✓ VERIFIED | `links.test (d)(f)(g)(h)` pass. The invite literal appears once under `src/` (site.js). The CI-like build has 4 invite hits, all from site.js, and 0 localhost. The SITE_URL mutation flows to og:image (verify.example). See R2-WR-02 below for the domain-cutover doc issue in the test file |
+| SC4 | A front-matter-only page renders the shared header/nav/footer/Discord CTA | ✓ VERIFIED | `devpages.test (b)(d)` pass. Layout files are unchanged since the previous verification |
+| SC5 | Works at domain root and under a subpath prefix | ✓ VERIFIED | `links.test (a)(b)` pass. My own `/IBC-Website/` build has no unprefixed internal ref. The live Pages site serves prefixed assets with 200 |
 
-### Observable Truths — PLAN must_haves (merged, roadmap duplicates removed)
+### Observable Truths: plan 01-07 must_haves (new)
 
-| Plan | Truth (abridged) | Status | Evidence |
-|------|------------------|--------|----------|
-| 01-01 | D-07 baseline: 10 screenshots ≥10 KB + scores.md with 3 runs + median | ✓ VERIFIED | 10 PNGs 91–1428 KB; scores.md Median row; raw lh/mobile-1..3.json = 39/46/46 perf, 96/77/100 |
-| 01-01 | `npm run build` emits index, css, js, 9 assets | ✓ VERIFIED | Real build listing above |
-| 01-01 | PATH_PREFIX build links /IBC-Website/css + js; no `src="."`, no C:/ | ✓ VERIFIED | Own build; build.test + links.test (c) |
-| 01-01 | SITE_URL trailing slash + PATH_PREFIX without slashes → exact og:image, no `//` | ✓ VERIFIED | build.test "SITE_URL and PATH_PREFIX are normalized" passes; site.js normalization read |
-| 01-01 | Unset/empty env → localhost:8080 and `/` | ✓ VERIFIED | Own root build og:image = `http://localhost:8080/assets/hero-bg.jpg`; build.test "empty env" passes |
-| 01-01 | Non-empty env overrides site.js; no third source | ✓ VERIFIED | site.js is the only reader of SITE_URL/PATH_PREFIX; eleventy.config.js imports `site.pathPrefix` |
-| 01-01 | Every invite in home = site.discord.invite; index.njk has no literal | ✓ VERIFIED | index.njk uses `{{ site.discord.invite }}` only |
-| 01-01 | Per-suite `_test/` dirs; helper strips SITE_URL/PATH_PREFIX/INCLUDE_DEV_PAGES/ELEVENTY_RUN_MODE | ✓ VERIFIED | test/helpers.js; suite passes in parallel |
-| 01-02 | Home keeps all sections/ids/Polish text, one h1, 4 gallery items, #lightbox, #terminal-console[data-discord-url], overlay, trigger | ✓ VERIFIED | Diff vs old index.html; layout.test passes |
-| 01-02 | index.njk is front matter + body; shell from base.njk + partials | ✓ VERIFIED | index.njk read; `layout: layouts/base.njk` |
-| 01-02 | Header Discord hud-btn outside nav list, target _blank, rel noopener noreferrer | ✓ VERIFIED | discord-cta.njk, header.njk (`header-actions` after `</nav>`) |
-| 01-02 | Nav order from navigation.js; only home marks System active | ✓ VERIFIED | header.njk `page.url == "/" and loop.first`; layout.test FOUND-05 |
-| 01-02 | Under prefix logo/gallery src+data-src/css/js/nav start with /IBC-Website/ | ✓ VERIFIED | Own sub build ref list |
-| 01-02 | Skip link first in body, hidden until focus; `<main id="main">` | ✓ VERIFIED (presence) | base.njk + `.skip-link`/`.skip-link:focus` CSS; visual reveal is in human items |
-| 01-02 | Keywords + SportsTeam JSON-LD home-only; FA CDN, Google Fonts, inline styles unchanged | ✓ VERIFIED | head.njk `page.url == "/"`; diff shows no head/inline-style changes |
-| 01-02 | Header one row at 320/390/768/1440 with baseline height | ⚠️ PRESENT_BEHAVIOR_UNVERIFIED | CSS present; after/*-w320-top.png looks right; planner-deferred human-check |
-| 01-03 | main.js has no invite literal; terminal prints 'Połączenie nawiązane: ' + invite without scheme | ✓ VERIFIED | client.test passes; source read |
-| 01-03 | Missing data-discord-url → still boots | ✓ VERIFIED | client.test "boots without data-discord-url" |
-| 01-03 | Three spans via textContent; no innerHTML in writeToConsole | ✓ VERIFIED | Source + client.test |
-| 01-03 | Scroll-spy hash-based, filtered by pathname; header → #hero | ✓ VERIFIED | client.test (vm, /IBC-Website/) passes |
-| 01-03 | Scroll-spy inert on other paths | ✓ VERIFIED | client.test "inert" |
-| 01-03 | Classic script, 5 inits on DOMContentLoaded, `node --check` | ✓ VERIFIED | client.test node --check |
-| 01-04 | Push to main: npm ci → test → build with prod env, upload, deploy | ⚠️ PRESENT_BEHAVIOR_UNVERIFIED | pages.yml correct and contract-tested; Pages not enabled (01-USER-SETUP.md Incomplete), no deploy has run |
-| 01-04 | PR runs build/test, never uploads/deploys | ✓ VERIFIED | `if: github.event_name != 'pull_request'` on upload and deploy job; workflow.test (c)(d) |
-| 01-04 | Only deploy has pages/id-token write; no npm in deploy; workflow-level contents: read | ✓ VERIFIED | pages.yml read; workflow.test (b)(d) |
-| 01-04 | Polish README: Node 24, dev/build/test, `_site/` replaces root, config in site.js, Pages workflow, Settings step | ✓ VERIFIED | README read; .nvmrc = 24 |
-| 01-04 | README has no invite, no host outside workflow values | ✓ VERIFIED | No `discord.gg` in README; only the github.io deploy address |
-| 01-05 | Front matter-only page renders chrome, empty main, default title | ✓ VERIFIED | devpages (d) |
-| 01-05 | devOnly pages in dev/INCLUDE_DEV_PAGES only; prod has no _dev/ | ✓ VERIFIED | Real `npm run build` output has no _dev/; preprocessor in eleventy.config.js |
-| 01-05 | `npm run build` deletes `_site/` first | ✓ VERIFIED | Planted stale page removed by real build |
-| 01-05 | clean.js refuses repo root / outside paths | ✓ VERIFIED | devpages (h) passes; guard read |
-| 01-05 | Dev pages have no keywords/JSON-LD; eleventyExcludeFromCollections | ✓ VERIFIED | Front matter + head.njk guard; devpages (c) |
-| 01-06 | CSS url() targets resolve from css/ in both | ✓ VERIFIED | links.test (b) |
-| 01-06 | Mutated SITE_URL build: all own absolute URLs under it, no github.io / localhost | ✓ VERIFIED | links.test (d); own mutated build |
-| 01-06 | Absolute URLs only self or allowlisted hosts | ✓ VERIFIED | Own mutated build host list |
-| 01-06 | No github.io host under src/ or config; localhost:8080 only in site.js | ✓ VERIFIED | links.test (f) |
-| 01-06 | After-migration screenshots for both variants; Lighthouse medians within gate | ✓ VERIFIED | 20 PNGs in after/; raw after-mobile-1..3.json = 44/44/45, 96, 77, 100 vs baseline 46/96/77/100 |
-| 01-06 | User walked D-07 checklist and confirmed parity | ⚠️ PRESENT_BEHAVIOR_UNVERIFIED | All parity.md boxes unchecked, A5 blank |
+| # | Truth (abridged) | Status | Evidence |
+|---|------------------|--------|----------|
+| 1 | Build-mode with unset, empty or blank SITE_URL exits non-zero, prints `SITE_URL is not set` and `ALLOW_LOCAL_SITE_URL=1`, writes no index.html | ✓ VERIFIED | Real `npm run build` (unset) exits 1, the message contains both strings (2 hits for the opt-out name), no `_site/`. Scratch `SITE_URL=""` exits 1 with no output dir. Tests "fails loudly" and "blank SITE_URL counts as missing" pass |
+| 2 | Only `ALLOW_LOCAL_SITE_URL=1` opts out and keeps the localhost og:image | ✓ VERIFIED | `=true` exits 1. `=1` exits 0 with og:image `http://localhost:8080/assets/hero-bg.jpg`. `site.js:11` uses strict `!== "1"` |
+| 3 | A set SITE_URL passes without the opt-out and emits no localhost | ✓ VERIFIED | verify.example and CI-env builds: exit 0, 0 localhost hits. Test "a set SITE_URL passes the guard" passes |
+| 4 | `npm run dev` (serve) and watch are unaffected | ✓ VERIFIED | Test "site.js keeps the local default in serve and watch mode" passes. It is a real child-process import with `ELEVENTY_RUN_MODE=serve/watch`, and the probe matches production: `cmd.cjs:86` maps `--serve`→"serve", and `Eleventy.js:636` writes the env var |
+| 5 | `npm test` green, also with an inherited SITE_URL/PATH_PREFIX/opt-out; helpers strip the opt-out and add it only for variants without SITE_URL | ✓ VERIFIED | 56/56. `helpers.js`: `buildEnvKeys` includes `ALLOW_LOCAL_SITE_URL` (case-insensitive strip); `build()` adds the opt-out only when `env.SITE_URL` is blank. Test "build helpers never inherit an opt-out" passes |
+| 6 | pages.yml sets SITE_URL/PATH_PREFIX at job level, never the opt-out, unchanged | ✓ VERIFIED | pages.yml is unchanged since `c5ae6c3`. Job-level `env:` has both values. workflow.test (g)(h) pass |
+| 7 | README documents the static-host build (PowerShell + Git Bash), the subfolder, the guard and the opt-out; Szybki start and Konfiguracja corrected | ✓ VERIFIED | README read in full: all blocks present, 0 `discord.gg`, the old one-line sentence is gone. Polish readability is the remaining human item |
 
-(01-05 truth 1 folded into SC4; 01-06 truths 1 and 5 folded into SC5 and SC3.)
+### Observable Truths: earlier plans (regression check)
 
-**Score:** 39/43 truths verified (4 present, behavior-unverified)
+All 39 truths verified in the previous report still hold. The full suite is green, and none of their artifacts changed except the five files above, whose changes are confined to the guard. The 4 truths previously marked ⚠️ PRESENT_BEHAVIOR_UNVERIFIED are now resolved by direct human observation recorded in 01-UAT.md:
+
+| Plan | Truth | Previous | Now | Evidence |
+|------|-------|----------|-----|----------|
+| — | SC2 parity | ⚠️ | ✓ VERIFIED | UAT 1-3 pass |
+| 01-02 | Header one row at 320/390/768/1440, skip link | ⚠️ | ✓ VERIFIED | UAT 1 (explicitly lists header CTA at those widths and the skip link) |
+| 01-04 | Push to main deploys `_site/` to Pages | ⚠️ | ✓ VERIFIED | UAT 7 pass. Independent `curl` of the live URL: 200, Eleventy output with prefix and absolute og:image |
+| 01-06 | User walked D-07 checklist | ⚠️ | ✓ VERIFIED | UAT 1-4 pass. A5 answered "no" and ticked in parity.md. See the ℹ️ note on the checklist boxes |
+
+**Score:** 50/50 truths verified (0 present-but-behavior-unverified). That is 43 earlier truths plus 7 from 01-07.
 
 ### Prohibitions
 
 | Plan | Prohibition | Tier | Disposition |
 |------|-------------|------|-------------|
-| 01-01 FOUND-06 | No developer filesystem paths in built HTML | test | ✓ Enforced and passing: build.test prefix variant + links.test (c) |
-| 01-02 FOUND-02 | No change to existing Polish copy/facts; new text only Polish or "Discord" | judgment | **unverified-prohibition — human review recommended.** Non-authoritative LLM verdict: holds. The diff against ef0d894 shows no copy changes, and the new strings are "Przejdź do treści" and "Discord" |
-| 01-02 FOUND-02 | No new third-party origin / tracking | test | ✓ Enforced: links.test host allowlist; own build hosts = fonts.googleapis/gstatic, cdnjs, discord.gg, youtube, facebook, schema.org + own host |
-| 01-05 FOUND-05 | Dev pages never in production output/collections | test | ✓ Enforced: devpages (e), clean (g)(i), real build with a planted stale page |
+| 01-01 FOUND-06 | No developer filesystem paths in built HTML | test | ✓ Enforced, passing |
+| 01-02 FOUND-02 | No change to Polish copy/facts | judgment | ✓ Resolved by human: UAT test 6 passed |
+| 01-02 FOUND-02 | No new third-party origin | test | ✓ Enforced, passing |
+| 01-05 FOUND-05 | Dev pages never in production output | test | ✓ Enforced. The real build output has no `_dev/` |
 
-### Required Artifacts
+### Required Artifacts (01-07)
 
 | Artifact | Status | Details |
 |----------|--------|---------|
-| `package.json` | ✓ VERIFIED | `~3.1.6`, ESM, dev/build/test, `node scripts/clean.js && eleventy` |
-| `eleventy.config.js` | ✓ VERIFIED | HtmlBasePlugin, passthrough, `pathPrefix: site.pathPrefix`, devOnly preprocessor |
-| `src/_data/site.js` | ✓ VERIFIED | url, pathPrefix, name, discord.invite (only literal), includeDevPages |
-| `src/_data/navigation.js` | ✓ VERIFIED | 4 entries, used by header + footer loops |
-| `src/index.njk` | ✓ VERIFIED | Front matter + body, `site.discord.invite`, `htmlBaseUrl` on data-src |
-| `src/_includes/layouts/base.njk` + 4 partials | ✓ VERIFIED | Included by index and both dev pages |
-| `src/js/main.js` | ✓ VERIFIED | `getAttribute('data-discord-url')`, hash scroll-spy |
-| `src/_dev/layout-test.njk`, `layout-empty.njk` | ✓ VERIFIED | devOnly, excluded from collections |
-| `scripts/clean.js` | ✓ VERIFIED | Guarded rmSync, wired into the build script |
-| `.github/workflows/pages.yml` | ✓ VERIFIED (static) | deploy-pages@v5; runtime deploy pending user setup |
-| `README.md` | ✓ VERIFIED | Polish, `_site/`, site.js |
-| `test/*.test.js` (6) + helpers | ✓ VERIFIED | 47/47 pass; links 202 lines, client 237, layout 177, devpages 134, build 98, workflow 91 |
-| `baseline/scores.md`, `baseline/parity.md`, `baseline/after/` | ✓ VERIFIED | Present and match the raw reports; checklist unchecked |
+| `src/_data/site.js` | ✓ VERIFIED | `localUrl` const. Guard at lines 11-17 with the exact message. Export shape unchanged. Imported by eleventy.config.js |
+| `test/helpers.js` | ✓ VERIFIED | `cleanEnv`, `runBuild` exported. Opt-out-aware `build()`. Used by every test suite |
+| `test/build.test.js` | ✓ VERIFIED | 7 guard tests (lines 104-175). All substantive and passing |
+| `test/workflow.test.js` | ✓ VERIFIED | (g) and (h) present and passing |
+| `README.md` | ✓ VERIFIED | Contains `$env:SITE_URL`, `SITE_URL is not set`, opt-out commands, MSYS subfolder form |
 
-### Key Link Verification
+### Key Link Verification (01-07)
 
 | From | To | Via | Status |
 |------|----|-----|--------|
-| eleventy.config.js | site.js | `import site` → `pathPrefix: site.pathPrefix` | WIRED |
-| head.njk | site.js | `htmlBaseUrl(site.url)` for og:image | WIRED (output confirmed) |
-| index.njk / discord-cta / footer | site.js | `site.discord.invite` | WIRED (mutation propagated) |
-| header/footer | navigation.js | `for item in navigation` | WIRED |
-| main.js terminal | index.njk `data-discord-url` | `runBootSequence(consoleEl, discordUrl)` | WIRED |
-| main.js scroll-spy | nav hrefs | `link.pathname === window.location.pathname`, `link.hash` | WIRED |
-| package.json build | scripts/clean.js | `node scripts/clean.js && eleventy` | WIRED (stale page removed) |
-| devOnly preprocessor | site.includeDevPages | `data.devOnly && !site.includeDevPages` | WIRED |
-| pages.yml | package scripts / .nvmrc / env | npm ci→test→build, `node-version-file: .nvmrc`, SITE_URL/PATH_PREFIX | WIRED (static) |
-| links.test | helpers / site.js | `build("links-*")`, `site.discord.invite` | WIRED |
+| site.js | eleventy.config.js / Eleventy run mode | config imports site.js after `Eleventy.js:636` sets `ELEVENTY_RUN_MODE` | WIRED. The real CLI build fails before any output is written |
+| helpers.js | site.js | `ALLOW_LOCAL_SITE_URL: "1"` only for SITE_URL-less variants | WIRED. Production-like variants pass the real guard |
+| pages.yml | site.js | job-level `SITE_URL` reaches `npm run build` | WIRED. Statically asserted; CI-env reproduced locally; the deploy before 01-07 was green |
+| README | site.js | quotes the guard error, documents the opt-out | WIRED |
 
 ### Data-Flow Trace (Level 4)
 
 | Artifact | Data | Source | Real data | Status |
 |----------|------|--------|-----------|--------|
-| Built og:image | site.url + pathPrefix | env SITE_URL/PATH_PREFIX → site.js | Yes; mutated value flows | ✓ FLOWING (falls back to localhost when SITE_URL is unset, see CR-01) |
-| Invite hrefs + terminal line | site.discord.invite | site.js → templates → `data-discord-url` → main.js | Yes; mutated value flows to all 8 occurrences, 0 stale | ✓ FLOWING |
-| Nav items | navigation.js | global data → header/footer loops | Yes | ✓ FLOWING |
+| og:image | site.url + pathPrefix | env SITE_URL (required in build mode) → site.js | Yes | ✓ FLOWING. The localhost fallback can no longer reach a production build silently |
+| Invite hrefs + terminal | site.discord.invite | site.js → templates → `data-discord-url` → main.js | Yes | ✓ FLOWING |
+| Nav | navigation.js | header/footer loops | Yes | ✓ FLOWING |
 
 ### Behavioral Spot-Checks
 
 | Behavior | Command | Result | Status |
 |----------|---------|--------|--------|
-| Full suite (run once) | `npm test` | 47 pass, 0 fail | ✓ PASS |
-| Documented build is clean + complete | plant `_site/_dev/stale`, `npm run build`, `find _site` | 12 files, no _dev | ✓ PASS |
-| Subpath build | `PATH_PREFIX=/IBC-Website/ eleventy --output=<scratch>/sub` | all refs prefixed or fragment | ✓ PASS |
-| Single-source mutation | scratch copy, invite + SITE_URL changed, rebuild | 0 old invite, 8 new, no stray host | ✓ PASS |
-| Parity vs old page | `diff -w` old index.html vs built | only intended changes | ✓ PASS (structural) |
-| Lighthouse gate | read raw lh/*.json | after 44/96/77/100 vs base 46/96/77/100 | ✓ PASS |
-| Plain build og:image (CR-01) | `grep localhost:8080 _site/index.html` | 1 hit | ⚠️ reproduced |
+| Full suite (run once) | `env -u SITE_URL -u ALLOW_LOCAL_SITE_URL -u PATH_PREFIX -u ELEVENTY_RUN_MODE npm test` | 56 pass, 0 fail | ✓ PASS |
+| Plain production build is guarded | `npm run build` (no SITE_URL) | exit 1, guard message, no `_site/` | ✓ PASS |
+| Strict opt-out | `ALLOW_LOCAL_SITE_URL=true npm run build` | exit 1 | ✓ PASS |
+| Empty SITE_URL | `SITE_URL= eleventy --output=<scratch>` | exit 1, no output | ✓ PASS |
+| Documented build | `SITE_URL=https://verify.example npm run build` | exit 0, 12 files, absolute og:image, 0 localhost | ✓ PASS |
+| CI-env subpath build | `SITE_URL=…github.io PATH_PREFIX=/IBC-Website/ eleventy --output=<scratch>` | exit 0, all internal refs prefixed | ✓ PASS |
+| Opt-out build | `ALLOW_LOCAL_SITE_URL=1 eleventy --output=<scratch>` | exit 0, localhost og:image | ✓ PASS |
+| Live deploy | `curl -sI` / `curl -s` the Pages URL | 200; prefixed CSS, skip link, invite, absolute og:image | ✓ PASS |
+| Malformed SITE_URL (R2-WR-01) | `SITE_URL=ibc.example eleventy --output=<scratch>` | exit 0, og:image `/ibc.example/assets/hero-bg.jpg` | ⚠️ reproduced (warning) |
+
+I removed `_site/` afterwards (`node scripts/clean.js`), so no verify.example build is left behind.
 
 ### Probe Execution
 
@@ -222,67 +192,61 @@ No `scripts/*/tests/probe-*.sh` exist and no plan declares probes. Step 7c: SKIP
 
 ### Requirements Coverage
 
-| Req | Plans | Description | Status | Evidence |
-|-----|-------|-------------|--------|----------|
-| FOUND-01 | 01-01, 01-04, 01-05 | Builds into `_site/`, deploy steps documented | ✓ SATISFIED (CR-01 warning) | SC1 |
-| FOUND-02 | 01-02, 01-03, 01-06 | Same content and look as before | ? NEEDS HUMAN | Structural diff clean; visual/behavioural sign-off pending |
-| FOUND-03 | 01-01, 01-06 | One SITE_URL value, all absolute URLs from it | ✓ SATISFIED | SC3 mutation; links (d)(f) |
-| FOUND-04 | 01-01..03, 01-06 | Invite defined once | ✓ SATISFIED | links (g)(h); mutation |
-| FOUND-05 | 01-02, 01-05 | Shared layout | ✓ SATISFIED | SC4 |
-| FOUND-06 | 01-01..03, 01-06 | Works at root and subpath | ✓ SATISFIED | SC5 |
+| Req | Plans | Status | Evidence |
+|-----|-------|--------|----------|
+| FOUND-01 | 01-01, 01-04, 01-05, 01-07 | ✓ SATISFIED | SC1. The deploy steps are now correct for both GitHub Pages and any static host |
+| FOUND-02 | 01-02, 01-03, 01-06 | ✓ SATISFIED | SC2, human-attested in UAT 1-3 and 6 |
+| FOUND-03 | 01-01, 01-06, 01-07 | ✓ SATISFIED | SC3. Build-mode SITE_URL is mandatory; mutation flows. Malformed values are a warning (R2-WR-01) |
+| FOUND-04 | 01-01..03, 01-06 | ✓ SATISFIED | One invite literal; links (g)(h) |
+| FOUND-05 | 01-02, 01-05 | ✓ SATISFIED | SC4 |
+| FOUND-06 | 01-01..03, 01-06 | ✓ SATISFIED | SC5 plus the live prefixed deploy |
 
-All six phase IDs are claimed by at least one plan. No orphaned requirements. Note: REQUIREMENTS.md already marks FOUND-02 `[x] Complete`, but its human sign-off is still pending.
+All six IDs are claimed by at least one plan and marked Complete in REQUIREMENTS.md. There are no orphaned requirements.
 
 ### Anti-Patterns Found
 
-| File | Line | Pattern | Severity | Impact |
-|------|------|---------|----------|--------|
-| (all phase files) | — | TBD/FIXME/XXX/TODO | none found | — |
-| README.md / src/_data/site.js | 24 / 6-7 | CR-01: generic deploy path omits SITE_URL → localhost og:image | ⚠️ Warning | Wrong social-preview URL for self-hosted deploys. GitHub Pages path is unaffected. The old site had a relative (also invalid) og:image, so this is not a parity regression |
-| src/js/main.js | 76, 260, 267 | WR-02: `overflow = 'auto'` on close overrides the new `overflow-x: clip` | ⚠️ Warning | After a lightbox/easter-egg close, narrow phones fall back to the baseline overflow. No worse than baseline, but it undoes the 01-02 fix |
-| src/js/main.js | 197-198 | WR-03: pathname filter breaks scroll-spy, and turns nav clicks into reloads, at `/index.html` | ⚠️ Warning | Behaviour regression vs the old `#about` hrefs when the page is reached as /index.html. The canonical `/` and `/IBC-Website/` are unaffected |
-| src/_includes/partials/head.njk | 6, 17-18 | WR-04: og:title/description hardcoded in the shared head | ℹ️ Info for Phase 1 | Phase 2 (SEO-01) scope |
-| test/devpages.test.js | 122-129 | WR-05: test runs the real rm against the repo root behind the guard | ⚠️ Warning | Test-safety risk only |
-| src/_includes/partials/footer.njk | 21 | Hardcoded `© 2026` (IN-07) | ℹ️ Info | — |
+The debt-marker scan (TBD/FIXME/XXX/TODO) over the five changed files found nothing.
 
-All 13 review findings are still `open` in 01-REVIEW-DISPOSITION.md.
+Assessment of the three incremental-review warnings, as requested:
 
-### CR-01 judgment (requested)
+| Finding | File | Severity | Blocks goal? | Reasoning |
+|---------|------|----------|--------------|-----------|
+| R2-WR-01: malformed SITE_URL passes the guard (same root as WR-01) | `src/_data/site.js:10-18` | ⚠️ Warning | No | Reproduced: `SITE_URL=ibc.example` exits 0 and gives a relative og:image. This does not falsify any SC or the G-01-5 truth: the value still comes from the single SITE_URL source, and the guard's stated job (missing value → loud failure) holds. 01-07 scoped WR-01 out explicitly. **Phase 2 SC5 ("production build fails with a clear message on a missing or relative canonical or og:image") covers it directly.** Fix sketch in 01-REVIEW.md, cheap to land now |
+| R2-WR-02: test (g) pins the exact Pages host/prefix, so the README "Zmiana domeny" steps break CI | `test/workflow.test.js:94-103` (and the pre-existing pin in (c) at :46-47); `README.md:118-126` | ⚠️ Warning | No | Confirmed by reading: after the documented cutover, `npm test` in the build job fails before `npm run build`, so "Nic więcej w kodzie nie trzeba zmieniać" is false. The pin in test (c) already existed at the previous verification (missed then); (g) adds a second copy. SC3 still holds as worded: the rebuild with a new SITE_URL updates every URL in `_site/`, and the failure is loud, not silent. The domain is unknown today, and **Phase 2 SC5 ("a documented domain cutover checklist exists")** owns the cutover procedure. Recommended fix: assert the shape of the values, not the literals |
+| R2-WR-03: PowerShell `$env:ALLOW_LOCAL_SITE_URL="1"` persists for the session silently | `README.md:63-69`; `site.js` | ⚠️ Warning | No | The bypass needs an explicit, documented opt-out the user typed, and the README shows `Remove-Item` right after it. It is an ergonomic hole: the user's primary shell is PowerShell. Recommended fix: `console.warn` when the opt-out is what lets a build through, plus `try { … } finally { Remove-Item … }` in the README. Not phase-goal relevant |
+| R2-IN-01..05 | tests/README/site.js | ℹ️ Info | No | IN-04 is worth fixing with WR-02: the README "Jedynym miejscem konfiguracji jest `src/_data/site.js`" is now inaccurate for the production SITE_URL |
+| WR-02..WR-05, IN-01..IN-07 (earlier review) | various | ⚠️/ℹ️ | No | Unchanged since the previous verification; still `open` in 01-REVIEW-DISPOSITION.md |
+| parity.md checklist boxes | `baseline/parity.md` | ℹ️ Info | No | 20 boxes are still unticked (only A5 is ticked), but UAT tests 1-3 record a human pass. The UAT is the sign-off record; ticking the boxes is bookkeeping |
+| Unpushed guard | git | ℹ️ Info | No | Local `main` is 11 commits ahead of `origin/main`. The live site predates 01-07. The first CI run with the guard is still to come. pages.yml sets SITE_URL at job level, and I reproduced the CI env locally (exit 0) |
 
-CR-01 does **not** falsify SC1 or SC3 as written:
-- **SC1:** the documented command does produce a complete static site in `_site/`, and the docs name `_site/` as the folder to deploy.
-- **SC3:** the localhost value is the default inside the single config location (`site.js`), not a template literal. Changing it, or setting SITE_URL, updates every absolute URL (proven by mutation). The production GitHub Pages path sets SITE_URL in the workflow.
+None of these is a blocker, and none is a carried-forward gap. The warnings are recorded with evidence, not downgraded to advisory.
 
-It is still a real defect on a documented path. README "Dowolny hosting statyczny: uruchom `npm run build`" never mentions SITE_URL, and the project constraint is that the user deploys to any static host. Right now only og:image is affected, and the old page's relative og:image was invalid too, so it is not a regression. It becomes serious in Phase 2, when canonical/og:url/sitemap inherit the same fallback. Phase 2 SC5 (build gate for bad canonical/og:image, noindex for non-final hosts, domain cutover checklist) is the natural home for the guard. The one-line README fix is cheap enough to do now. I classified it as a WARNING and listed it as a human decision item, not a blocker.
+### Advisory (New Scope, Unevidenced)
+
+None. All new-scope findings above are evidenced warnings, not unevidenced blocker candidates.
 
 ### Human Verification Required
 
-1. **D-07 parity at `/`.** Walk the `baseline/parity.md` checklist (`npm run dev`, http://localhost:8080/). Expected: everything behaves as on the old page. Why human: lightbox, menu and easter egg have no behavioural test; visual parity is judgment.
-2. **D-07 parity at `/IBC-Website/`.** Same checklist with PATH_PREFIX set. Expected: identical, full-size lightbox images and hero background load. Why human: real-browser subpath rendering.
-3. **Screenshot pairs.** Compare the 10 baseline PNGs with after/root-* and after/sub-*. Expected: only the header Discord button differs (plus the explained mobile fixed-header offset).
-4. **Header fit at 320/390/768/1440 + skip link.** This check was deferred from 01-02 by the planner.
-5. **Hosting question A5.** Answer it in parity.md.
-6. **CR-01 decision.** Fix the README/build guard now, or defer to Phase 2 and record it in 01-REVIEW-DISPOSITION.md.
-7. **Judgment-tier prohibition (FOUND-02 copy unchanged).** Confirm the non-authoritative LLM verdict above.
-8. **GitHub Pages first deploy.** Complete 01-USER-SETUP.md and confirm a green deploy at https://inglourious-basterds-clan.github.io/IBC-Website/.
+1. **README "Wdrożenie" readability (planner-deferred from 01-07 Task 3).**
+   - **Test:** Read the section and the SITE_URL bullet in "Konfiguracja" once. Optionally paste the PowerShell commands.
+   - **Expected:** The Polish reads naturally, and the commands work as written.
+   - **Why human:** This is a language-quality and ergonomics judgment.
+
+Recommended developer decision while doing that read (not a gate): set dispositions in 01-REVIEW-DISPOSITION.md for R2-WR-01..03. My suggestion:
+- R2-WR-01 and R2-WR-02: `deferred` to Phase 2 SC5, or fix now (both are small).
+- R2-WR-03: fix now (a warn line plus try/finally in the README).
 
 ### Gaps Summary
 
-There are no blocking gaps. Every automatable must-have holds against the actual code and fresh builds:
-- build and clean;
-- root and subpath link resolution;
-- single-source SITE_URL and invite, proven by a real mutation;
-- the shared layout for front-matter-only pages;
-- terminal and scroll-spy behaviour;
-- workflow structure;
-- Lighthouse non-regression.
+There are no gaps. G-01-5 / CR-01 is closed in the code:
+- A production build without SITE_URL stops before rendering, with a clear message and no deployable output.
+- Only `ALLOW_LOCAL_SITE_URL=1` bypasses the guard.
+- Serve/watch and the GitHub Pages workflow are unaffected.
+- The README documents SITE_URL for both shells.
 
-The phase cannot be marked passed because:
-- the visual/behavioural parity sign-off (SC2, FOUND-02) has not happened: every parity.md box is unchecked;
-- the GitHub Pages deploy has never run (user setup pending);
-- the CR-01 scope decision and one judgment-tier prohibition need the developer.
+All five roadmap success criteria and all six FOUND requirements hold. The four behaviour-unverified items from the previous round now have human UAT evidence, and the live deploy was confirmed independently.
 
-WR-02 and WR-03 are worth a look during the parity walk. Opening and closing a lightbox at 390 px, and loading `/index.html`, would show them.
+The only open item is the 01-07 planner-deferred human read of the Polish README. The three incremental-review warnings are real, but they do not block the phase goal. Two of them map onto Phase 2 SC5.
 
 ---
 

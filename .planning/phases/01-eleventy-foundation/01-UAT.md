@@ -1,14 +1,18 @@
 ---
-status: diagnosed
+status: testing
 phase: 01-eleventy-foundation
 source: [01-VERIFICATION.md]
 started: 2026-10-03T00:00:00Z
-updated: 2026-10-02T23:12:50Z
+updated: 2026-10-03T10:33:46Z
 ---
 
 ## Current Test
 
-[testing complete]
+number: 8
+name: Read README "Wdrożenie" and the SITE_URL bullet in "Konfiguracja" (plan 01-07 human-check)
+expected: |
+  Polish reads naturally; the PowerShell and Git Bash SITE_URL build commands work when pasted as written
+awaiting: user response
 
 ## Tests
 
@@ -44,12 +48,16 @@ result: pass
 expected: Build and deploy jobs green; https://inglourious-basterds-clan.github.io/IBC-Website/ serves the site with all assets
 result: pass
 
+### 8. Read README "Wdrożenie" and the SITE_URL bullet in "Konfiguracja" (re-verification after gap closure 01-07)
+expected: Polish reads naturally; the PowerShell and Git Bash SITE_URL build commands work when pasted as written
+result: [pending]
+
 ## Summary
 
-total: 7
+total: 8
 passed: 6
 issues: 1
-pending: 0
+pending: 1
 skipped: 0
 blocked: 0
 
@@ -57,7 +65,8 @@ blocked: 0
 
 - gap_id: G-01-5
   truth: "A production build never silently emits http://localhost:8080 absolute URLs: `npm run build` without SITE_URL fails loudly (opt-out ALLOW_LOCAL_SITE_URL=1 for local/test builds), and README deploy instructions document SITE_URL (review finding CR-01)"
-  status: failed
+  status: resolved
+  resolved_by: 01-07 (re-verified in 01-VERIFICATION.md)
   reason: "User reported: fix (decided to fix CR-01 in Phase 1 rather than defer to Phase 2)"
   severity: major
   test: 5
