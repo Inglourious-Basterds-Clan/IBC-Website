@@ -4,7 +4,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { build, read, listFiles, attrValues, block } from "./helpers.js";
+import { build, runBuild, read, listFiles, attrValues, block } from "./helpers.js";
 import site from "../src/_data/site.js";
 
 const assetFiles = [
@@ -95,4 +95,19 @@ test("invite comes from site.js", () => {
 
   const template = readFileSync(new URL("../src/index.njk", import.meta.url), "utf8");
   assert.ok(!template.includes("discord.gg"), "src/index.njk contains an invite literal");
+});
+
+// CR-01 / G-01-5: a production build (Eleventy CLI, run mode "build") without SITE_URL must
+// stop instead of writing http://localhost:8080 into absolute URLs such as og:image.
+test("production build without SITE_URL fails loudly", () => {
+  const { outDir, result } = runBuild("build-guard-missing", {});
+  assert.notEqual(result.status, 0, "build without SITE_URL succeeded");
+  assert.ok(result.stderr.includes("SITE_URL is not set"), `guard message missing from stderr:\n${result.stderr}`);
+  assert.ok(result.stderr.includes("ALLOW_LOCAL_SITE_URL=1"), "guard message does not name the opt-out");
+  assert.ok(!existsSync(join(outDir, "index.html")), "failed build still wrote index.html");
+});
+
+test("ALLOW_LOCAL_SITE_URL=1 keeps the local default", () => {
+  const out = build("build-guard-optout", { ALLOW_LOCAL_SITE_URL: "1" });
+  assert.equal(ogImage(read(out, "index.html")), "http://localhost:8080/assets/hero-bg.jpg");
 });
