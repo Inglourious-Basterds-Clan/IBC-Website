@@ -3,16 +3,16 @@ gsd_state_version: "1.0"
 current_phase: 01
 current_phase_name: Eleventy Foundation
 status: verifying
-stopped_at: Completed 01-06-PLAN.md
-last_updated: "2026-10-02T22:42:32.968Z"
-last_activity: 2026-10-02
+stopped_at: Completed 01-07-PLAN.md
+last_updated: "2026-10-03T10:23:55.369Z"
+last_activity: 2026-10-03
 last_activity_desc: Phase 01 execution started
-state_head: 32c5a1c61cd1e02a11087b46c16d7cecc7513bb9
+state_head: 02ae806ef7469997e60aad42c38509f2e74e9485
 progress:
   total_phases: 5
   completed_phases: 0
-  total_plans: 6
-  completed_plans: 6
+  total_plans: 7
+  completed_plans: 7
   percent: 0
 ---
 
@@ -28,9 +28,9 @@ See: .planning/PROJECT.md (updated 2026-10-02)
 ## Current Position
 
 Phase: 01 (Eleventy Foundation) — EXECUTING
-Plan: 6 of 6
+Plan: 7 of 7
 Status: Phase complete — ready for verification
-Last activity: 2026-10-02 — Phase 01 execution started
+Last activity: 2026-10-03 — Completed 01-07 (gap G-01-5 / CR-01 closed)
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -62,6 +62,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 01 P04 | 5min | 2 tasks | 4 files |
 | Phase 01 P05 | 3min | 2 tasks | 6 files |
 | Phase 01 P06 | 9 min | 2 tasks | 24 files |
+| Phase 01 P07 | 5 min | 3 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -86,6 +87,8 @@ Recent decisions affecting current work:
 - [Phase 01]: 01-05: npm run build = node scripts/clean.js && eleventy; clean.js refuses repo root, parents and other drives
 - [Phase 01]: 01-06: After-migration screenshots use the baseline CDP method; the missing header in baseline scrolled mobile shots is an artifact of the pre-existing 498px layout-viewport overflow, not a parity target
 - [Phase 01]: 01-06: favicon.ico 404 (only console error before and after) is pre-existing; deferred to Phase 2
+- [Phase 01]: Production builds (ELEVENTY_RUN_MODE=build) with unset/blank SITE_URL throw; only ALLOW_LOCAL_SITE_URL=1 opts out; serve/watch keep the localhost default (CR-01, G-01-5)
+- [Phase 01]: Test harness strips ALLOW_LOCAL_SITE_URL from the inherited env and adds the opt-out only for variants without SITE_URL
 
 ### Pending Todos
 
@@ -110,6 +113,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-10-02T22:42:32.926Z
-Stopped at: Completed 01-06-PLAN.md
+Last session: 2026-10-03T10:23:55.311Z
+Stopped at: Completed 01-07-PLAN.md
 Resume file: None
