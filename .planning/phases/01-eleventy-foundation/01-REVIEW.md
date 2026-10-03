@@ -2,214 +2,154 @@
 phase: 01-eleventy-foundation
 reviewed: 2026-10-03T00:00:00Z
 depth: standard
-files_reviewed: 26
+scope: incremental (gap-closure plan 01-07, diff 18efc6c..HEAD)
+files_reviewed: 5
 files_reviewed_list:
-  - .github/workflows/pages.yml
-  - .gitignore
-  - .nvmrc
-  - eleventy.config.js
-  - package.json
   - README.md
-  - scripts/clean.js
-  - src/_data/navigation.js
   - src/_data/site.js
-  - src/_dev/layout-empty.njk
-  - src/_dev/layout-test.njk
-  - src/_includes/layouts/base.njk
-  - src/_includes/partials/discord-cta.njk
-  - src/_includes/partials/footer.njk
-  - src/_includes/partials/head.njk
-  - src/_includes/partials/header.njk
-  - src/css/style.css
-  - src/index.njk
-  - src/js/main.js
   - test/build.test.js
-  - test/client.test.js
-  - test/devpages.test.js
   - test/helpers.js
-  - test/layout.test.js
-  - test/links.test.js
   - test/workflow.test.js
 findings:
-  critical: 1
-  warning: 5
-  info: 7
-  total: 13
+  critical: 0
+  warning: 3
+  info: 5
+  total: 8
 status: issues_found
 ---
 
-# Phase 01: Code Review Report
+# Phase 01: Code Review Report (incremental, plan 01-07)
 
 **Reviewed:** 2026-10-03
 **Depth:** standard
-**Files Reviewed:** 26
+**Files Reviewed:** 5
 **Status:** issues_found
 
 ## Summary
 
-I reviewed the Eleventy 3 migration: config, single-source site data, layout and partials, dev-only page gating, the clean script, the GitHub Pages workflow, client JS changes, and the node:test suites. I also checked the claims I could test directly:
+This review covers only gap-closure plan 01-07 (G-01-5 / CR-01). Production builds must now fail when `SITE_URL` is unset, and `ALLOW_LOCAL_SITE_URL=1` opts out. It replaces the earlier full-phase review. Findings from that review that are outside this diff (WR-02..WR-05, IN-01..IN-07 of the earlier report) were not re-checked here and stay open unless closed elsewhere.
 
-- **Dev-page gate:** sound. Eleventy 3.1.6 sets `process.env.ELEVENTY_RUN_MODE` in `initializeConfig()` before it imports the user config (`node_modules/@11ty/eleventy/src/Eleventy.js:260-264`), so `site.includeDevPages` is computed correctly when `eleventy.config.js` imports `site.js`.
-- **Action versions:** every pinned tag exists on GitHub (`checkout@v7`, `setup-node@v7`, `upload-pages-artifact@v5`, `deploy-pages@v5`).
-- **Lightbox inside `<main>`:** `main` has no styles, so it creates no stacking context. The lightbox at z-index 110 still sits above the header at z-index 100.
+**What I verified:**
 
-Scratch builds into the session scratchpad confirmed these problems:
+- **Guard timing and coverage:** sound. Eleventy 3.1.6 writes `process.env.ELEVENTY_RUN_MODE` in `initializeConfig()` (`node_modules/@11ty/eleventy/src/Eleventy.js:260-264`, `:636`) before it imports the user config. The programmatic API defaults `runMode` to `"build"` (`Eleventy.js:148`), so the guard also fires for non-CLI builds.
+- **CI path:** the build job sets `SITE_URL`/`PATH_PREFIX` at job level (`pages.yml:21-23`), so `npm run build` in CI passes the guard. `cleanEnv` strips both keys from every test child process, so CI env cannot leak into test variants.
+- **Tests:** `node --test test/build.test.js test/workflow.test.js` runs 21 tests and all pass.
 
-- A plain build (no `SITE_URL`) writes `og:image content="http://localhost:8080/assets/hero-bg.jpg"`.
-- `SITE_URL=example.com` writes `og:image content="/example.com/assets/hero-bg.jpg"`.
-- `SITE_URL=https://example.com/sub` silently drops `/sub`.
+**What is wrong:**
 
-Main concerns:
-1. The README's "any static host" deploy path ships localhost absolute URLs, and nothing guards against it.
-2. `site.js` does not validate `SITE_URL`/`PATH_PREFIX`.
-3. Pre-existing scroll-unlock code (`overflow = 'auto'`) cancels the new `overflow-x: clip` header fix.
-4. Root-relative nav hrefs plus the strict pathname filter break scroll-spy at `/index.html`.
-5. `og:title`/descriptions are hardcoded in the shared head partial.
-6. A test runs the real `rm -rf` script against the repo root.
+- The guard only checks that `SITE_URL` is empty. A malformed value still produces broken absolute URLs, and the build exits 0. I confirmed this with a scratch build.
+- The README's domain-change procedure now breaks CI because of a new hardcoded workflow assertion.
+- The opt-out gives no signal when it is active, and the documented PowerShell form keeps it set for the rest of the session.
 
 ## Narrative Findings (AI reviewer)
 
-## Critical Issues
-
-### CR-01: Documented "any static host" build ships `http://localhost:8080` absolute URLs
-
-**File:** `src/_data/site.js:6-7`, `README.md:24`, `src/_includes/partials/head.njk:19`
-**Issue:** `site.url` falls back to `http://localhost:8080` whenever `SITE_URL` is unset, and nothing guards a production build (`ELEVENTY_RUN_MODE === "build"`) against that fallback. README line 24 tells self-hosters: "uruchom `npm run build` i wgraj zawartość folderu `_site/`". It never mentions `SITE_URL`. I ran that build and the output contains `<meta property="og:image" content="http://localhost:8080/assets/hero-bg.jpg">`.
-
-The project funnels visitors through Discord, and Discord and Facebook link previews read `og:image`, so every shared link from such a deploy gets a broken preview. Every absolute URL added in later SEO phases (canonical, `og:url`, sitemap) would inherit the same localhost value. The project constraints say the user "deploys it themselves" to any static host, so this is a documented deployment path that produces wrong output silently.
-**Fix:** Fail or loudly warn when a production build has no `SITE_URL`, and document the variable in the deploy instructions:
-```js
-// src/_data/site.js
-const rawUrl = (process.env.SITE_URL || "").trim();
-if (!rawUrl && process.env.ELEVENTY_RUN_MODE === "build" && process.env.ALLOW_LOCAL_SITE_URL !== "1") {
-  throw new Error("SITE_URL is not set: a production build would emit http://localhost:8080 absolute URLs. " +
-    "Set SITE_URL=https://<domain> (or ALLOW_LOCAL_SITE_URL=1 for local/test builds).");
-}
-```
-`test/helpers.js` would then pass `ALLOW_LOCAL_SITE_URL: "1"` for variants that rely on the default. In README "Dowolny hosting statyczny", use `SITE_URL=https://<domena> npm run build` (with PowerShell and Git Bash variants).
-
 ## Warnings
 
-### WR-01: `SITE_URL` / `PATH_PREFIX` are normalized but never validated, so bad values produce wrong URLs silently
+### WR-01: The guard rejects only empty `SITE_URL`; a malformed value still ships broken `og:image` and exits 0
 
-**File:** `src/_data/site.js:6-10`
-**Issue:** I confirmed three silent failures with real builds:
-- `SITE_URL=example.com` (missing scheme) makes `htmlBaseUrl` treat the base as a path. The output is `og:image content="/example.com/assets/hero-bg.jpg"`, a relative URL in a field that must be absolute.
-- `SITE_URL=https://example.com/sub` loses `/sub` (`og:image` = `https://example.com/IBC/assets/hero-bg.jpg`), because `htmlBaseUrl` resolves a root-relative path against the origin.
-- The Git Bash MSYS path rewrite that README lines 59-63 warn about (`PATH_PREFIX=C:/Program Files/Git/IBC-Website/`) is accepted as-is. It becomes `pathPrefix = "/C:/Program Files/Git/IBC-Website/"` and breaks every link. The code could reject it cheaply instead of relying on a README warning.
+**File:** `src/_data/site.js:10-18`
+**Issue:** The guard treats any non-blank string as valid. The new README text (`README.md:24-54`) now asks people to type `SITE_URL` by hand. Leaving out the scheme is an easy mistake, and it silently produces the same broken output CR-01 was meant to stop. I reproduced it:
 
-For a project whose core constraint is "site URL must be a single config value", that value deserves validation at the point of definition.
-**Fix:**
-```js
-let parsed;
-try { parsed = new URL(url); } catch { throw new Error(`SITE_URL is not an absolute URL: "${rawUrl}"`); }
-if (!/^https?:$/.test(parsed.protocol)) throw new Error(`SITE_URL must be http(s): "${rawUrl}"`);
-if (parsed.pathname !== "/") throw new Error(`SITE_URL must be an origin only; put "${parsed.pathname}" in PATH_PREFIX`);
-if (/[:\\\s]/.test(rawPrefix)) throw new Error(`PATH_PREFIX looks like a filesystem path: "${process.env.PATH_PREFIX}" (Git Bash? use MSYS_NO_PATHCONV=1)`);
+```
+SITE_URL=ibc.example node node_modules/@11ty/eleventy/cmd.cjs --output=_test/review-probe --quiet
+status=0
+og:image" content="/ibc.example/assets/hero-bg.jpg"
 ```
 
-### WR-02: Lightbox / easter-egg close sets `body.style.overflow = 'auto'`, which overrides the new `overflow-x: clip` header fix
+That `og:image` is a relative path, so Discord and Facebook previews break with no error. A value with a path (`https://example.com/sub`, which README line 24 forbids in prose) and a non-http scheme are also accepted. This is the earlier review's WR-01, still open. Plan 01-07 increased the exposure by moving the "any static host" path onto a manually typed variable.
 
-**File:** `src/js/main.js:76`, `src/js/main.js:260`, `src/js/main.js:267` (interacting with `src/css/style.css:368-370`)
-**Issue:** This phase added `body { overflow-x: clip; }` so the pre-existing narrow-phone overflow cannot widen the layout and push the fixed header's Discord CTA and menu toggle off-screen. The `overflow` shorthand set inline sets both axes, though:
-- `closeLightbox()` and both easter-egg close paths set `document.body.style.overflow = 'auto'`. The inline `overflow-x: auto` then beats the stylesheet's `clip` for the rest of the session. After a visitor opens and closes one gallery image, body becomes a horizontal scroll container and the overflow the fix was meant to hide comes back.
-- The mobile menu (lines 23 and 32) restores with `''`, so the three handlers are already inconsistent.
-**Fix:** Clear the inline value instead of forcing `auto`:
+**Fix:** validate the value in the same place as the empty check:
+
 ```js
-document.body.style.overflow = ''; // restore stylesheet value (keeps overflow-x: clip)
-```
-Apply this at lines 76, 260 and 267. Better still, add the shared `showModal`/`hideModal` helper that CLAUDE.md already recommends.
-
-### WR-03: Scroll-spy and in-page nav break when the home page is reached as `/index.html`
-
-**File:** `src/js/main.js:197-198`, `src/_data/navigation.js:4-7`
-**Issue:** The nav hrefs changed from `#about` to root-relative `/#about` (or `/IBC-Website/#about` after prefixing). Scroll-spy now keeps only links where `link.pathname === window.location.pathname`. On the same document served as `/index.html` or `/IBC-Website/index.html` (old bookmarks, a local `python -m http.server`, hosts that link `index.html`), the link pathname is `/IBC-Website/` and the location pathname is `/IBC-Website/index.html`. Two things break:
-- Scroll-spy is silently inert.
-- Every nav click becomes a cross-document navigation (full page reload) instead of an in-page scroll. The old `#about` hrefs worked from any URL, so this phase introduced the regression.
-**Fix:** Normalize a trailing `index.html` before comparing:
-```js
-const normalize = (p) => p.replace(/\/index\.html?$/, '/');
-const here = normalize(window.location.pathname);
-const navLinks = Array.from(document.querySelectorAll('nav ul li a'))
-  .filter(link => link.hash && normalize(link.pathname) === here);
-```
-Also consider a canonical redirect or `<link rel="canonical">` in the SEO phase. Add a `client.test.js` case with `pathname: "/IBC-Website/index.html"`.
-
-### WR-04: Shared head partial hardcodes `og:title`, `og:description` and `meta description` for every page
-
-**File:** `src/_includes/partials/head.njk:6`, `src/_includes/partials/head.njk:17-18`
-**Issue:** `head.njk` is now the shared head for every page. Only `<title>` reads front matter (`title or ...`). `og:title`, `og:description` and `<meta name="description">` are literals, so any page with its own `title` advertises the home page's title and description in social previews and search snippets.
-
-The dev page shows this already: `/_dev/layout-test/` renders `<title>Test layoutu</title>` next to `og:title="IBC Clan // Wizytówka Taktyczna Arma 3"`. The phase's purpose is a multi-page, well-indexed site, and duplicate descriptions across pages hurt it directly. No test catches this; `devpages.test.js (c)` checks only `<title>`.
-**Fix:**
-```njk
-{% set pageTitle = title or "IBC Clan // Wizytówka Taktyczna Arma 3" %}
-{% set pageDescription = description or "Oficjalna strona klanu IBC w Arma 3. ..." %}
-<title>{{ pageTitle }}</title>
-<meta name="description" content="{{ pageDescription }}">
-<meta property="og:title" content="{{ pageTitle }}">
-<meta property="og:description" content="{{ pageDescription }}">
-```
-Extend `devpages.test.js (c)` to assert `og:title` equals the page title.
-
-### WR-05: `devpages.test.js (h)` runs the real recursive delete against the repo root
-
-**File:** `test/devpages.test.js:122-129`, `scripts/clean.js:14-19`
-**Issue:** The test spawns `scripts/clean.js .` and `scripts/clean.js ..`, which the guard is supposed to refuse. If a future edit weakens the guard (a refactor of the `rel` checks, or a different `repoRoot` computation), `npm test` itself runs `rmSync(repoRoot, { recursive: true, force: true })`. That wipes the working tree, including `.git` and any uncommitted work, before the assertion can fail. The post-check at line 128 (`package.json was deleted`) can only report the damage after it has happened. A test whose failure mode destroys the developer's repository is not a reliable test.
-**Fix:** Move the guard into a pure, exported function and unit-test it without touching the filesystem. Keep the CLI as a thin wrapper:
-```js
-// scripts/clean.js
-export function isSafeTarget(repoRoot, target) {
-  const rel = relative(repoRoot, target);
-  return !(rel === "" || rel === ".." || rel.startsWith(".." + sep) || isAbsolute(rel));
+const localUrl = "http://localhost:8080";
+const rawUrl = (process.env.SITE_URL || "").trim();
+const isBuild = process.env.ELEVENTY_RUN_MODE === "build";
+if (!rawUrl && isBuild && process.env.ALLOW_LOCAL_SITE_URL !== "1") {
+  throw new Error(/* existing message */);
 }
-if (import.meta.url === pathToFileURL(process.argv[1]).href) { /* existing CLI using isSafeTarget */ }
+let parsed;
+try {
+  parsed = new URL(rawUrl || localUrl);
+} catch {
+  throw new Error(`SITE_URL "${rawUrl}" is not an absolute URL; use https://<domain>.`);
+}
+if (!/^https?:$/.test(parsed.protocol) || parsed.pathname !== "/" || parsed.search || parsed.hash) {
+  throw new Error(`SITE_URL "${rawUrl}" must be http(s)://<host> with no path, query or hash; put a subfolder in PATH_PREFIX.`);
+}
+const url = parsed.origin;
 ```
-Test `isSafeTarget(repoRoot, resolve(repoRoot, "."))` etc. Alternatively, run the CLI with a `--dry-run` flag, or against a temp-dir copy of the script so its computed `repoRoot` is disposable.
+
+Then add `runBuild` cases for `SITE_URL: "ibc.example"` and `SITE_URL: "https://example.com/sub"` that expect a non-zero exit.
+
+### WR-02: Following the README "Zmiana domeny" steps now fails `npm test` in CI and blocks the deploy
+
+**File:** `test/workflow.test.js:94-103` (new test (g)); also `test/workflow.test.js:46-47` (test (c)); `README.md:118-126`
+**Issue:** `README.md:122` tells the maintainer to set `SITE_URL` to `https://<domena>` and `PATH_PREFIX` to `/` in `pages.yml`. Line 126 then says "Nic więcej w kodzie nie trzeba zmieniać" ("nothing else in the code needs changing"). The new test (g) requires the literal strings `SITE_URL: https://inglourious-basterds-clan.github.io` and `PATH_PREFIX: /IBC-Website/` in the build job's env (lines 101-102). After the documented cutover, `npm test` fails in the build job, so `npm run build` and the deploy never run. Test (c) already had the same literals. Test (g) adds a second copy instead of testing what CR-01 needs, which is "a non-empty absolute `SITE_URL` is set at job level". This also conflicts with the project constraint that the site URL is a single config value.
+**Fix:** check the shape of the values, not the literals:
+
+```js
+const siteUrlLine = /\n {6}SITE_URL: (https:\/\/[^\s/]+)\n/.exec(jobHead);
+assert.ok(siteUrlLine, "build job env has no absolute https SITE_URL");
+assert.match(jobHead, /\n {6}PATH_PREFIX: \/(?:[^\s/]+\/)?\n/, "build job env has no PATH_PREFIX");
+```
+
+Do the same for the two literals in test (c). If the literal pin is intentional, add a step 4 to `README.md:118-126` ("update `test/workflow.test.js`") and remove "Nic więcej w kodzie nie trzeba zmieniać".
+
+### WR-03: The opt-out gives no signal and stays set in PowerShell, so a forgotten `Remove-Item` brings CR-01 back
+
+**File:** `src/_data/site.js:11-18`; `README.md:63-69` (also `:28-32`, `:44-49`)
+**Issue:** The documented PowerShell form `$env:ALLOW_LOCAL_SITE_URL="1"; npm run build` sets a session-wide variable. Clearing it depends on the user running `Remove-Item` by hand afterwards. If they forget, or close the editor's terminal pane and reopen the same session, every later `npm run build` in that session writes `http://localhost:8080` into `og:image` and exits 0. That is the exact CR-01 output, and the guard is bypassed. `site.js` prints nothing when the opt-out is what let the build through, so the build log gives no warning. The Git Bash form (`VAR=1 cmd`) is scoped to one command. The PowerShell form is not.
+**Fix:** (1) Make the opt-out visible on every build where it is the reason the build passes:
+
+```js
+if (!rawUrl && process.env.ELEVENTY_RUN_MODE === "build" && process.env.ALLOW_LOCAL_SITE_URL === "1") {
+  console.warn(`[site.js] ALLOW_LOCAL_SITE_URL=1: building with ${localUrl} absolute URLs. Do NOT deploy this _site/.`);
+}
+```
+
+(2) Scope the PowerShell examples so the variable is always removed, even when the build fails:
+
+```powershell
+try { $env:ALLOW_LOCAL_SITE_URL="1"; npm run build } finally { Remove-Item Env:ALLOW_LOCAL_SITE_URL }
+```
+
+Use the same `try/finally` form for the `SITE_URL` and `PATH_PREFIX` examples.
 
 ## Info
 
-### IN-01: Easter egg still writes terminal lines via `innerHTML`, with hardcoded colors
+### IN-01: The "inherited opt-out" build assertion passes on any failure
 
-**File:** `src/js/main.js:240-244`, `src/js/main.js:163`
-**Issue:** This phase hardened `writeToConsole` to use `textContent`, but `openEasterEgg` still builds the same three-span line with `innerHTML`. The content is static, so it is not exploitable today, but the logic is duplicated and the hardening is inconsistent. The `client.test.js` static check covers only `writeToConsole`. Lines 163 and 242-243 also hardcode `#ef4444` even though `--danger-color` exists. The ternary on line 163 returns `var(--accent-color)` for both success and default, so it is partly redundant.
-**Fix:** Lift `writeToConsole` to module scope (taking `consoleEl`), reuse it from `openEasterEgg` with an `'error'`-style status, and use `var(--danger-color)`.
+**File:** `test/build.test.js:169-170`
+**Issue:** `runBuild("build-guard-inherited", {})` only asserts `result.status !== 0`. A template error, a crash, or a signal kill (`status === null`) also passes, so this half of the test does not prove that the guard caused the failure. The `cleanEnv` key check at lines 167-168 does cover the stripping itself.
+**Fix:** add `assert.ok(result.stderr.includes("SITE_URL is not set"), result.stderr);`, as the other guard tests already do.
 
-### IN-02: Terminal prints a dangling "Połączenie nawiązane: " when the invite attribute is missing, and the test enshrines it
+### IN-02: "empty env falls back to defaults" now passes only because of a hidden opt-out, and the empty-string guard case is untested
 
-**File:** `src/js/main.js:126`, `src/js/main.js:184`, `test/client.test.js:159-169`
-**Issue:** If `data-discord-url` is absent, `discordUrl` is `''` and the terminal claims a connection to nothing. `client.test.js` asserts this degenerate output as the expected behavior instead of a sensible fallback.
-**Fix:** Skip the connection line, or print a `warn` line, when `discordUrl` is empty, and update the test to assert that behavior.
+**File:** `test/build.test.js:1-2`, `:79-84`; `test/helpers.js:53-54`
+**Issue:** `build()` silently adds `ALLOW_LOCAL_SITE_URL=1` whenever `SITE_URL` is blank. So `build("build-empty", { SITE_URL: "" })` now asserts behaviour (an empty `SITE_URL` gives localhost) that a production build forbids. The test name and the file header ("with empty env values") still describe the old contract. No test runs a build-mode `SITE_URL: ""` without the opt-out. Only the unset case (line 105) and the whitespace case (line 118) are covered.
+**Fix:** rename the test to say it runs under the opt-out and pass `ALLOW_LOCAL_SITE_URL: "1"` explicitly. Add `runBuild("build-guard-empty", { SITE_URL: "" })` that expects a non-zero exit and the guard message.
 
-### IN-03: `clean.js` accepts any in-repo path and duplicates the output-dir literal
+### IN-03: Comments that are inaccurate or repeated
 
-**File:** `scripts/clean.js:10`, `eleventy.config.js:23`
-**Issue:** The guard refuses only the root and outside paths, so `node scripts/clean.js .git` or `node scripts/clean.js src` deletes them. Separately, `_site` is hardcoded in both `clean.js` and `eleventy.config.js`. If `dir.output` changes, `npm run build` silently stops cleaning the real output folder, and stale `_dev/` pages could then ship, which defeats FOUND-01.
-**Fix:** Import the output dir from the Eleventy config (`import { config } from "../eleventy.config.js"`), and restrict targets to that dir or `_test/*`.
+**File:** `src/_data/site.js:5-7`; `test/build.test.js:139-141`; `test/workflow.test.js:94-95`
+**Issue:**
+- `site.js` lines 5-6 and line 7 both say that `eleventy.config.js` imports this file.
+- `build.test.js:139-141` says `cmd.cjs` "writes it to ELEVENTY_RUN_MODE before importing the config". In fact `cmd.cjs:86` only passes `runMode`, and `Eleventy.js:260-264`/`:636` writes the env var.
+- The title of test (g) says the job env is "for npm test". `cleanEnv` strips `SITE_URL`/`PATH_PREFIX` from every test build, so the job env has no effect on `npm test`.
 
-### IN-04: Dev-page exclusion depends on every file repeating `devOnly: true`
+**Fix:** remove the duplicate sentence, name `Eleventy#initializeConfig` as the writer, and drop "npm test" from the (g) title.
 
-**File:** `src/_dev/layout-empty.njk:3`, `src/_dev/layout-test.njk:4`, `eleventy.config.js:15-17`
-**Issue:** A new file in `src/_dev/` that omits `devOnly: true` is published to production. `devpages.test.js (e)` would catch it, but only if tests run.
-**Fix:** Add `src/_dev/_dev.11tydata.json` with `{ "devOnly": true, "eleventyExcludeFromCollections": true }` so the directory sets the flag for every file in it.
+### IN-04: The README still says `site.js` is the only configuration place
 
-### IN-05: Duplicate `.menu-toggle` rule in the 768px media query
+**File:** `README.md:88-94`
+**Issue:** Line 90 was edited in this plan but kept "Jedynym miejscem konfiguracji jest plik `src/_data/site.js`" ("the only configuration place is `src/_data/site.js`"). A production build can no longer get its URL from `site.js`: it must come from the shell env or `pages.yml`. `pages.yml:2` also calls itself "the only place the production host is set". Two "only place" claims contradict each other.
+**Fix:** reword it, for example: "Wartości domyślne i link Discorda są w `src/_data/site.js`; produkcyjny `SITE_URL` podaje się przez zmienną środowiskową (GitHub Actions: `.github/workflows/pages.yml`)." ("Defaults and the Discord link are in `src/_data/site.js`; the production `SITE_URL` comes from an environment variable (GitHub Actions: `.github/workflows/pages.yml`).")
 
-**File:** `src/css/style.css:1436-1442`
-**Issue:** Two consecutive `.menu-toggle` blocks in the same media query (`display: flex;`, then `order: 3;`).
-**Fix:** Merge them into one rule.
+### IN-05: `site.js` now throws on import, and the test-runner processes import it unprotected
 
-### IN-06: Supply-chain hardening: mutable action tags next to `id-token: write`; CDN stylesheet without SRI
-
-**File:** `.github/workflows/pages.yml:25-26,34,51`, `src/_includes/partials/head.njk:13`
-**Issue:** All actions are pinned to mutable major tags, and the deploy job holds `pages: write` + `id-token: write`. Font Awesome 6.0.0 loads from cdnjs without `integrity`/`crossorigin`.
-**Fix:** Pin actions to commit SHAs (with a `# vX` comment) and add Dependabot for `github-actions`. Add the cdnjs SRI hash with `crossorigin="anonymous"`, or self-host the icon subset.
-
-### IN-07: Copyright year hardcoded
-
-**File:** `src/_includes/partials/footer.njk:21`
-**Issue:** `&copy; 2026` goes stale every January even though there is now a build step.
-**Fix:** Add a global data value (e.g. `year: new Date().getFullYear()` in `site.js`) and render `&copy; {{ site.year }}`.
+**File:** `test/build.test.js:10` (also `test/devpages.test.js:10`, `test/layout.test.js:7`, `test/links.test.js:9`)
+**Issue:** The guard runs when the module is evaluated. The test files import `site.js` in the parent `node --test` process, where `cleanEnv` does not apply. If a shell has `ELEVENTY_RUN_MODE=build` exported and no `SITE_URL`, four suites crash at load with the guard message instead of running. This is unlikely, but the failure message points to the wrong cause.
+**Fix:** read `discord.invite` from a side-effect-free module (for example `src/_data/discord.js` re-exported by `site.js`), or document that `ELEVENTY_RUN_MODE` must not be set when running `npm test`.
 
 ---
 
