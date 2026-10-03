@@ -1,5 +1,6 @@
 // D-01..D-04 contract for .github/workflows/pages.yml: build + test on every PR and push,
 // deploy only on push to main, and elevated permissions only on the deploy job (which runs no npm).
+// The build job env must carry SITE_URL, because production builds refuse to run without it.
 // The YAML is read as text so no YAML dependency is needed.
 import { test } from "node:test";
 import assert from "node:assert/strict";
@@ -88,4 +89,19 @@ test("(e) .nvmrc pins Node 24", () => {
 
 test("(f) workflow holds no Discord invite", () => {
   assert.ok(!inviteDomainPattern.test(workflow), "workflow contains a Discord invite");
+});
+
+test("(g) build job env sets SITE_URL and PATH_PREFIX for npm test and npm run build", () => {
+  // Job-level env reaches every run step, so `npm run build` passes the SITE_URL guard.
+  const jobStart = indexOrFail(workflow, "\n  build:\n");
+  const stepsStart = workflow.indexOf("\n    steps:", jobStart);
+  assert.ok(stepsStart > jobStart, "build job has no steps: line");
+  const jobHead = workflow.slice(jobStart, stepsStart);
+  assert.ok(jobHead.includes("\n    env:\n"), "build job has no job-level env:");
+  assert.ok(jobHead.includes("SITE_URL: https://inglourious-basterds-clan.github.io"), "build job env is missing SITE_URL");
+  assert.ok(jobHead.includes("PATH_PREFIX: /IBC-Website/"), "build job env is missing PATH_PREFIX");
+});
+
+test("(h) the workflow never sets the local opt-out", () => {
+  assert.ok(!workflow.includes("ALLOW_LOCAL_SITE_URL"), "workflow sets ALLOW_LOCAL_SITE_URL");
 });

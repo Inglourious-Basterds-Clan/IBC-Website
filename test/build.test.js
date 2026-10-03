@@ -2,9 +2,11 @@
 // under /IBC-Website/, with a mutated SITE_URL and with empty env values.
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { build, runBuild, read, listFiles, attrValues, block } from "./helpers.js";
+import { pathToFileURL } from "node:url";
+import { build, runBuild, cleanEnv, repoRoot, read, listFiles, attrValues, block } from "./helpers.js";
 import site from "../src/_data/site.js";
 
 const assetFiles = [
@@ -110,4 +112,64 @@ test("production build without SITE_URL fails loudly", () => {
 test("ALLOW_LOCAL_SITE_URL=1 keeps the local default", () => {
   const out = build("build-guard-optout", { ALLOW_LOCAL_SITE_URL: "1" });
   assert.equal(ogImage(read(out, "index.html")), "http://localhost:8080/assets/hero-bg.jpg");
+});
+
+test("blank SITE_URL counts as missing", () => {
+  const { result } = runBuild("build-guard-blank", { SITE_URL: "   " });
+  assert.notEqual(result.status, 0, "build with a blank SITE_URL succeeded");
+  assert.ok(result.stderr.includes("SITE_URL is not set"), `guard message missing from stderr:\n${result.stderr}`);
+});
+
+test("only ALLOW_LOCAL_SITE_URL=1 opts out", () => {
+  const { result } = runBuild("build-guard-strict", { ALLOW_LOCAL_SITE_URL: "true" });
+  assert.notEqual(result.status, 0, 'ALLOW_LOCAL_SITE_URL="true" bypassed the guard');
+  assert.ok(result.stderr.includes("SITE_URL is not set"), `guard message missing from stderr:\n${result.stderr}`);
+});
+
+test("a set SITE_URL passes the guard without the opt-out", () => {
+  // runBuild directly, so the helper adds no ALLOW_LOCAL_SITE_URL.
+  const { outDir, result } = runBuild("build-guard-set", { SITE_URL: "https://guard.example" });
+  assert.equal(result.status, 0, `build with SITE_URL failed:\n${result.stderr || result.error}`);
+  assert.equal(ogImage(read(outDir, "index.html")), "https://guard.example/assets/hero-bg.jpg");
+  for (const page of allHtml(outDir)) {
+    assert.ok(!page.includes("localhost:8080"), "localhost:8080 leaked into a build with SITE_URL");
+  }
+});
+
+// Eleventy's cmd.cjs maps --serve to run mode "serve", --watch to "watch" and everything
+// else to "build", and writes it to ELEVENTY_RUN_MODE before importing the config. So
+// importing site.js with ELEVENTY_RUN_MODE=serve stands in for `npm run dev`.
+test("site.js keeps the local default in serve and watch mode", () => {
+  const siteHref = pathToFileURL(join(repoRoot, "src/_data/site.js")).href;
+  const probe = `import site from ${JSON.stringify(siteHref)}; console.log(site.url);`;
+  const runProbe = (mode) =>
+    spawnSync(process.execPath, ["--input-type=module", "-e", probe], {
+      cwd: repoRoot,
+      encoding: "utf8",
+      env: cleanEnv({ ELEVENTY_RUN_MODE: mode }),
+    });
+
+  for (const mode of ["serve", "watch"]) {
+    const result = runProbe(mode);
+    assert.equal(result.status, 0, `site.js threw in ${mode} mode:\n${result.stderr}`);
+    assert.equal(result.stdout.trim(), "http://localhost:8080");
+  }
+
+  const buildResult = runProbe("build");
+  assert.notEqual(buildResult.status, 0, "site.js did not throw in build mode without SITE_URL");
+  assert.ok(buildResult.stderr.includes("SITE_URL is not set"), `guard message missing from stderr:\n${buildResult.stderr}`);
+});
+
+test("build helpers never inherit an opt-out", () => {
+  const saved = process.env.ALLOW_LOCAL_SITE_URL;
+  process.env.ALLOW_LOCAL_SITE_URL = "1";
+  try {
+    const leaked = Object.keys(cleanEnv({})).filter((key) => key.toUpperCase() === "ALLOW_LOCAL_SITE_URL");
+    assert.deepEqual(leaked, [], "cleanEnv kept the inherited ALLOW_LOCAL_SITE_URL");
+    const { result } = runBuild("build-guard-inherited", {});
+    assert.notEqual(result.status, 0, "an inherited ALLOW_LOCAL_SITE_URL bypassed the guard");
+  } finally {
+    if (saved === undefined) delete process.env.ALLOW_LOCAL_SITE_URL;
+    else process.env.ALLOW_LOCAL_SITE_URL = saved;
+  }
 });
