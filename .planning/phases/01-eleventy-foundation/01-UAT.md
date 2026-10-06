@@ -1,18 +1,14 @@
 ---
-status: testing
+status: complete
 phase: 01-eleventy-foundation
 source: [01-VERIFICATION.md]
 started: 2026-10-03T00:00:00Z
-updated: 2026-10-03T10:33:46Z
+updated: 2026-10-06T00:00:00Z
 ---
 
 ## Current Test
 
-number: 8
-name: Read README "Wdrożenie" and the SITE_URL bullet in "Konfiguracja" (plan 01-07 human-check)
-expected: |
-  Polish reads naturally; the PowerShell and Git Bash SITE_URL build commands work when pasted as written
-awaiting: user response
+[testing complete]
 
 ## Tests
 
@@ -50,14 +46,14 @@ result: pass
 
 ### 8. Read README "Wdrożenie" and the SITE_URL bullet in "Konfiguracja" (re-verification after gap closure 01-07)
 expected: Polish reads naturally; the PowerShell and Git Bash SITE_URL build commands work when pasted as written
-result: [pending]
+result: pass
 
 ## Summary
 
 total: 8
-passed: 6
+passed: 7
 issues: 1
-pending: 1
+pending: 0
 skipped: 0
 blocked: 0
 
