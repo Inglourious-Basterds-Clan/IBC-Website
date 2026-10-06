@@ -38,21 +38,27 @@ created: "2026-10-06"
 
 ## Per-Task Verification Map
 
-Filled by the planner from PLAN.md task IDs. Requirement → test map from research:
+Filled by the planner from the PLAN.md task IDs (2026-10-06). Every test file is created by the task it verifies (tracer-first, as in Phase 1), so no task references a missing file.
 
-| Requirement | Behavior | Test Type | Automated Command | File Exists | Status |
-|-------------|----------|-----------|-------------------|-------------|--------|
-| SEO-01 | Unique title, description, one absolute canonical (root, prefix, mutated) | integration | `node --test test/seo.test.js` | ❌ W0 | ⬜ pending |
-| SEO-01 | Gate fails on missing/relative/foreign canonical, missing description | unit (fixtures) | `node --test test/seo-gate.test.js` | ❌ W0 | ⬜ pending |
-| SEO-02 | sitemap lists exactly indexable pages absolute; robots `Sitemap:` only when indexable | integration | `node --test test/seo.test.js` | ❌ W0 | ⬜ pending |
-| SEO-02 | Gate fails when indexable page missing from sitemap | unit | `node --test test/seo-gate.test.js` | ❌ W0 | ⬜ pending |
-| SEO-03 | og/twitter absolute, follow SITE_URL; OG file 1200×630 < 300 KB | integration | `node --test test/seo.test.js` | ❌ W0 | ⬜ pending |
-| SEO-04 | favicon.ico, 180/192/512 PNGs, manifest JSON prefixed, theme-color `#080e11`, head links resolve | integration | `node --test test/seo.test.js test/links.test.js` | ❌ W0 | ⬜ pending |
-| SEO-05 | Organization + WebSite JSON-LD, alternateName IBC, foundingDate 2018, sameAs, no SportsTeam/Event/keywords | integration + unit | `node --test test/seo.test.js` | ❌ W0 | ⬜ pending |
-| SEO-07 | 404.html in layout, Polish, home + invite links, noindex, not in sitemap; web.config 404 path prefix-aware | integration | `node --test test/seo.test.js test/links.test.js` | ❌ W0 | ⬜ pending |
-| SEO-08 | Gate passes real builds; each rule G1–G10 fails its fixture naming the file; build script runs gate | unit + integration | `node --test test/seo-gate.test.js test/devpages.test.js` | ❌ W0 | ⬜ pending |
-| SEO-09 | Default noindex everywhere; `SITE_INDEXABLE=1` + https lifts it except 404; http/localhost rejected; pages.yml never sets flag; README cutover checklist | integration + text | `node --test test/seo.test.js test/build.test.js test/workflow.test.js` | ❌ W0 | ⬜ pending |
-| D-05 | Every `TODO(FACTS-NN)` in src has a FACTS.md row and vice versa | unit (text) | `node --test test/facts.test.js` | ❌ W0 | ⬜ pending |
+| Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
+|---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
+| 02-01-T1 (tracer) | 02-01 | 1 | SEO-02, SEO-08 | T-02-04 | Gate chained unconditionally after Eleventy, no env switch of its own | integration (real build + CLI on a broken fixture) | `node --test test/seo-gate.test.js test/devpages.test.js && npm test && SITE_URL=https://guard.example npm run build` | created by task | ⬜ pending |
+| 02-01-T2 | 02-01 | 1 | SEO-09, SEO-01 (canonical) | T-02-01, T-02-02 | noindex unless SITE_INDEXABLE is exactly "1" on an https host; SITE_URL/PATH_PREFIX validated | integration (root, prefix, mutated, indexable variants) | `node --test test/seo.test.js && npm test` | created by task | ⬜ pending |
+| 02-01-T3 | 02-01 | 1 | SEO-02, SEO-08, SEO-09 | T-02-01, T-02-03 | robots.txt never disallows; G9 noindex both ways; build-kind banner | unit (fixtures) + integration | `node --test test/seo-gate.test.js test/seo.test.js && npm test` + preview/indexable builds print their banner | ✅ (from T1/T2) | ⬜ pending |
+| 02-02-T1 | 02-02 | 1 | SEO-03, SEO-04, SEO-05 | T-02-SC | Blocking-human legitimacy gate before installing sharp 0.35.4 | registry check + human | `npm view sharp@0.35.4 repository.url \| grep -q "lovell/sharp"` | n/a | ⬜ pending |
+| 02-02-T2 | 02-02 | 1 | SEO-03, SEO-04, SEO-05 | T-02-SC, T-02-05 | sharp isolated in tools/seo-images, exact pin, root lockfile untouched | static | `npm --prefix tools/seo-images ls sharp` + `node --check` + `git diff --quiet -- package.json package-lock.json` | n/a | ⬜ pending |
+| 02-02-T3 | 02-02 | 1 | SEO-03, SEO-04, SEO-05 | T-02-06 | Card carries only D-06 wording; safe-area self-check | unit (image headers) + human-check (OG card) | `node --test test/seo-assets.test.js && npm test` | created by task | ⬜ pending |
+| 02-03-T1 | 02-03 | 2 | SEO-01 | T-02-07 | Autoescape on meta values, no `safe` | integration | `node --test test/seo.test.js test/layout.test.js test/devpages.test.js && npm test` | ✅ | ⬜ pending |
+| 02-03-T2 | 02-03 | 2 | SEO-01, SEO-08 | T-02-08 | G10 blocks drafts on indexable builds only | unit (fixtures) + text (FACTS.md) + indexable build must fail | `node --test test/seo-gate.test.js test/facts.test.js && npm test` + `SITE_URL=https://example.org SITE_INDEXABLE=1 npm run build` exits 1 naming TODO(FACTS-01) | created by task (facts) | ⬜ pending |
+| 02-04-T1 | 02-04 | 3 | SEO-03 | T-02-09 | og/twitter URLs only via htmlBaseUrl(site.url) | integration | `node --test test/seo.test.js test/build.test.js test/links.test.js && npm test` | ✅ | ⬜ pending |
+| 02-04-T2 | 02-04 | 3 | SEO-03, SEO-08 | T-02-09 | G3: absolute, consistent, existing, 1200×630 on indexable pages | unit (fixtures) + integration | `node --test test/seo-gate.test.js test/seo.test.js test/devpages.test.js test/links.test.js && npm test` | ✅ | ⬜ pending |
+| 02-04-T3 | 02-04 | 3 | SEO-04 | T-02-10 | Manifest serialized with dump, prefixed URLs | integration + human-check (favicon, manifest, Discord stripe flag) | `node --test test/seo.test.js test/links.test.js && npm test` | ✅ | ⬜ pending |
+| 02-05-T1 | 02-05 | 4 | SEO-05 | T-02-11, T-02-12 | jsonLd escapes `<`; no Person/rating nodes | unit + integration + human-check (schema validator) | `node --test test/schema.test.js test/layout.test.js && npm test` | created by task | ⬜ pending |
+| 02-05-T2 | 02-05 | 4 | SEO-05, SEO-08 | T-02-13 | Footer loop keeps rel=noopener noreferrer; G5 | unit (fixtures) + integration | `node --test test/schema.test.js test/seo-gate.test.js test/layout.test.js test/links.test.js && npm test` | ✅ | ⬜ pending |
+| 02-06-T1 | 02-06 | 4 | SEO-07 | T-02-15, T-02-16 | remove-before-add in web.config; 404 noindex, unlisted | integration + human-check (dev-server 404) | `node --test test/seo-files.test.js test/facts.test.js test/links.test.js && npm test` | created by task | ⬜ pending |
+| 02-06-T2 | 02-06 | 4 | SEO-09 | T-02-17 | Workflow never opts into indexing; README pairs `$env:` with Remove-Item | text | `node --test test/docs.test.js test/workflow.test.js test/links.test.js && npm test` | created by task (docs) | ⬜ pending |
+
+Requirement coverage: SEO-01 (02-01, 02-03), SEO-02 (02-01), SEO-03 (02-02, 02-04), SEO-04 (02-02, 02-04), SEO-05 (02-02, 02-05), SEO-07 (02-06), SEO-08 (02-01, 02-03, 02-04, 02-05), SEO-09 (02-01, 02-06), D-05 register (02-03, 02-06).
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 
@@ -60,12 +66,14 @@ Filled by the planner from PLAN.md task IDs. Requirement → test map from resea
 
 ## Wave 0 Requirements
 
-- [ ] `test/helpers.js` — add `SITE_INDEXABLE` to `buildEnvKeys`; `checkSeo(outDir, env)` helper; fixture writer under `_test/`
-- [ ] `test/seo.test.js` — SEO-01..05, 07, 09 on real builds (dirs prefixed `seo-`)
-- [ ] `test/seo-gate.test.js` — SEO-08 fixtures G1–G10 + real-build passes
-- [ ] `test/facts.test.js` — D-05 cross-reference
-- [ ] Update Phase 1 assertions: `test/layout.test.js:105-110`, `test/devpages.test.js` (12, c, d, i), `test/build.test.js` og:image, `test/links.test.js` (d)/(e)
-- [ ] `test/workflow.test.js` — "never sets SITE_INDEXABLE"
+Planned inside the tasks they verify (no separate stub wave):
+
+- [ ] `test/helpers.js`: `SITE_INDEXABLE` in `buildEnvKeys` (02-01 T2); gate fixture writer and CLI spawn live in `test/seo-gate.test.js` (02-01 T1)
+- [ ] `test/seo-gate.test.js`: created by 02-01 T1, extended per rule by 02-01 T3 (G0/G2/G7/G8/G9), 02-03 T2 (G1/G4/G6/G10), 02-04 T2 (G3), 02-05 T2 (G5)
+- [ ] `test/seo.test.js`: created by 02-01 T2 (SEO-01 canonical, SEO-09), extended by 02-01 T3, 02-03 T1, 02-04 T1-T3
+- [ ] `test/seo-assets.test.js` (02-02 T3), `test/facts.test.js` (02-03 T2), `test/schema.test.js` (02-05 T1), `test/seo-files.test.js` (02-06 T1), `test/docs.test.js` (02-06 T2)
+- [ ] Phase 1 assertions updated in the task that changes the head: `test/devpages.test.js` (i) in 02-01 T1; `test/layout.test.js:105-108` and `test/devpages.test.js` (12, c, d) in 02-03 T1; `test/build.test.js` og:image and `test/links.test.js` (d)/(e) in 02-04 T1; `test/layout.test.js:109` in 02-05 T1
+- [ ] `test/workflow.test.js` (i) "never opts into indexing" in 02-06 T2
 
 ---
 
@@ -77,16 +85,19 @@ Filled by the planner from PLAN.md task IDs. Requirement → test map from resea
 | OG card visual quality | SEO-03 | Text layout/overflow is visual | Open generated OG image; headline fully inside frame, legible |
 | Rich Results / Schema validator | SEO-05 | External validator | Paste built `_site/index.html` into validator.schema.org; no errors |
 | IIS 404 status + httpErrors unlocked | SEO-07 | Production host only | From a remote machine: `curl -I https://<domena>/nie-istnieje` returns 404 with the Polish page |
+| sharp package legitimacy | T-02-SC | Trust decision, never auto-approved | 02-02 T1 blocking-human checkpoint before install |
+| Favicon in the tab, manifest panel | SEO-04 | Browser UI | 02-04 T3 human-check (dev server, light and dark theme) |
+| Polish 404 in the dev server and on the Pages preview | SEO-07 | Host 404 behaviour | 02-06 T1 human-check; after deploy open a missing URL under /IBC-Website/ |
 
 ---
 
 ## Validation Sign-Off
 
-- [ ] All tasks have `<automated>` verify or Wave 0 dependencies
-- [ ] Sampling continuity: no 3 consecutive tasks without automated verify
-- [ ] Wave 0 covers all MISSING references
-- [ ] No watch-mode flags
-- [ ] Feedback latency < 30s
-- [ ] `nyquist_compliant: true` set in frontmatter
+- [x] All tasks have `<automated>` verify or Wave 0 dependencies (planner, 2026-10-06)
+- [x] Sampling continuity: no 3 consecutive tasks without automated verify
+- [x] Wave 0 covers all MISSING references (each test file is created by the task it verifies)
+- [x] No watch-mode flags
+- [ ] Feedback latency < 30s (confirm during execution)
+- [ ] `nyquist_compliant: true` set in frontmatter (validate-phase)
 
 **Approval:** pending
