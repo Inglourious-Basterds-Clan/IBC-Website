@@ -31,9 +31,10 @@ note: "User answered: no — only GitHub Pages serves the repo"
 
 ### 5. Decide on review finding CR-01 (plain `npm run build` emits og:image=http://localhost:8080/...)
 expected: Explicit decision recorded in 01-REVIEW-DISPOSITION.md — fixed now (README + build guard) or deferred to Phase 2 (SC5 build gate)
-result: issue
+result: pass
 reported: "fix"
 severity: major
+resolved_by: 01-07 (gap G-01-5; CR-01 disposition fixed in 01-REVIEW-DISPOSITION.md; fix confirmed by test 8)
 note: "Decision: fix CR-01 now in Phase 1 (build guard on missing SITE_URL + README SITE_URL docs), not deferred"
 
 ### 6. Confirm no existing Polish copy or factual claim changed; new visible text is only 'Przejdź do treści' and 'Discord'
@@ -51,8 +52,8 @@ result: pass
 ## Summary
 
 total: 8
-passed: 7
-issues: 1
+passed: 8
+issues: 0
 pending: 0
 skipped: 0
 blocked: 0
