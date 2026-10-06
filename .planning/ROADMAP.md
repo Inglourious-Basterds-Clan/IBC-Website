@@ -12,7 +12,7 @@ This milestone takes the IBC site from one hand-written Polish landing page to a
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Eleventy Foundation** - Migrate the existing page to Eleventy at visual parity, with one config value for the site URL and Discord invite and a shared layout
+- [x] **Phase 1: Eleventy Foundation** - Migrate the existing page to Eleventy at visual parity, with one config value for the site URL and Discord invite and a shared layout (completed 2026-10-06)
 - [ ] **Phase 2: Technical SEO** - Every page gets complete metadata, structured data, a sitemap, a noindex guard for non-final hosts and a build gate for SEO errors
 - [ ] **Phase 3: Performance & Assets** - Optimized images, self-hosted Polish fonts, inline SVG icons, and modular CSS/JS that set the mobile performance budget
 - [ ] **Phase 4: Join & Operations Pages** - Real `/jak-dolaczyc/` and `/operacje/` pages, multi-page navigation, breadcrumbs, user-confirmed facts and a live Discord badge
@@ -32,7 +32,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. A new page that has only front matter and body content renders with the same header, nav, footer and Discord CTA as the home page.
   5. The built site works both at a domain root and under a subpath prefix (e.g. GitHub Pages `/IBC-Website/`). Every internal link, stylesheet, script and image resolves in both setups.
 
-**Plans**: 7/7 plans executed (01-07 = gap closure G-01-5)
+**Plans**: 7/7 plans complete (01-07 = gap closure G-01-5)
 
 Plans:
 **Wave 1**
@@ -117,7 +117,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5. Phases 2 and 3 both 
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Eleventy Foundation | 7/7 | In Progress|  |
+| 1. Eleventy Foundation | 7/7 | Complete    | 2026-10-06 |
 | 2. Technical SEO | 0/TBD | Not started | - |
 | 3. Performance & Assets | 0/TBD | Not started | - |
 | 4. Join & Operations Pages | 0/TBD | Not started | - |

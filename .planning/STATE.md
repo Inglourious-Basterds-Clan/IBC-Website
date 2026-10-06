@@ -1,43 +1,43 @@
 ---
 gsd_state_version: "1.0"
-current_phase: 01
-current_phase_name: Eleventy Foundation
-status: verifying
-stopped_at: Completed 01-07-PLAN.md
-last_updated: "2026-10-03T10:23:55.369Z"
-last_activity: 2026-10-03
-last_activity_desc: Phase 01 execution started
-state_head: 02ae806ef7469997e60aad42c38509f2e74e9485
+current_phase: 2
+current_phase_name: Technical SEO
+status: planning
+stopped_at: Phase 01 complete, ready to plan Phase 2
+last_updated: "2026-10-06T16:11:57.971Z"
+last_activity: 2026-10-06
+last_activity_desc: Phase 01 complete, transitioned to Phase 2
+state_head: 16d1fad029807fc97b8450d7b57dc623fd1c12b6
 progress:
   total_phases: 5
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 7
   completed_plans: 7
-  percent: 0
+  percent: 20
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-10-02)
+See: .planning/PROJECT.md (updated 2026-10-06)
 
 **Core value:** A Polish player searching for an Arma 3 milsim clan (or for "IBC" by name) finds this site, understands what IBC is and how to join, and clicks through to Discord.
-**Current focus:** Phase 01 — Eleventy Foundation
+**Current focus:** Phase 2 — Technical SEO
 
 ## Current Position
 
-Phase: 01 (Eleventy Foundation) — EXECUTING
-Plan: 7 of 7
-Status: Phase complete — ready for verification
-Last activity: 2026-10-03 — Completed 01-07 (gap G-01-5 / CR-01 closed)
+Phase: 2 — Technical SEO
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-10-06 — Phase 01 complete, transitioned to Phase 2
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [██░░░░░░░░] 20%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 0
+- Total plans completed: 7
 - Average duration: -
 - Total execution time: 0.0 hours
 
@@ -45,7 +45,7 @@ Progress: [░░░░░░░░░░] 0%
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| - | - | - | - |
+| 01 | 7 | - | - |
 
 **Recent Trend:**
 - Last 5 plans: -
@@ -96,8 +96,9 @@ None yet.
 
 ### Blockers/Concerns
 
-- [Phase 1]: ~~The deploy target changes from the repo root to `_site/`. The user must be told and the change documented.~~ Documented in README.md (01-04); remaining user step: enable Settings -> Pages -> Source: GitHub Actions (01-USER-SETUP.md).
-- [Phase 1/2]: Domain and host are unknown. Decide whether to deploy before the domain exists (GitHub Pages subpath → pathPrefix + noindex).
+- [Phase 2]: Domain still unknown; site is live on the GitHub Pages subpath, so Phase 2 needs the noindex guard for non-final hosts.
+- [Phase 2]: favicon.ico 404 (pre-existing) and review warnings WR-01..03 / R2-* left open in 01-REVIEW-DISPOSITION.md.
+- [Phase 2+]: initEasterEgg still builds a line with innerHTML (constants only; not a sink) — candidate for textContent refactor.
 - [Phase 3/5]: Share Tech Mono has no Polish glyphs. Phase 3 self-hosts fonts with Polish coverage (interim mono if needed); the Phase 5 UI-SPEC makes the final HUD font choice.
 - [Phase 4]: Needs clan facts from the user (schedule, modpack, DLC, join steps, play style, honest member metric) to confirm in FACTS.md.
 - [Phase 2/4]: The TODO-marker gate (SEO-08) should fail production builds only, so Phase 4 drafting can still build in dev.
@@ -113,6 +114,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-10-03T10:23:55.311Z
-Stopped at: Completed 01-07-PLAN.md
+Last session: 2026-10-06
+Stopped at: Phase 01 complete, ready to plan Phase 2
 Resume file: None

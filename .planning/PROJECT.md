@@ -22,19 +22,22 @@ A Polish player searching for an Arma 3 milsim clan (or for "IBC" by name) finds
 - ✓ Scroll-spy navigation highlighting — existing
 - ✓ Footer easter egg (decryption overlay) — existing
 - ✓ Basic SEO: title, meta description, keywords, Open Graph tags, SportsTeam JSON-LD — existing
+- ✓ Eleventy 3.1 build into `_site/` with documented deploy (GitHub Pages workflow + any static host) — Phase 1
+- ✓ Site URL is configured in one place (`SITE_URL`); production builds fail without it — Phase 1
+- ✓ Discord invite defined once (`src/_data/site.js`) — Phase 1
+- ✓ Shared layout (header, nav, footer, Discord CTA) and pathPrefix-safe links at root and under `/IBC-Website/` — Phase 1
 
 ### Active
 
 - [ ] Technical SEO is complete: canonical URLs, sitemap.xml, robots.txt, full OG/Twitter cards with absolute image URLs, favicons/manifest, structured data (Organization + WebSite + BreadcrumbList; no Event markup — Google doesn't support online/members-only events or show them in Poland; FAQPage gives no rich result since 2026-05)
-- [ ] Site URL is configured in one place so it can be switched once a domain is purchased
 - [ ] Lighthouse scores are high (target ≥ 90 in Performance, Accessibility, Best Practices, SEO on mobile)
 - [ ] Images optimized (WebP/AVIF, responsive sizes, explicit dimensions, lazy-loading)
 - [ ] Third-party weight reduced (Font Awesome full CDN → inline SVG icons; self-hosted/subset fonts)
-- [ ] Accessibility: semantic landmarks, skip link, ARIA for modals/menu, focus management, contrast, reduced-motion support
+- [ ] Accessibility: semantic landmarks, skip link (added in Phase 1), ARIA for modals/menu, focus management, contrast, reduced-motion support
 - [ ] Visual refresh that keeps the tactical identity but feels more polished and trustworthy to first-time visitors
 - [ ] New indexable page: How to join / FAQ (requirements, mods, schedule, recruitment steps)
 - [ ] New indexable page: Operations / events (when IBC plays, mission types, op recaps)
-- [ ] Multi-page structure with shared header/footer and consistent internal linking
+- [ ] Multi-page structure with consistent internal linking (shared layout done in Phase 1; subpages in Phase 4)
 - [ ] Live Discord member/online badge (public invite endpoint) with static fallback
 
 ### Deferred (v2)
@@ -72,10 +75,12 @@ A Polish player searching for an Arma 3 milsim clan (or for "IBC" by name) finds
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
 | Expand from single page to multi-page | Generic recruitment queries need more indexable content than one landing page | — Pending |
-| Open to a light build tool / SSG | Shared layouts and image optimization across pages are painful by hand | — Pending |
+| Open to a light build tool / SSG | Shared layouts and image optimization across pages are painful by hand | ✓ Good — Phase 1 migrated at visual parity |
 | Visual refresh allowed, tactical identity kept | Goal is better first impression, not a rebrand | — Pending |
 | Roster deferred to v2 | Bot not ready yet; avoid blocking v1 | — Pending |
-| Eleventy 3.1 + Nunjucks | Least-rewrite SSG, zero client JS, official image/icon plugins (research) | — Pending |
+| Eleventy 3.1 + Nunjucks | Least-rewrite SSG, zero client JS, official image/icon plugins (research) | ✓ Good — Phase 1 (single dep, 56 node:test tests) |
+| Deploy `_site/` via GitHub Pages Actions; production host set only in pages.yml | Repo root no longer deployable; PRs never deploy; write perms only on deploy job | ✓ Good — Phase 1, live at inglourious-basterds-clan.github.io/IBC-Website/ |
+| Production build fails without SITE_URL (opt-out ALLOW_LOCAL_SITE_URL=1) | Prevents shipping localhost absolute URLs (review CR-01, UAT decision) | ✓ Good — Phase 1 (01-07) |
 | No Event JSON-LD | Google ineligibility for online/members-only events in PL | — Pending |
 | Slugs /jak-dolaczyc/, /operacje/, /sklad/ | Match Polish search phrasing; fixed forever | — Pending |
 | Polish only | Target audience is Polish players | — Pending |
@@ -98,4 +103,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-10-02 after initialization*
+*Last updated: 2026-10-06 after Phase 1*
