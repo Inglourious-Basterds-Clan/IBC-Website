@@ -1,5 +1,5 @@
 # Builds and tests every pull request and push. Only a push to main deploys _site/ to GitHub Pages.
-# SITE_URL and PATH_PREFIX below are the only place the production host is set (domain cutover = edit these two values).
+# SITE_URL and PATH_PREFIX below set the GitHub Pages preview address; this preview is never opened to search engines (the final IIS host is built locally per the README cutover checklist).
 name: Build and deploy
 
 on:

@@ -105,3 +105,7 @@ test("(g) build job env sets SITE_URL and PATH_PREFIX for npm test and npm run b
 test("(h) the workflow never sets the local opt-out", () => {
   assert.ok(!workflow.includes("ALLOW_LOCAL_SITE_URL"), "workflow sets ALLOW_LOCAL_SITE_URL");
 });
+
+test("(i) the workflow never opts into indexing (D-15, D-18)", () => {
+  assert.ok(!workflow.includes("SITE_INDEXABLE"), "workflow mentions SITE_INDEXABLE; the Pages preview must stay noindex");
+});
