@@ -3,16 +3,16 @@ gsd_state_version: "1.0"
 current_phase: 02
 current_phase_name: Technical SEO
 status: executing
-stopped_at: Completed 02-02-PLAN.md
-last_updated: "2026-10-07T19:00:54.189Z"
+stopped_at: Completed 02-03-PLAN.md
+last_updated: "2026-10-07T19:08:29.999Z"
 last_activity: 2026-10-07
 last_activity_desc: Phase 02 execution started
-state_head: 19a5dc5bad31567fa298c6abd6d4b60142928ec5
+state_head: 3a4c6f86173144433648882c26fb1142489ec99d
 progress:
   total_phases: 5
   completed_phases: 1
   total_plans: 13
-  completed_plans: 9
+  completed_plans: 10
   percent: 20
 ---
 
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-10-06)
 ## Current Position
 
 Phase: 02 (Technical SEO) — EXECUTING
-Plan: 3 of 6
+Plan: 4 of 6
 Status: Ready to execute
 Last activity: 2026-10-07 — Phase 02 execution started
 
@@ -65,6 +65,7 @@ Progress: [██░░░░░░░░] 20%
 | Phase 01 P07 | 5 min | 3 tasks | 7 files |
 | Phase 02 P01 | 5 min | 3 tasks | 12 files |
 | Phase 02 P02 | 4 min | 3 tasks | 11 files |
+| Phase 02 P03 | 10min | 2 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -96,6 +97,9 @@ Recent decisions affecting current work:
 - [Phase 02]: Indexing is opt-in only: SITE_INDEXABLE exactly "1" on an https non-local SITE_URL; site.js holds the SEO config contract (shortName, locale, themeColor, indexable, ogImage, ogImageAlt, social)
 - [Phase 02]: 02-02: kept human-approved sharp 0.35.4 despite GHSA-wq5f-xc86-pv6w (fixed in 0.35.5); tool decodes only self-built SVG, inputs signature-checked; upgrade needs user vetting of 0.35.5
 - [Phase 02]: 02-02: lib/image-size.js is the shared header reader for committed SEO images (tests, 02-04 G3, 02-05 logo check)
+- [Phase 02]: Home title falls back to site.name so <title> is never empty (SEO-01 empty edge)
+- [Phase 02]: G10 problems are <relPath>:<line>: G10 unconfirmed draft marker TODO(FACTS-NN); gate output sorted by file, rule, text
+- [Phase 02]: Real indexable build tests accept only G10 problems naming open FACTS.md rows (never pin a draft ID)
 
 ### Pending Todos
 
@@ -121,6 +125,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-10-07T19:00:54.139Z
-Stopped at: Completed 02-02-PLAN.md
+Last session: 2026-10-07T19:08:29.947Z
+Stopped at: Completed 02-03-PLAN.md
 Resume file: None

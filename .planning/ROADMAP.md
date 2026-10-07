@@ -64,7 +64,7 @@ Plans:
   4. A visitor who opens a nonexistent URL sees a Polish 404 page in the site layout with a way back to the home page and Discord.
   5. The production build fails with a clear message on a missing or relative canonical or og:image, invalid JSON-LD, a page missing from the sitemap, or a leftover TODO marker. A build for a non-final host puts `noindex` on every page, and a documented domain cutover checklist exists.
 
-**Plans**: 2/6 plans executed
+**Plans**: 3/6 plans executed
 
 Plans:
 **Wave 1**
@@ -72,7 +72,7 @@ Plans:
 - [x] 02-02-PLAN.md — sharp legitimacy checkpoint, isolated image tool, committed OG card, favicon set and JSON-LD logo (wave 1, has checkpoint)
 
 **Wave 2** *(blocked on Wave 1 completion)*
-- [ ] 02-03-PLAN.md — Titles (D-01/D-02), front-matter descriptions, FACTS.md drafts register, gate G1/G4/G6/G10 (wave 2)
+- [x] 02-03-PLAN.md — Titles (D-01/D-02), front-matter descriptions, FACTS.md drafts register, gate G1/G4/G6/G10 (wave 2)
 
 **Wave 3** *(blocked on Wave 2 completion)*
 - [ ] 02-04-PLAN.md — Absolute OG/Twitter tags with per-page override, gate G3, favicons, web manifest, theme-color (wave 3)
@@ -133,7 +133,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5. Phases 2 and 3 both 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Eleventy Foundation | 7/7 | Complete    | 2026-10-06 |
-| 2. Technical SEO | 2/6 | In Progress|  |
+| 2. Technical SEO | 3/6 | In Progress|  |
 | 3. Performance & Assets | 0/TBD | Not started | - |
 | 4. Join & Operations Pages | 0/TBD | Not started | - |
 | 5. Accessibility & Visual Refresh | 0/TBD | Not started | - |
