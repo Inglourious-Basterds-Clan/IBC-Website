@@ -3,16 +3,16 @@ gsd_state_version: "1.0"
 current_phase: 02
 current_phase_name: Technical SEO
 status: executing
-stopped_at: Completed 02-03-PLAN.md
-last_updated: "2026-10-07T19:08:29.999Z"
+stopped_at: Completed 02-04-PLAN.md
+last_updated: "2026-10-07T19:15:02.200Z"
 last_activity: 2026-10-07
 last_activity_desc: Phase 02 execution started
-state_head: 3a4c6f86173144433648882c26fb1142489ec99d
+state_head: e9816c2c278d9165d4b7bc738677cd2365a2f5c2
 progress:
   total_phases: 5
   completed_phases: 1
   total_plans: 13
-  completed_plans: 10
+  completed_plans: 11
   percent: 20
 ---
 
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-10-06)
 ## Current Position
 
 Phase: 02 (Technical SEO) — EXECUTING
-Plan: 4 of 6
+Plan: 5 of 6
 Status: Ready to execute
 Last activity: 2026-10-07 — Phase 02 execution started
 
@@ -66,6 +66,7 @@ Progress: [██░░░░░░░░] 20%
 | Phase 02 P01 | 5 min | 3 tasks | 12 files |
 | Phase 02 P02 | 4 min | 3 tasks | 11 files |
 | Phase 02 P03 | 10min | 2 tasks | 9 files |
+| Phase 02 P04 | 4min | 3 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -100,6 +101,9 @@ Recent decisions affecting current work:
 - [Phase 02]: Home title falls back to site.name so <title> is never empty (SEO-01 empty edge)
 - [Phase 02]: G10 problems are <relPath>:<line>: G10 unconfirmed draft marker TODO(FACTS-NN); gate output sorted by file, rule, text
 - [Phase 02]: Real indexable build tests accept only G10 problems naming open FACTS.md rows (never pin a draft ID)
+- [Phase 02]: G3 compares og:url with the canonical present in the head; image headers are read once per output file
+- [Phase 02]: Per-page share override via front matter ogImage (+ ogImageWidth/ogImageHeight together, + ogImageAlt); G3 requires 1200x630 on indexable pages
+- [Phase 02]: site.webmanifest is a Nunjucks dict serialized with dump(2), display browser, prefix-aware paths
 
 ### Pending Todos
 
@@ -125,6 +129,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-10-07T19:08:29.947Z
-Stopped at: Completed 02-03-PLAN.md
+Last session: 2026-10-07T19:15:02.150Z
+Stopped at: Completed 02-04-PLAN.md
 Resume file: None
