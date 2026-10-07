@@ -15,7 +15,15 @@ const cmdPath = fileURLToPath(new URL("../node_modules/@11ty/eleventy/cmd.cjs", 
 // Env vars that change the build output. They are stripped from the inherited env so
 // a developer shell or CI job env cannot leak into a variant; each test sets its own.
 // ALLOW_LOCAL_SITE_URL is stripped too, so an inherited opt-out cannot weaken the SITE_URL guard tests.
-const buildEnvKeys = ["SITE_URL", "PATH_PREFIX", "INCLUDE_DEV_PAGES", "ELEVENTY_RUN_MODE", "ALLOW_LOCAL_SITE_URL"];
+// SITE_INDEXABLE is stripped so a developer shell cannot leak an indexable build into a test variant.
+const buildEnvKeys = [
+  "SITE_URL",
+  "PATH_PREFIX",
+  "INCLUDE_DEV_PAGES",
+  "ELEVENTY_RUN_MODE",
+  "ALLOW_LOCAL_SITE_URL",
+  "SITE_INDEXABLE",
+];
 
 function escapeRegExp(text) {
   return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
