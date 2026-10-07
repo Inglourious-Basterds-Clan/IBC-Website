@@ -1,9 +1,13 @@
 import { HtmlBasePlugin } from "@11ty/eleventy";
 import site from "./src/_data/site.js";
+import { isIndexableUrl } from "./lib/seo.js";
 
 export default function (eleventyConfig) {
   // Rewrites root-relative href/src/srcset with pathPrefix and provides the htmlBaseUrl filter.
   eleventyConfig.addPlugin(HtmlBasePlugin);
+
+  // Shared indexing predicate (D-19): head noindex, sitemap and scripts/check-seo.js use the same rule.
+  eleventyConfig.addFilter("isIndexableUrl", isIndexableUrl);
 
   eleventyConfig.addPassthroughCopy({
     "src/css": "css",

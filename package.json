@@ -7,7 +7,7 @@
   },
   "scripts": {
     "dev": "eleventy --serve",
-    "build": "node scripts/clean.js && eleventy",
+    "build": "node scripts/clean.js && eleventy && node scripts/check-seo.js",
     "test": "node --test \"test/*.test.js\""
   },
   "devDependencies": {

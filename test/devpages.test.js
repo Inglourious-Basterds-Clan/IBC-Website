@@ -128,7 +128,7 @@ test("(h) clean.js refuses the repo root and paths outside it", () => {
   assert.ok(existsSync(join(repoRoot, "package.json")), "package.json was deleted");
 });
 
-test("(i) the build script cleans _site/ before Eleventy runs", () => {
+test("(i) the build script cleans _site/, runs Eleventy, then the SEO gate", () => {
   const pkg = JSON.parse(readFileSync(join(repoRoot, "package.json"), "utf8"));
-  assert.equal(pkg.scripts.build, "node scripts/clean.js && eleventy");
+  assert.equal(pkg.scripts.build, "node scripts/clean.js && eleventy && node scripts/check-seo.js");
 });
