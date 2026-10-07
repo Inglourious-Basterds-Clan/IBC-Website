@@ -1,0 +1,98 @@
+---
+phase: 02
+review: 02-REVIEW.md
+titles: json
+findings:
+  - id: CR-01
+    severity: critical
+    disposition: open
+    title: "SEO gate silently skips itself (exit 0) when run through a symlinked or junction path"
+  - id: CR-02
+    severity: critical
+    disposition: open
+    title: "A rejected build stays in `_site/` and the README says it cannot be deployed by mistake"
+  - id: WR-01
+    severity: warning
+    disposition: open
+    title: "A page that overrides og:image gets the default card's alt text"
+  - id: WR-02
+    severity: warning
+    disposition: open
+    title: "Indexable builds are allowed with a non-root PATH_PREFIX, where robots.txt and its Sitemap line are never read"
+  - id: WR-03
+    severity: warning
+    disposition: open
+    title: "`isIndexableUrl` treats any collection URL as an indexable page, including future non-HTML outputs"
+  - id: WR-04
+    severity: warning
+    disposition: open
+    title: "SITE_URL is validated through `new URL()` but emitted raw, so site.js accepts values the gate rejects"
+  - id: WR-05
+    severity: warning
+    disposition: open
+    title: "G8 `Disallow: /` detection only matches one exact spelling"
+  - id: IN-01
+    severity: info
+    disposition: open
+    title: "web.config comment says GitHub Pages ignores the file, but Pages publishes it"
+  - id: IN-02
+    severity: info
+    disposition: open
+    title: "Gate helpers duplicated between the script, the tests and site.js"
+  - id: IN-03
+    severity: info
+    disposition: open
+    title: "The JSON-LD Organization description is a hand-copied duplicate of the hero paragraph"
+  - id: IN-04
+    severity: info
+    disposition: open
+    title: "The traversal guard in `locToRelPath` ignores backslash segments on Windows"
+  - id: IN-05
+    severity: info
+    disposition: open
+    title: "Regenerating the SEO images is machine-dependent and not atomic"
+  - id: IN-06
+    severity: info
+    disposition: open
+    title: "`--dir` pointing at a file crashes with a stack trace"
+  - id: IN-07
+    severity: info
+    disposition: open
+    title: "G3 checks only the first og:image:width/height and allows duplicates"
+  - id: IN-08
+    severity: info
+    disposition: open
+    title: "Draft-marker format is narrower than FACTS.md suggests"
+  - id: IN-09
+    severity: info
+    disposition: open
+    title: "Workflow actions are pinned to mutable major tags while deploy holds `id-token: write`"
+open: 16
+total: 16
+recorded: 2026-10-07T19:34:32.107Z
+---
+
+# Phase 02: Code Review Disposition
+
+| Finding | Severity | Disposition | Source |
+|---------|----------|-------------|--------|
+| CR-01 | critical | open | - |
+| CR-02 | critical | open | - |
+| WR-01 | warning | open | - |
+| WR-02 | warning | open | - |
+| WR-03 | warning | open | - |
+| WR-04 | warning | open | - |
+| WR-05 | warning | open | - |
+| IN-01 | info | open | - |
+| IN-02 | info | open | - |
+| IN-03 | info | open | - |
+| IN-04 | info | open | - |
+| IN-05 | info | open | - |
+| IN-06 | info | open | - |
+| IN-07 | info | open | - |
+| IN-08 | info | open | - |
+| IN-09 | info | open | - |
+
+Dispositions: `open` (recorded, not yet triaged), `fixed`, `skipped`, `deferred`.
+Set `deferred` by hand and put the reason in the Source cell; both are preserved. A `|` in the reason is kept as prose and escaped on the next run.
+Re-running the gate keeps every row it can. A row the current review no longer reports is kept and its Source cell flagged, so a finding does not leave this record silently. ONE exception: when a finding id is REUSED by a different finding, the earlier decision cannot keep a row — the id is taken — and it is dropped. A RECORDED decision (anything but `open`) is named on the console when that happens; a row still at `open` is replaced silently, because `open` records no decision to lose.
