@@ -4,10 +4,11 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { build, cleanEnv, repoRoot } from "./helpers.js";
 import { checkSite } from "../scripts/check-seo.js";
+import { isIndexableUrl } from "../lib/seo.js";
 
 const fixtureSite = { url: "https://fixture.example", pathPrefix: "/", indexable: false };
 const indexableSite = { ...fixtureSite, indexable: true };
@@ -31,13 +32,21 @@ function writeFixture(name, files) {
 
 // A minimal page that passes every gate rule implemented so far. url is the page.url ("/", "/o-nas/").
 // head replaces the default head lines; noindex defaults to true (a preview page).
-function validPage(base, url, { canonical, noindex = true, head } = {}) {
+// title defaults to a title unique per url; description defaults to a non-empty one on
+// indexable urls and none elsewhere (D-04). null leaves the tag out.
+function validPage(base, url, { canonical, noindex = true, head, title, description } = {}) {
   const href = canonical === undefined ? base + url.slice(1) : canonical;
-  const lines = head ?? [`<link rel="canonical" href="${href}">`, ...(noindex ? [noindexTag] : [])];
+  const pageTitle = title === undefined ? `Fixture ${url}` : title;
+  const pageDescription = description === undefined ? (isIndexableUrl(url) ? `Opis strony ${url}` : null) : description;
+  const lines = head ?? [
+    ...(pageTitle === null ? [] : [`<title>${pageTitle}</title>`]),
+    `<link rel="canonical" href="${href}">`,
+    ...(noindex ? [noindexTag] : []),
+    ...(pageDescription === null ? [] : [`<meta name="description" content="${pageDescription}">`]),
+  ];
   return `<!DOCTYPE html>
 <html lang="pl">
 <head>
-  <title>Fixture</title>
   ${lines.join("\n  ")}
 </head>
 <body><h1>Fixture</h1></body>
@@ -108,8 +117,31 @@ test("real prefix build passes the gate", () => {
   assert.deepEqual(checkSite(prefixBuild(), { url: "https://guard.example", pathPrefix: "/IBC-Website/" }), []);
 });
 
-test("real indexable build passes the gate", () => {
-  assert.deepEqual(checkSite(indexableBuild(), { url: "https://example.org", pathPrefix: "/", indexable: true }), []);
+// IDs of the FACTS.md rows still waiting for the clan's confirmation.
+function openFactIds() {
+  const facts = readFileSync(join(repoRoot, "FACTS.md"), "utf8");
+  return Array.from(facts.matchAll(/^\|\s*(FACTS-\d+)\s*\|.*\|\s*do potwierdzenia\s*\|\s*$/gm), (match) => match[1]);
+}
+
+// G10 problems name the marker; returns the problem's FACTS-NN id or null.
+function g10FactId(problem) {
+  const match = /: G10 unconfirmed draft marker TODO\((FACTS-\d+)\)/.exec(problem);
+  return match ? match[1] : null;
+}
+
+// Research Pitfall 3: never pin a draft ID. The real indexable build may only fail on G10
+// markers that are open FACTS.md rows, so this stays green once the user confirms a draft.
+function assertOnlyOpenDrafts(problems) {
+  const open = openFactIds();
+  for (const problem of problems) {
+    const id = g10FactId(problem);
+    assert.ok(id !== null, `indexable build has a non-G10 problem or an untracked TODO:\n${problem}`);
+    assert.ok(open.includes(id), `${id} is not an open (do potwierdzenia) row in FACTS.md:\n${problem}`);
+  }
+}
+
+test("real indexable build fails the gate only on open FACTS.md drafts", () => {
+  assertOnlyOpenDrafts(checkSite(indexableBuild(), { url: "https://example.org", pathPrefix: "/", indexable: true }));
 });
 
 test("valid preview and indexable fixtures pass the gate", () => {
@@ -152,8 +184,14 @@ test("CLI banner names the build kind", () => {
 
   indexableBuild();
   const indexable = runGate("_test/seo-gate-indexable", { SITE_URL: "https://example.org", SITE_INDEXABLE: "1" });
-  assert.equal(indexable.status, 0, indexable.stderr);
   assert.match(indexable.stdout, /check-seo: INDEXABLE build for https:\/\/example\.org\//);
+  // While drafts are open the indexable gate exits 1 on their G10 markers only (D-19).
+  const problems = indexable.stderr
+    .split(/\r?\n/)
+    .filter((line) => line.startsWith("check-seo: ") && !line.includes("must not be deployed"))
+    .map((line) => line.slice("check-seo: ".length));
+  assert.equal(indexable.status, problems.length === 0 ? 0 : 1, indexable.stderr);
+  assertOnlyOpenDrafts(problems);
 });
 
 test("G0 empty output folder", () => {
@@ -243,4 +281,117 @@ test("G9 indexable home with noindex", () => {
 test("G9 indexable build whose 404.html lacks noindex", () => {
   const page = validPage(fixtureBase, "/404.html", { noindex: false });
   assertProblem(check("g9-404", { "404.html": page }, indexableSite), "404.html: G9 non-indexable page is missing robots noindex");
+});
+
+test("G1 empty <title> (SEO-01 empty edge)", () => {
+  const page = validPage(fixtureBase, "/about/", { title: "  " });
+  assertProblem(check("g1-empty", { "about/index.html": page }), "about/index.html: G1 empty <title>");
+});
+
+test("G1 missing <title>", () => {
+  const page = validPage(fixtureBase, "/about/", { title: null });
+  assertProblem(check("g1-missing", { "about/index.html": page }), "about/index.html: G1 missing <title>");
+});
+
+test("G1 two <title> tags", () => {
+  const href = fixtureBase + "about/";
+  const page = validPage(fixtureBase, "/about/", {
+    head: ["<title>Jeden</title>", "<title>Dwa</title>", `<link rel="canonical" href="${href}">`, noindexTag, '<meta name="description" content="Opis">'],
+  });
+  assertProblem(check("g1-two", { "about/index.html": page }), "about/index.html: G1 2 <title> tags");
+});
+
+test("G1 two indexable pages share a title, naming both files (SEO-01 adjacency edge)", () => {
+  const problems = check("g1-duplicate", {
+    "index.html": validPage(fixtureBase, "/", { title: "Ten sam tytuł" }),
+    "about/index.html": validPage(fixtureBase, "/about/", { title: "Ten sam tytuł" }),
+  });
+  assertProblem(problems, "about/index.html: G1 duplicate title also used by index.html");
+  assertProblem(problems, "index.html: G1 duplicate title also used by about/index.html");
+});
+
+test("G1 a non-indexable page may share an indexable page's title", () => {
+  const problems = check("g1-404-shared", { "404.html": validPage(fixtureBase, "/404.html", { title: "Fixture /" }) });
+  assert.deepEqual(problems, []);
+});
+
+test("G4 indexable page without a description", () => {
+  const page = validPage(fixtureBase, "/about/", { description: null });
+  assertProblem(check("g4-missing", { "about/index.html": page }), 'about/index.html: G4 missing <meta name="description">');
+});
+
+test('G4 indexable page with content=""', () => {
+  const page = validPage(fixtureBase, "/about/", { description: "" });
+  assertProblem(check("g4-empty", { "about/index.html": page }), "about/index.html: G4 empty meta description");
+});
+
+test("G4 indexable page with two descriptions", () => {
+  const href = fixtureBase + "about/";
+  const page = validPage(fixtureBase, "/about/", {
+    head: ["<title>O nas</title>", `<link rel="canonical" href="${href}">`, noindexTag, '<meta name="description" content="A">', '<meta name="description" content="B">'],
+  });
+  assertProblem(check("g4-two", { "about/index.html": page }), "about/index.html: G4 2 meta descriptions");
+});
+
+test("G4 exempts 404.html and /_dev/ pages (D-04)", () => {
+  const problems = check("g4-exempt", {
+    "404.html": validPage(fixtureBase, "/404.html", { description: null }),
+    "_dev/layout-test/index.html": validPage(fixtureBase, "/_dev/layout-test/", { description: null }),
+  });
+  assert.ok(!problems.some((problem) => problem.includes(": G4 ")), problems.join("\n"));
+  assert.deepEqual(problems, []);
+});
+
+test("G6 meta keywords", () => {
+  const href = fixtureBase + "about/";
+  const page = validPage(fixtureBase, "/about/", {
+    head: [
+      "<title>O nas</title>",
+      `<link rel="canonical" href="${href}">`,
+      noindexTag,
+      '<meta name="description" content="Opis">',
+      '<meta name="keywords" content="arma, milsim">',
+    ],
+  });
+  assertProblem(check("g6-keywords", { "about/index.html": page }), "about/index.html: G6");
+});
+
+// A fixture with a front-matter style marker in index.html, a TODO comment in the CSS and
+// the bytes TODO inside a .png, which G10 never reads.
+function todoFiles(indexable) {
+  return {
+    ...validFiles(indexable),
+    "index.html": validPage(fixtureBase, "/", { noindex: !indexable }).replace("</head>", "  <!-- TODO(FACTS-01) -->\n</head>"),
+    "css/style.css": "body { color: #fff; }\n/* TODO: kolory */\n",
+    "assets/image.png": Buffer.from("\x89PNG TODO TODO", "latin1"),
+  };
+}
+
+test("G10 TODO markers pass a preview build (D-19)", () => {
+  const dir = writeFixture("g10-preview", todoFiles(false));
+  assert.deepEqual(checkSite(dir, fixtureSite), []);
+});
+
+test("G10 TODO markers fail an indexable build, one problem per marker, images ignored", () => {
+  const dir = writeFixture("g10-indexable", todoFiles(true));
+  const problems = checkSite(dir, indexableSite).filter((problem) => problem.includes(": G10 "));
+  assert.equal(problems.length, 2, problems.join("\n"));
+  assert.match(problems[0], /^css\/style\.css:2: G10 unconfirmed draft marker TODO /);
+  assert.match(problems[1], /^index\.html:\d+: G10 unconfirmed draft marker TODO\(FACTS-01\) \(confirm it in FACTS\.md/);
+  assert.ok(!problems.some((problem) => problem.startsWith("assets/")), "G10 read a binary file");
+  assert.deepEqual(checkSite(dir, indexableSite), problems, "the TODO fixture should fail on G10 only");
+});
+
+test("gate output is stable and sorted (SEO-01 ordering edge)", () => {
+  const dir = writeFixture("ordering", {
+    ...validFiles(),
+    "index.html": validPage(fixtureBase, "/", { title: "Ten sam", description: null }),
+    "about/index.html": validPage(fixtureBase, "/about/", { title: "Ten sam", canonical: "/about/" }),
+  });
+  const first = checkSite(dir, fixtureSite);
+  const second = checkSite(dir, fixtureSite);
+  assert.ok(first.length >= 4, first.join("\n"));
+  assert.deepEqual(first, second, "two runs on the same output differ");
+  assert.deepEqual(first, [...first].sort(), "problems are not sorted by file then rule");
+  assert.ok(new Set(first.map((problem) => problem.split(":")[0])).size === 2, "expected problems in two files");
 });
