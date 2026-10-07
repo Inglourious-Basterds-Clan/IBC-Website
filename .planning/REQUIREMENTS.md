@@ -22,7 +22,7 @@ Requirements for this milestone. Each maps to a roadmap phase.
 - [x] **SEO-02**: `sitemap.xml` lists every indexable page, and `robots.txt` points to it
 - [x] **SEO-03**: Every page has absolute OG/Twitter tags with a 1200×630 OG image, so Discord link previews render correctly
 - [x] **SEO-04**: Favicons, web manifest and `theme-color` are present
-- [ ] **SEO-05**: Home page has Organization + WebSite JSON-LD (alternateName "IBC", sameAs links, foundingDate 2018); SportsTeam and meta keywords are removed; no Event markup
+- [x] **SEO-05**: Home page has Organization + WebSite JSON-LD (alternateName "IBC", sameAs links, foundingDate 2018); SportsTeam and meta keywords are removed; no Event markup
 - [ ] **SEO-06**: Subpages show visible breadcrumbs and have BreadcrumbList JSON-LD
 - [ ] **SEO-07**: Custom Polish 404 page
 - [x] **SEO-08**: Build fails on a missing or relative canonical/og:image, invalid JSON-LD, a page missing from the sitemap, or a leftover TODO marker
@@ -111,7 +111,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SEO-02 | Phase 2 | Complete |
 | SEO-03 | Phase 2 | Complete |
 | SEO-04 | Phase 2 | Complete |
-| SEO-05 | Phase 2 | Pending |
+| SEO-05 | Phase 2 | Complete |
 | SEO-06 | Phase 4 | Pending |
 | SEO-07 | Phase 2 | Pending |
 | SEO-08 | Phase 2 | Complete |

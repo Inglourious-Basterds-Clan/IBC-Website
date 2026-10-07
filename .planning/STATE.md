@@ -3,16 +3,16 @@ gsd_state_version: "1.0"
 current_phase: 02
 current_phase_name: Technical SEO
 status: executing
-stopped_at: Completed 02-04-PLAN.md
-last_updated: "2026-10-07T19:15:02.200Z"
+stopped_at: Completed 02-05-PLAN.md
+last_updated: "2026-10-07T19:20:09.469Z"
 last_activity: 2026-10-07
 last_activity_desc: Phase 02 execution started
-state_head: e9816c2c278d9165d4b7bc738677cd2365a2f5c2
+state_head: 3a31a508007514e003c4b2c0aac542980d8e0dee
 progress:
   total_phases: 5
   completed_phases: 1
   total_plans: 13
-  completed_plans: 11
+  completed_plans: 12
   percent: 20
 ---
 
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-10-06)
 ## Current Position
 
 Phase: 02 (Technical SEO) — EXECUTING
-Plan: 5 of 6
+Plan: 6 of 6
 Status: Ready to execute
 Last activity: 2026-10-07 — Phase 02 execution started
 
@@ -67,6 +67,7 @@ Progress: [██░░░░░░░░] 20%
 | Phase 02 P02 | 4 min | 3 tasks | 11 files |
 | Phase 02 P03 | 10min | 2 tasks | 9 files |
 | Phase 02 P04 | 4min | 3 tasks | 9 files |
+| Phase 02 P05 | 3min | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -104,6 +105,8 @@ Recent decisions affecting current work:
 - [Phase 02]: G3 compares og:url with the canonical present in the head; image headers are read once per output file
 - [Phase 02]: Per-page share override via front matter ogImage (+ ogImageWidth/ogImageHeight together, + ogImageAlt); G3 requires 1200x630 on indexable pages
 - [Phase 02]: site.webmanifest is a Nunjucks dict serialized with dump(2), display browser, prefix-aware paths
+- [Phase 02]: 02-05: G5 checks the Organization + WebSite identity graph on index.html only and bans Event/SportsTeam at any depth; Person/Review/AggregateRating/founder/member/employee prohibitions live in test/schema.test.js
+- [Phase 02]: 02-05: site.social is the single social list; footer loop and JSON-LD sameAs (social then Discord invite) both read it
 
 ### Pending Todos
 
@@ -129,6 +132,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-10-07T19:15:02.150Z
-Stopped at: Completed 02-04-PLAN.md
+Last session: 2026-10-07T19:20:09.417Z
+Stopped at: Completed 02-05-PLAN.md
 Resume file: None
