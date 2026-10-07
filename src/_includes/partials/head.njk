@@ -1,14 +1,17 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
+  {# D-01: the home uses its full title as is; D-02: every other page gets " | IBC" (site name when untitled) #}
+  {%- set isHome = page.url == "/" %}
+  {%- set fullTitle = (title or site.name) if isHome else ((title or site.name) ~ " | " ~ site.shortName) %}
+
   <!-- SEO Meta Tags -->
-  <title>{{ title or "IBC Clan // Wizytówka Taktyczna Arma 3" }}</title>
+  <title>{{ fullTitle }}</title>
   <link rel="canonical" href="{{ page.url | htmlBaseUrl(site.url) }}">
   {% if not site.indexable or not (page.url | isIndexableUrl) %}<meta name="robots" content="noindex">{% endif %}
-  <meta name="description" content="Oficjalna strona klanu IBC w Arma 3. Dołącz do naszej społeczności milsim, bierz udział w zorganizowanych operacjach i przeżyj realistyczną symulację pola walki.">
-  {% if page.url == "/" %}<meta name="keywords" content="Arma 3, klan, milsim, IBC, rekrutacja, co-op, symulacja wojskowa, gry taktyczne">{% endif %}
-  <meta name="author" content="IBC Clan">
-  
+  {% if todo %}<!-- TODO({{ todo }}) -->{% endif -%}
+  {# D-04: description comes from front matter only, no site-wide fallback #}
+  {% if description %}<meta name="description" content="{{ description }}">{% endif %}
+
   <!-- Stylesheets & Preconnect -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

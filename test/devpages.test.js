@@ -9,7 +9,7 @@ import { join } from "node:path";
 import { build, read, attrValues, block, repoRoot } from "./helpers.js";
 import site from "../src/_data/site.js";
 
-const defaultTitle = "IBC Clan // Wizytówka Taktyczna Arma 3";
+const defaultTitle = "Inglourious Basterds Clan | IBC";
 const navLabels = ["System", "O nas", "Galeria", "Rekrutacja"];
 const activeNav = ' class="active-nav"';
 
@@ -65,7 +65,7 @@ test("(b) dev pages share the home page's header and footer byte for byte", () =
 
 test("(c) layout-test renders its own title and body inside the full chrome, without home-only head data", () => {
   const html = devPage("layout-test");
-  assert.ok(html.includes("<title>Test layoutu</title>"), "wrong <title>");
+  assert.ok(html.includes("<title>Test layoutu | IBC</title>"), "wrong <title>");
   assert.equal(count(html, "<h1"), 1, "expected exactly one <h1>");
   assert.ok(html.includes('<main id="main">'), "missing <main id=\"main\">");
   assert.ok(/<a href="#main" class="skip-link">/.test(html), "missing skip link to #main");

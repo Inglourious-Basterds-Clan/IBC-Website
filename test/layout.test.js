@@ -102,10 +102,10 @@ test("home page keeps its structure and ids", () => {
   assert.ok(!/\ssrc=/.test(lightboxImg[1]), "lightbox img must have no src attribute");
 });
 
-test("home page keeps its Polish copy and home-only head data", () => {
+test("home page keeps its Polish copy and its new head title (D-01, D-14)", () => {
   for (const text of polishCopy) assert.ok(rootHtml.includes(text), `missing copy: ${text}`);
-  assert.ok(rootHtml.includes("<title>IBC Clan // Wizytówka Taktyczna Arma 3</title>"), "default title changed");
-  assert.ok(rootHtml.includes('name="keywords"'), "meta keywords missing on home");
+  assert.ok(rootHtml.includes("<title>Klan Arma 3 Milsim – Inglourious Basterds Clan (IBC)</title>"), "home title is not the D-01 title");
+  assert.ok(!rootHtml.includes('name="keywords"'), "meta keywords must be gone (D-14)");
   assert.ok(rootHtml.includes('"@type": "SportsTeam"'), "SportsTeam JSON-LD missing on home");
 });
 

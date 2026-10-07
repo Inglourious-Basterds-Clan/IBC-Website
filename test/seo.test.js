@@ -4,8 +4,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { relative } from "node:path";
-import { build, runBuild, cleanEnv, read, listFiles, block } from "./helpers.js";
+import { join, relative } from "node:path";
+import { build, runBuild, cleanEnv, read, listFiles, block, repoRoot } from "./helpers.js";
 
 const noindexTag = '<meta name="robots" content="noindex">';
 
@@ -151,4 +151,58 @@ test("(g) robots.txt never disallows and names the sitemap only when indexable",
   const indexableRobots = read(indexableBuild(), "robots.txt");
   assert.ok(indexableRobots.includes("Sitemap: https://example.org/sitemap.xml"), indexableRobots);
   assert.ok(!/^\s*Disallow/im.test(indexableRobots), "robots.txt must never contain a Disallow line");
+});
+
+const homeTitle = "Klan Arma 3 Milsim – Inglourious Basterds Clan (IBC)";
+
+// The `description` value from the front matter of src/index.njk (the user edits the draft,
+// so the test reads it instead of pinning the sentence).
+function homeDescriptionSource() {
+  const source = readFileSync(join(repoRoot, "src", "index.njk"), "utf8");
+  const line = source.split(/\r?\n/).find((text) => text.startsWith("description:"));
+  assert.ok(line, "src/index.njk has no description: front matter line");
+  return line.slice("description:".length).trim().replace(/^"(.*)"$/, "$1");
+}
+
+// content of every <meta name="description"> in <head>.
+function descriptions(html) {
+  const head = block(html, "head");
+  return Array.from(head.matchAll(/<meta\s[^>]*name="description"[^>]*>/g), (match) => {
+    const content = /\scontent="([^"]*)"/.exec(match[0]);
+    return content ? content[1] : null;
+  });
+}
+
+test("(h) home title and description (D-01, D-03, D-04)", () => {
+  const html = read(rootBuild(), "index.html");
+  assert.ok(html.includes(`<title>${homeTitle}</title>`), "home <title> is not the D-01 title");
+  assert.equal(count(block(html, "head"), "<title>"), 1, "home must have exactly one <title>");
+
+  const expected = homeDescriptionSource();
+  assert.deepEqual(descriptions(html), [expected], "home must carry exactly the front-matter description");
+  const length = [...expected].length;
+  assert.ok(length >= 70 && length <= 160, `home description is ${length} characters, expected 70-160`);
+});
+
+test("(i) subpage titles get the | IBC suffix and no empty tags (D-02, D-04)", () => {
+  const root = rootBuild();
+  const layoutTest = read(root, "_dev/layout-test/index.html");
+  const layoutEmpty = read(root, "_dev/layout-empty/index.html");
+  assert.ok(layoutTest.includes("<title>Test layoutu | IBC</title>"), "layout-test title lacks the | IBC suffix");
+  assert.ok(layoutEmpty.includes("<title>Inglourious Basterds Clan | IBC</title>"), "layout-empty title is not the site-name fallback");
+  for (const [name, html] of [["layout-test", layoutTest], ["layout-empty", layoutEmpty]]) {
+    assert.ok(!html.includes('name="description"'), `${name} must not carry a description (no fallback, D-04)`);
+  }
+  for (const { relPath, html } of htmlFiles(root)) {
+    assert.ok(!html.includes('content=""'), `${relPath} has an empty content attribute`);
+    assert.ok(!/<title>\s*<\/title>/.test(html), `${relPath} has an empty <title>`);
+  }
+});
+
+test("(j) no page carries meta keywords (D-14)", () => {
+  for (const dir of [rootBuild(), prefixBuild()]) {
+    for (const { relPath, html } of htmlFiles(dir)) {
+      assert.ok(!html.includes('name="keywords"'), `${relPath} carries meta keywords`);
+    }
+  }
 });
