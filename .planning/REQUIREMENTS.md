@@ -24,9 +24,9 @@ Requirements for this milestone. Each maps to a roadmap phase.
 - [x] **SEO-04**: Favicons, web manifest and `theme-color` are present
 - [x] **SEO-05**: Home page has Organization + WebSite JSON-LD (alternateName "IBC", sameAs links, foundingDate 2018); SportsTeam and meta keywords are removed; no Event markup
 - [ ] **SEO-06**: Subpages show visible breadcrumbs and have BreadcrumbList JSON-LD
-- [ ] **SEO-07**: Custom Polish 404 page
+- [x] **SEO-07**: Custom Polish 404 page
 - [x] **SEO-08**: Build fails on a missing or relative canonical/og:image, invalid JSON-LD, a page missing from the sitemap, or a leftover TODO marker
-- [ ] **SEO-09**: Non-final hosts are served `noindex` automatically, and a domain cutover checklist is documented
+- [x] **SEO-09**: Non-final hosts are served `noindex` automatically, and a domain cutover checklist is documented
 
 ### Performance
 
@@ -113,9 +113,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SEO-04 | Phase 2 | Complete |
 | SEO-05 | Phase 2 | Complete |
 | SEO-06 | Phase 4 | Pending |
-| SEO-07 | Phase 2 | Pending |
+| SEO-07 | Phase 2 | Complete |
 | SEO-08 | Phase 2 | Complete |
-| SEO-09 | Phase 2 | Pending |
+| SEO-09 | Phase 2 | Complete |
 | PERF-01 | Phase 3 | Pending |
 | PERF-02 | Phase 3 | Pending |
 | PERF-03 | Phase 3 | Pending |

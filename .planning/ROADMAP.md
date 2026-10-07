@@ -64,7 +64,7 @@ Plans:
   4. A visitor who opens a nonexistent URL sees a Polish 404 page in the site layout with a way back to the home page and Discord.
   5. The production build fails with a clear message on a missing or relative canonical or og:image, invalid JSON-LD, a page missing from the sitemap, or a leftover TODO marker. A build for a non-final host puts `noindex` on every page, and a documented domain cutover checklist exists.
 
-**Plans**: 5/6 plans executed
+**Plans**: 6/6 plans executed
 
 Plans:
 **Wave 1**
@@ -79,7 +79,7 @@ Plans:
 
 **Wave 4** *(blocked on Wave 3 completion)*
 - [x] 02-05-PLAN.md — Organization + WebSite JSON-LD, footer socials from site.social, gate G5 (wave 4)
-- [ ] 02-06-PLAN.md — Polish 404 page, IIS web.config, README cutover checklist and indexing docs (wave 4)
+- [x] 02-06-PLAN.md — Polish 404 page, IIS web.config, README cutover checklist and indexing docs (wave 4)
 
 ### Phase 3: Performance & Assets
 
@@ -133,7 +133,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5. Phases 2 and 3 both 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Eleventy Foundation | 7/7 | Complete    | 2026-10-06 |
-| 2. Technical SEO | 5/6 | In Progress|  |
+| 2. Technical SEO | 6/6 | In Progress|  |
 | 3. Performance & Assets | 0/TBD | Not started | - |
 | 4. Join & Operations Pages | 0/TBD | Not started | - |
 | 5. Accessibility & Visual Refresh | 0/TBD | Not started | - |
