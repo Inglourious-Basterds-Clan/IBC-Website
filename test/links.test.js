@@ -140,7 +140,7 @@ test("(d) absolute URLs come from SITE_URL (mutated build)", () => {
     }
   }
   assert.ok(checked >= 5, `expected absolute URLs in the mutated build, found ${checked}`);
-  assert.equal(ogImage(read(out.mutated, "index.html")), `${mutatedBase}assets/hero-bg.jpg`);
+  assert.equal(ogImage(read(out.mutated, "index.html")), `${mutatedBase}assets/og/og-default-v1.jpg`);
   for (const { path, text } of allFiles(out.mutated, [".html", ".css", ".js"])) {
     const file = relative(out.mutated, path).replace(/\\/g, "/");
     assert.ok(!text.includes(prodHost), `${file} contains the GitHub Pages host`);
@@ -149,7 +149,7 @@ test("(d) absolute URLs come from SITE_URL (mutated build)", () => {
 });
 
 test("(e) production values in the GitHub Pages build", () => {
-  assert.equal(ogImage(read(out.prod, "index.html")), `https://${prodHost}/IBC-Website/assets/hero-bg.jpg`);
+  assert.equal(ogImage(read(out.prod, "index.html")), `https://${prodHost}/IBC-Website/assets/og/og-default-v1.jpg`);
   for (const { path, text } of allFiles(out.prod, [".html", ".css", ".js", ".json", ".xml", ".txt"])) {
     assert.ok(!text.includes(localHost), `${relative(out.prod, path)} contains ${localHost}`);
   }

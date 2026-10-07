@@ -6,6 +6,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { join, relative } from "node:path";
 import { build, runBuild, cleanEnv, read, listFiles, block, repoRoot } from "./helpers.js";
+import { readImageSize } from "../lib/image-size.js";
 
 const noindexTag = '<meta name="robots" content="noindex">';
 
@@ -49,6 +50,12 @@ function prefixBuild() {
   return prefixDir;
 }
 
+let mutatedDir;
+function mutatedBuild() {
+  mutatedDir ??= build("seo-mutated", { SITE_URL: "https://mutated.example/", PATH_PREFIX: "IBC-Website" });
+  return mutatedDir;
+}
+
 let indexableDir;
 function indexableBuild() {
   indexableDir ??= build("seo-indexable", { SITE_URL: "https://example.org", SITE_INDEXABLE: "1", INCLUDE_DEV_PAGES: "1" });
@@ -65,8 +72,7 @@ test("(a) one absolute canonical per page in root, prefix and mutated builds", (
 
   assert.equal(canonical(prefixBuild(), "index.html"), "https://guard.example/IBC-Website/");
 
-  const mutated = build("seo-mutated", { SITE_URL: "https://mutated.example/", PATH_PREFIX: "IBC-Website" });
-  assert.equal(canonical(mutated, "index.html"), "https://mutated.example/IBC-Website/");
+  assert.equal(canonical(mutatedBuild(), "index.html"), "https://mutated.example/IBC-Website/");
 });
 
 test("(b) noindex everywhere unless SITE_INDEXABLE=1", () => {
@@ -205,4 +211,64 @@ test("(j) no page carries meta keywords (D-14)", () => {
       assert.ok(!html.includes('name="keywords"'), `${relPath} carries meta keywords`);
     }
   }
+});
+
+// content of every <meta {attr}="{key}"> in <head> (attr is "property" or "name").
+function metas(html, attr, key) {
+  const head = block(html, "head");
+  const pattern = new RegExp(`<meta\\s[^>]*${attr}="${key.replace(/[.:]/g, "\\$&")}"[^>]*>`, "g");
+  return Array.from(head.matchAll(pattern), (match) => {
+    const content = /\scontent="([^"]*)"/.exec(match[0]);
+    return content ? content[1] : null;
+  });
+}
+
+// The single value of a meta tag, failing when it is missing or repeated.
+function meta(html, attr, key) {
+  const values = metas(html, attr, key);
+  assert.equal(values.length, 1, `expected exactly one <meta ${attr}="${key}">, found ${values.length}`);
+  return values[0];
+}
+
+const prefixOgImage = "https://guard.example/IBC-Website/assets/og/og-default-v1.jpg";
+
+test("(k) Open Graph and Twitter tags (D-07)", () => {
+  const home = read(prefixBuild(), "index.html");
+  assert.equal(meta(home, "property", "og:image"), prefixOgImage);
+  assert.equal(meta(home, "name", "twitter:image"), prefixOgImage);
+  assert.equal(meta(home, "property", "og:url"), canonical(prefixDir, "index.html"));
+  const titleText = /<title>([^<]*)<\/title>/.exec(block(home, "head"))[1];
+  assert.equal(meta(home, "property", "og:title"), titleText);
+  assert.equal(meta(home, "name", "twitter:title"), titleText);
+  assert.deepEqual(descriptions(home), [meta(home, "property", "og:description")]);
+  assert.equal(meta(home, "name", "twitter:description"), meta(home, "property", "og:description"));
+  assert.equal(meta(home, "property", "og:locale"), "pl_PL");
+  assert.equal(meta(home, "property", "og:type"), "website");
+  assert.equal(meta(home, "property", "og:site_name"), "Inglourious Basterds Clan");
+  assert.equal(meta(home, "property", "og:image:width"), "1200");
+  assert.equal(meta(home, "property", "og:image:height"), "630");
+  assert.ok(meta(home, "property", "og:image:alt").length > 0, "og:image:alt is empty");
+  assert.equal(meta(home, "name", "twitter:card"), "summary_large_image");
+
+  const mutated = read(mutatedBuild(), "index.html");
+  assert.ok(meta(mutated, "property", "og:image").startsWith("https://mutated.example/IBC-Website/"), "og:image ignores SITE_URL");
+
+  // SEO-03 empty edge: no description means no og:/twitter:description tag at all.
+  const layoutTest = read(rootBuild(), "_dev/layout-test/index.html");
+  assert.equal(meta(layoutTest, "property", "og:image"), "http://localhost:8080/assets/og/og-default-v1.jpg");
+  assert.equal(meta(layoutTest, "name", "twitter:image"), "http://localhost:8080/assets/og/og-default-v1.jpg");
+  assert.equal(metas(layoutTest, "property", "og:description").length, 0, "layout-test carries og:description");
+  assert.equal(metas(layoutTest, "name", "twitter:description").length, 0, "layout-test carries twitter:description");
+
+  for (const dir of [rootDir, prefixDir]) {
+    for (const { relPath, html } of htmlFiles(dir)) {
+      assert.equal(metas(html, "property", "og:image").length, 1, `${relPath} must have exactly one og:image`);
+      assert.equal(metas(html, "name", "twitter:image").length, 1, `${relPath} must have exactly one twitter:image`);
+      assert.equal(meta(html, "name", "twitter:image"), meta(html, "property", "og:image"), `${relPath}: twitter:image differs`);
+      assert.equal(meta(html, "property", "og:url"), canonicals(html)[0], `${relPath}: og:url differs from the canonical`);
+    }
+  }
+
+  const size = readImageSize(readFileSync(join(prefixDir, "assets", "og", "og-default-v1.jpg")));
+  assert.deepEqual(size && [size.format, size.width, size.height], ["jpeg", 1200, 630]);
 });

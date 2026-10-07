@@ -3,10 +3,14 @@
   {# D-01: the home uses its full title as is; D-02: every other page gets " | IBC" (site name when untitled) #}
   {%- set isHome = page.url == "/" %}
   {%- set fullTitle = (title or site.name) if isHome else ((title or site.name) ~ " | " ~ site.shortName) %}
+  {#- HtmlBasePlugin never rewrites <meta content>, so share URLs are made absolute here (D-07) #}
+  {%- set canonical = page.url | htmlBaseUrl(site.url) %}
+  {%- set ogImageUrl = (ogImage or site.ogImage) | htmlBaseUrl(site.url) %}
+  {%- set ogImageAltText = ogImageAlt or site.ogImageAlt %}
 
   <!-- SEO Meta Tags -->
   <title>{{ fullTitle }}</title>
-  <link rel="canonical" href="{{ page.url | htmlBaseUrl(site.url) }}">
+  <link rel="canonical" href="{{ canonical }}">
   {% if not site.indexable or not (page.url | isIndexableUrl) %}<meta name="robots" content="noindex">{% endif %}
   {% if todo %}<!-- TODO({{ todo }}) -->{% endif -%}
   {# D-04: description comes from front matter only, no site-wide fallback #}
@@ -19,11 +23,24 @@
   <link rel="stylesheet" href="/css/style.css">
   
   <!-- Open Graph & Twitter Cards -->
-  <meta property="og:title" content="IBC Clan // Wizytówka Taktyczna Arma 3">
-  <meta property="og:description" content="Oficjalna strona klanu IBC w Arma 3. Dołącz do naszej społeczności milsim, bierz udział w zorganizowanych operacjach i przeżyj realistyczną symulację pola walki.">
-  <meta property="og:image" content="{{ "/assets/hero-bg.jpg" | htmlBaseUrl(site.url) }}">
   <meta property="og:type" content="website">
-  
+  <meta property="og:site_name" content="{{ site.name }}">
+  <meta property="og:locale" content="{{ site.locale }}">
+  <meta property="og:title" content="{{ fullTitle }}">
+  {% if description %}<meta property="og:description" content="{{ description }}">{% endif %}
+  <meta property="og:url" content="{{ canonical }}">
+  <meta property="og:image" content="{{ ogImageUrl }}">
+  {% if not ogImage %}<meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  {% elif ogImageWidth and ogImageHeight %}<meta property="og:image:width" content="{{ ogImageWidth }}">
+  <meta property="og:image:height" content="{{ ogImageHeight }}">
+  {% endif %}<meta property="og:image:alt" content="{{ ogImageAltText }}">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{{ fullTitle }}">
+  {% if description %}<meta name="twitter:description" content="{{ description }}">{% endif %}
+  <meta name="twitter:image" content="{{ ogImageUrl }}">
+  <meta name="twitter:image:alt" content="{{ ogImageAltText }}">
+
   <!-- Structured Data JSON-LD -->
   {% if page.url == "/" %}<script type="application/ld+json">
   {

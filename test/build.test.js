@@ -68,7 +68,7 @@ test("SITE_URL and PATH_PREFIX are normalized", () => {
   const out = build("build-mutated", { SITE_URL: "https://mutated.example/", PATH_PREFIX: "IBC-Website" });
   const html = read(out, "index.html");
   const image = ogImage(html);
-  assert.equal(image, "https://mutated.example/IBC-Website/assets/hero-bg.jpg");
+  assert.equal(image, "https://mutated.example/IBC-Website/assets/og/og-default-v1.jpg");
   assert.ok(!image.replace(/^https:\/\//, "").includes("//"), "double slash after the host");
   assert.ok(html.includes('href="/IBC-Website/css/style.css"'), "slashless PATH_PREFIX not normalized");
   for (const page of allHtml(out)) {
@@ -79,7 +79,7 @@ test("SITE_URL and PATH_PREFIX are normalized", () => {
 test("empty env falls back to defaults", () => {
   const out = build("build-empty", { SITE_URL: "", PATH_PREFIX: "" });
   const html = read(out, "index.html");
-  assert.equal(ogImage(html), "http://localhost:8080/assets/hero-bg.jpg");
+  assert.equal(ogImage(html), "http://localhost:8080/assets/og/og-default-v1.jpg");
   assert.ok(html.includes('href="/css/style.css"'), "empty PATH_PREFIX did not fall back to /");
 });
 
@@ -111,7 +111,7 @@ test("production build without SITE_URL fails loudly", () => {
 
 test("ALLOW_LOCAL_SITE_URL=1 keeps the local default", () => {
   const out = build("build-guard-optout", { ALLOW_LOCAL_SITE_URL: "1" });
-  assert.equal(ogImage(read(out, "index.html")), "http://localhost:8080/assets/hero-bg.jpg");
+  assert.equal(ogImage(read(out, "index.html")), "http://localhost:8080/assets/og/og-default-v1.jpg");
 });
 
 test("blank SITE_URL counts as missing", () => {
@@ -130,7 +130,7 @@ test("a set SITE_URL passes the guard without the opt-out", () => {
   // runBuild directly, so the helper adds no ALLOW_LOCAL_SITE_URL.
   const { outDir, result } = runBuild("build-guard-set", { SITE_URL: "https://guard.example" });
   assert.equal(result.status, 0, `build with SITE_URL failed:\n${result.stderr || result.error}`);
-  assert.equal(ogImage(read(outDir, "index.html")), "https://guard.example/assets/hero-bg.jpg");
+  assert.equal(ogImage(read(outDir, "index.html")), "https://guard.example/assets/og/og-default-v1.jpg");
   for (const page of allHtml(outDir)) {
     assert.ok(!page.includes("localhost:8080"), "localhost:8080 leaked into a build with SITE_URL");
   }
