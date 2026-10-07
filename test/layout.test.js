@@ -106,7 +106,8 @@ test("home page keeps its Polish copy and its new head title (D-01, D-14)", () =
   for (const text of polishCopy) assert.ok(rootHtml.includes(text), `missing copy: ${text}`);
   assert.ok(rootHtml.includes("<title>Klan Arma 3 Milsim – Inglourious Basterds Clan (IBC)</title>"), "home title is not the D-01 title");
   assert.ok(!rootHtml.includes('name="keywords"'), "meta keywords must be gone (D-14)");
-  assert.ok(rootHtml.includes('"@type": "SportsTeam"'), "SportsTeam JSON-LD missing on home");
+  assert.ok(!rootHtml.includes("SportsTeam"), "the legacy SportsTeam JSON-LD must be gone (D-14)");
+  assert.ok(rootHtml.includes("application/ld+json"), "home page lost its JSON-LD (SEO-05)");
 });
 
 test("prefix build puts every internal URL under the prefix", () => {

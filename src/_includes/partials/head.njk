@@ -50,13 +50,5 @@
   <meta name="theme-color" content="{{ site.themeColor }}">
 
   <!-- Structured Data JSON-LD -->
-  {% if page.url == "/" %}<script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "SportsTeam",
-    "name": "Inglourious Basterds Clan (IBC)",
-    "sport": "Arma 3 Milsim",
-    "foundingDate": "2018",
-    "description": "Taktyczna symulacja militarna (Milsim) w grze Arma 3. Realistyczne operacje bojowe i misje kooperacyjne."
-  }
-  </script>{% endif %}
+  {# D-14: Organization + WebSite on the home page only; jsonLd escapes "<", so this is the head's only safe #}
+  {% if isHome %}<script type="application/ld+json">{{ site | schemaGraph | jsonLd | safe }}</script>{% endif %}
