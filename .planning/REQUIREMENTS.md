@@ -19,7 +19,7 @@ Requirements for this milestone. Each maps to a roadmap phase.
 ### SEO
 
 - [ ] **SEO-01**: Every page has a unique title, a meta description and an absolute canonical URL
-- [ ] **SEO-02**: `sitemap.xml` lists every indexable page, and `robots.txt` points to it
+- [x] **SEO-02**: `sitemap.xml` lists every indexable page, and `robots.txt` points to it
 - [ ] **SEO-03**: Every page has absolute OG/Twitter tags with a 1200×630 OG image, so Discord link previews render correctly
 - [ ] **SEO-04**: Favicons, web manifest and `theme-color` are present
 - [ ] **SEO-05**: Home page has Organization + WebSite JSON-LD (alternateName "IBC", sameAs links, foundingDate 2018); SportsTeam and meta keywords are removed; no Event markup
@@ -108,7 +108,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FOUND-05 | Phase 1 | Complete |
 | FOUND-06 | Phase 1 | Complete |
 | SEO-01 | Phase 2 | Pending |
-| SEO-02 | Phase 2 | Pending |
+| SEO-02 | Phase 2 | Complete |
 | SEO-03 | Phase 2 | Pending |
 | SEO-04 | Phase 2 | Pending |
 | SEO-05 | Phase 2 | Pending |

@@ -3,16 +3,16 @@ gsd_state_version: "1.0"
 current_phase: 02
 current_phase_name: Technical SEO
 status: executing
-stopped_at: Phase 2 context gathered
-last_updated: "2026-10-07T18:43:32.364Z"
-last_activity: 2026-10-06
-last_activity_desc: Phase 01 complete, transitioned to Phase 2
-state_head: 1538734a7f657d7209dc768411522771ea2ece8e
+stopped_at: Completed 02-01-PLAN.md
+last_updated: "2026-10-07T18:55:00.484Z"
+last_activity: 2026-10-07
+last_activity_desc: Phase 02 execution started
+state_head: 700a2354aaacdf8a42ceb00d621a1673a80d31d1
 progress:
   total_phases: 5
   completed_phases: 1
   total_plans: 13
-  completed_plans: 7
+  completed_plans: 8
   percent: 20
 ---
 
@@ -23,14 +23,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-10-06)
 
 **Core value:** A Polish player searching for an Arma 3 milsim clan (or for "IBC" by name) finds this site, understands what IBC is and how to join, and clicks through to Discord.
-**Current focus:** Phase 2 — Technical SEO
+**Current focus:** Phase 02 — Technical SEO
 
 ## Current Position
 
-Phase: 02 (Technical SEO) — READY TO EXECUTE
-Plan: Not started
+Phase: 02 (Technical SEO) — EXECUTING
+Plan: 2 of 6
 Status: Ready to execute
-Last activity: 2026-10-06 — Phase 01 complete, transitioned to Phase 2
+Last activity: 2026-10-07 — Phase 02 execution started
 
 Progress: [██░░░░░░░░] 20%
 
@@ -63,6 +63,7 @@ Progress: [██░░░░░░░░] 20%
 | Phase 01 P05 | 3min | 2 tasks | 6 files |
 | Phase 01 P06 | 9 min | 2 tasks | 24 files |
 | Phase 01 P07 | 5 min | 3 tasks | 7 files |
+| Phase 02 P01 | 5 min | 3 tasks | 12 files |
 
 ## Accumulated Context
 
@@ -89,6 +90,9 @@ Recent decisions affecting current work:
 - [Phase 01]: 01-06: favicon.ico 404 (only console error before and after) is pre-existing; deferred to Phase 2
 - [Phase 01]: Production builds (ELEVENTY_RUN_MODE=build) with unset/blank SITE_URL throw; only ALLOW_LOCAL_SITE_URL=1 opts out; serve/watch keep the localhost default (CR-01, G-01-5)
 - [Phase 01]: Test harness strips ALLOW_LOCAL_SITE_URL from the inherited env and adds the opt-out only for variants without SITE_URL
+- [Phase 02]: Sitemap omits lastmod (Google ignores unverifiable lastmod; no git history needed in CI)
+- [Phase 02]: check-seo gate output is '<relPath>: G<n> <text>' sorted by file then rule; banner (LOCAL/INDEXABLE/preview) printed on every run
+- [Phase 02]: Indexing is opt-in only: SITE_INDEXABLE exactly "1" on an https non-local SITE_URL; site.js holds the SEO config contract (shortName, locale, themeColor, indexable, ogImage, ogImageAlt, social)
 
 ### Pending Todos
 
@@ -114,6 +118,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-10-07
-Stopped at: Session resumed, proceeding to Phase 2 plan verification (6 plans written in 31f45dc, plan checker not yet run)
-Resume file: .planning/phases/02-technical-seo/02-01-PLAN.md
+Last session: 2026-10-07T18:55:00.421Z
+Stopped at: Completed 02-01-PLAN.md
+Resume file: None
