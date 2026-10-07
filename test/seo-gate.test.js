@@ -30,11 +30,51 @@ function writeFixture(name, files) {
   return dir;
 }
 
+// Header-only PNG (signature + IHDR) declaring width x height: enough for readImageSize.
+function pngHeader(width, height) {
+  const buffer = Buffer.alloc(33);
+  Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]).copy(buffer, 0);
+  buffer.writeUInt32BE(13, 8);
+  buffer.write("IHDR", 12, "latin1");
+  buffer.writeUInt32BE(width, 16);
+  buffer.writeUInt32BE(height, 20);
+  buffer[24] = 8; // bit depth
+  buffer[25] = 2; // colour type: RGB
+  return buffer;
+}
+
+const fixtureOgImage = "assets/og.png";
+
+// OG/Twitter lines for validPage (G3). og overrides one value; null leaves that tag out.
+// Defaults: og:url = the canonical, og:image = base + fixtureOgImage declared 1200x630,
+// twitter:image = og:image, twitter:card = summary_large_image.
+function shareLines(base, href, og = {}) {
+  const image = og.image === undefined ? base + fixtureOgImage : og.image;
+  const values = {
+    url: og.url === undefined ? href : og.url,
+    image,
+    width: og.width === undefined ? "1200" : og.width,
+    height: og.height === undefined ? "630" : og.height,
+    card: og.card === undefined ? "summary_large_image" : og.card,
+    twitterImage: og.twitterImage === undefined ? image : og.twitterImage,
+  };
+  const tags = [
+    ["property", "og:url", values.url],
+    ["property", "og:image", values.image],
+    ["property", "og:image:width", values.width],
+    ["property", "og:image:height", values.height],
+    ["name", "twitter:card", values.card],
+    ["name", "twitter:image", values.twitterImage],
+  ];
+  return tags.filter(([, , value]) => value !== null).map(([attr, key, value]) => `<meta ${attr}="${key}" content="${value}">`);
+}
+
 // A minimal page that passes every gate rule implemented so far. url is the page.url ("/", "/o-nas/").
 // head replaces the default head lines; noindex defaults to true (a preview page).
 // title defaults to a title unique per url; description defaults to a non-empty one on
-// indexable urls and none elsewhere (D-04). null leaves the tag out.
-function validPage(base, url, { canonical, noindex = true, head, title, description } = {}) {
+// indexable urls and none elsewhere (D-04). null leaves the tag out. og overrides the
+// share tags (shareLines).
+function validPage(base, url, { canonical, noindex = true, head, title, description, og } = {}) {
   const href = canonical === undefined ? base + url.slice(1) : canonical;
   const pageTitle = title === undefined ? `Fixture ${url}` : title;
   const pageDescription = description === undefined ? (isIndexableUrl(url) ? `Opis strony ${url}` : null) : description;
@@ -43,6 +83,7 @@ function validPage(base, url, { canonical, noindex = true, head, title, descript
     `<link rel="canonical" href="${href}">`,
     ...(noindex ? [noindexTag] : []),
     ...(pageDescription === null ? [] : [`<meta name="description" content="${pageDescription}">`]),
+    ...shareLines(base, href, og),
   ];
   return `<!DOCTYPE html>
 <html lang="pl">
@@ -75,6 +116,7 @@ function validFiles(indexable = false) {
     "404.html": validPage(fixtureBase, "/404.html"),
     "sitemap.xml": validSitemap(fixtureBase, ["/", "/about/"]),
     "robots.txt": validRobots(fixtureBase, indexable),
+    [fixtureOgImage]: pngHeader(1200, 630),
   };
 }
 
@@ -394,4 +436,62 @@ test("gate output is stable and sorted (SEO-01 ordering edge)", () => {
   assert.deepEqual(first, second, "two runs on the same output differ");
   assert.deepEqual(first, [...first].sort(), "problems are not sorted by file then rule");
   assert.ok(new Set(first.map((problem) => problem.split(":")[0])).size === 2, "expected problems in two files");
+});
+
+// G3 fixtures (SEO-03, D-07): each breaks one share tag on the /about/ page (or the image file).
+const aboutHref = fixtureBase + "about/";
+
+function g3About(name, og, extra = {}) {
+  return check(name, { "about/index.html": validPage(fixtureBase, "/about/", { og }), ...extra });
+}
+
+test("G3 og:image missing", () => {
+  assertProblem(g3About("g3-missing", { image: null, twitterImage: fixtureBase + fixtureOgImage }), "about/index.html: G3 missing og:image");
+});
+
+test("G3 relative og:image", () => {
+  assertProblem(g3About("g3-relative", { image: "/assets/og.png" }), 'about/index.html: G3 og:image "/assets/og.png" is not absolute');
+});
+
+test("G3 og:image on a foreign host", () => {
+  const problems = g3About("g3-foreign", { image: "https://evil.example/assets/og.png" });
+  assertProblem(problems, 'about/index.html: G3 og:image "https://evil.example/assets/og.png" is not under');
+});
+
+test("G3 og:image file missing from the output", () => {
+  assertProblem(check("g3-no-file", { [fixtureOgImage]: null }), "index.html: G3 og:image file assets/og.png is missing");
+});
+
+test("G3 twitter:image differs from og:image (SEO-03 adjacency edge)", () => {
+  const problems = g3About("g3-twitter-differs", { twitterImage: fixtureBase + "assets/other.png" });
+  assertProblem(problems, `about/index.html: G3 twitter:image "${fixtureBase}assets/other.png" differs from og:image`);
+});
+
+test("G3 og:url differs from the canonical (SEO-03 adjacency edge)", () => {
+  assertProblem(g3About("g3-og-url", { url: fixtureBase }), `about/index.html: G3 og:url is "${fixtureBase}", expected the canonical "${aboutHref}"`);
+});
+
+test("G3 twitter:card summary", () => {
+  assertProblem(g3About("g3-card", { card: "summary" }), 'about/index.html: G3 twitter:card is "summary"');
+});
+
+test("G3 declared og:image:width does not match the file", () => {
+  assertProblem(g3About("g3-width", { width: "1000" }), "about/index.html: G3 og:image:width 1000 does not match assets/og.png (1200)");
+});
+
+test("G3 indexable page needs a 1200x630 og:image; a /_dev/ page may use another size", () => {
+  const small = { image: fixtureBase + "assets/small.png", width: null, height: null };
+  const problems = check("g3-small", {
+    "about/index.html": validPage(fixtureBase, "/about/", { og: small }),
+    "_dev/og/index.html": validPage(fixtureBase, "/_dev/og/", { og: small }),
+    "assets/small.png": pngHeader(600, 315),
+  });
+  assertProblem(problems, "about/index.html: G3 og:image assets/small.png is 600x315, an indexable page needs 1200x630");
+  assert.ok(!problems.some((problem) => problem.startsWith("_dev/")), problems.join("\n"));
+  assert.equal(problems.length, 1, problems.join("\n"));
+});
+
+test("real build with dev pages passes the gate (per-page ogImage override)", () => {
+  const dir = build("seo-gate-dev", { INCLUDE_DEV_PAGES: "1" });
+  assert.deepEqual(checkSite(dir, { url: "http://localhost:8080", pathPrefix: "/", indexable: false }), []);
 });

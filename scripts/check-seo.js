@@ -3,7 +3,7 @@
 // Usage: node scripts/check-seo.js [--dir <folder relative to the repo root>] (default _site)
 // Reads the build output only, never writes. Node built-ins only. Configuration comes only
 // from src/_data/site.js (the same normalisation Eleventy used); the gate has no switch of its own.
-// Rules: G0 empty output, G1 title, G2 canonical, G4 description, G6 no meta keywords,
+// Rules: G0 empty output, G1 title, G2 canonical, G3 Open Graph/Twitter share tags, G4 description, G6 no meta keywords,
 // G7 sitemap, G8 robots.txt, G9 noindex both ways, G10 TODO markers (indexable builds only, D-19).
 // Which pages are meant to be indexed comes from lib/seo.js, the predicate the templates use.
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
@@ -11,6 +11,7 @@ import { extname, join, relative, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import site from "../src/_data/site.js";
 import { isIndexableUrl, outputPathToUrl } from "../lib/seo.js";
+import { readImageSize } from "../lib/image-size.js";
 
 const repoRoot = resolve(fileURLToPath(new URL("..", import.meta.url)));
 const localHosts = ["localhost", "127.0.0.1", "[::1]"];
@@ -106,6 +107,71 @@ function checkDescription(head, report) {
   if (tags.length > 1) return report(4, `${tags.length} meta descriptions in <head>, expected exactly one`);
   const content = /\scontent="([^"]*)"/i.exec(tags[0]);
   if (content === null || content[1].trim() === "") report(4, "empty meta description");
+}
+
+// content of every <meta {attr}="{key}"> in head (attr is "property" or "name"; null for a tag
+// without content). The closing quote keeps og:image from matching og:image:width.
+function metaContents(head, attr, key) {
+  const pattern = new RegExp(`<meta\\s[^>]*${attr}="${escapeRegExp(key)}"[^>]*>`, "gi");
+  return Array.from(head.matchAll(pattern), (match) => {
+    const content = /\scontent="([^"]*)"/i.exec(match[0]);
+    return content ? content[1] : null;
+  });
+}
+
+// G3 helper: exactly one tag, absolute and under base. Returns the URL or null.
+function singleShareUrl(head, attr, key, base, report) {
+  const values = metaContents(head, attr, key);
+  const value = values.length === 1 ? values[0] : null;
+  let problem = null;
+  if (values.length === 0) problem = `missing ${key}`;
+  else if (values.length > 1) problem = `${values.length} ${key} tags, expected exactly one`;
+  else if (value === null || !/^https?:\/\//.test(value)) problem = `${key} "${value}" is not absolute`;
+  else if (!value.startsWith(base)) problem = `${key} "${value}" is not under ${base}`;
+  if (problem === null) return value;
+  report(3, problem);
+  return null;
+}
+
+// G3 (SEO-03, D-07): one absolute og:image and twitter:image under base, equal to each other;
+// og:url equals the canonical; twitter:card is summary_large_image; the image file exists, its
+// declared og:image:width/height match the file, and indexable pages use a 1200x630 image.
+// readSize(relPath) returns { width, height } for an output file, or null when it is unreadable.
+function checkShareTags(head, page, base, outDir, readSize, report) {
+  const ogImage = singleShareUrl(head, "property", "og:image", base, report);
+  const twitterImage = singleShareUrl(head, "name", "twitter:image", base, report);
+  if (ogImage !== null && twitterImage !== null && twitterImage !== ogImage) {
+    report(3, `twitter:image "${twitterImage}" differs from og:image "${ogImage}"`);
+  }
+
+  const canonicals = canonicalHrefs(head);
+  const canonical = canonicals.length === 1 && canonicals[0] !== null ? canonicals[0] : page.absolute;
+  const ogUrls = metaContents(head, "property", "og:url");
+  if (ogUrls.length !== 1) report(3, `${ogUrls.length} og:url tags, expected exactly one`);
+  else if (ogUrls[0] !== canonical) report(3, `og:url is "${ogUrls[0]}", expected the canonical "${canonical}"`);
+
+  const cards = metaContents(head, "name", "twitter:card");
+  if (cards.length !== 1 || cards[0] !== "summary_large_image") {
+    report(3, `twitter:card is "${cards.join(", ")}", expected exactly one "summary_large_image"`);
+  }
+
+  if (ogImage === null) return;
+  const relPath = locToRelPath(ogImage.replace(/[?#].*$/, ""), base);
+  const full = relPath === null ? null : join(outDir, relPath);
+  if (full === null || !existsSync(full) || !statSync(full).isFile()) {
+    return report(3, `og:image file ${relPath ?? ogImage} is missing from the output`);
+  }
+  const size = readSize(relPath);
+  if (size === null) return report(3, `og:image file ${relPath} is not a readable PNG or JPEG`);
+  for (const [key, actual] of [["og:image:width", size.width], ["og:image:height", size.height]]) {
+    const declared = metaContents(head, "property", key);
+    if (declared.length > 0 && Number(declared[0]) !== actual) {
+      report(3, `${key} ${declared[0]} does not match ${relPath} (${actual})`);
+    }
+  }
+  if (isIndexableUrl(page.url) && (size.width !== 1200 || size.height !== 630)) {
+    report(3, `og:image ${relPath} is ${size.width}x${size.height}, an indexable page needs 1200x630 (SEO-03)`);
+  }
 }
 
 // G6: no <meta name="keywords"> anywhere (D-14).
@@ -223,6 +289,13 @@ export function checkSite(outDir, site) {
   });
   if (pages.length === 0) return [".: G0 no HTML pages in the build output"];
 
+  // og:image files are shared by most pages: read each header once.
+  const sizes = new Map();
+  const readSize = (relPath) => {
+    if (!sizes.has(relPath)) sizes.set(relPath, readImageSize(readFileSync(join(outDir, relPath))));
+    return sizes.get(relPath);
+  };
+
   const titled = [];
   for (const page of pages) {
     const report = reporter(page.relPath);
@@ -230,6 +303,7 @@ export function checkSite(outDir, site) {
     const title = checkTitle(head, report);
     if (title !== null && isIndexableUrl(page.url)) titled.push({ relPath: page.relPath, title });
     checkCanonical(head, page.absolute, report);
+    checkShareTags(head, page, base, outDir, readSize, report);
     if (isIndexableUrl(page.url)) checkDescription(head, report);
     checkNoKeywords(page.html, report);
     checkNoindex(head, page.url, indexable, report);

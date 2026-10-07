@@ -272,3 +272,33 @@ test("(k) Open Graph and Twitter tags (D-07)", () => {
   const size = readImageSize(readFileSync(join(prefixDir, "assets", "og", "og-default-v1.jpg")));
   assert.deepEqual(size && [size.format, size.width, size.height], ["jpeg", 1200, 630]);
 });
+
+// A scalar value from the front matter of a src/ template (quotes stripped).
+function frontMatterValue(relPath, key) {
+  const source = readFileSync(join(repoRoot, relPath), "utf8");
+  const line = source.split(/\r?\n/).find((text) => text.startsWith(`${key}:`));
+  assert.ok(line, `${relPath} has no ${key}: front matter line`);
+  return line.slice(key.length + 1).trim().replace(/^"(.*)"$/, "$1");
+}
+
+test("(l) ogImage front matter overrides the default (D-07)", () => {
+  const root = rootBuild();
+  const override = read(root, "_dev/og-override/index.html");
+  const heroUrl = "http://localhost:8080/assets/hero-bg.jpg";
+  // SEO-03 precedence edge: the override wins and the default is not emitted as a second tag.
+  assert.deepEqual(metas(override, "property", "og:image"), [heroUrl]);
+  assert.deepEqual(metas(override, "name", "twitter:image"), [heroUrl]);
+  assert.ok(!override.includes("og-default-v1.jpg"), "override page still mentions the default card");
+
+  const hero = readImageSize(readFileSync(join(root, "assets", "hero-bg.jpg")));
+  assert.ok(hero, "assets/hero-bg.jpg header not recognised");
+  assert.equal(meta(override, "property", "og:image:width"), String(hero.width));
+  assert.equal(meta(override, "property", "og:image:height"), String(hero.height));
+  const alt = frontMatterValue("src/_dev/og-override.njk", "ogImageAlt");
+  assert.equal(meta(override, "property", "og:image:alt"), alt);
+  assert.equal(meta(override, "name", "twitter:image:alt"), alt);
+
+  const layoutTest = read(root, "_dev/layout-test/index.html");
+  assert.equal(meta(layoutTest, "property", "og:image"), "http://localhost:8080/assets/og/og-default-v1.jpg");
+  assert.equal(meta(layoutTest, "property", "og:image:width"), "1200");
+});
