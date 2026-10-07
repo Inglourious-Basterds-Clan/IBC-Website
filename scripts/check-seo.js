@@ -3,7 +3,8 @@
 // Usage: node scripts/check-seo.js [--dir <folder relative to the repo root>] (default _site)
 // Reads the build output only, never writes. Node built-ins only. Configuration comes only
 // from src/_data/site.js (the same normalisation Eleventy used); the gate has no switch of its own.
-// Rules: G0 empty output, G1 title, G2 canonical, G3 Open Graph/Twitter share tags, G4 description, G6 no meta keywords,
+// Rules: G0 empty output, G1 title, G2 canonical, G3 Open Graph/Twitter share tags, G4 description,
+// G5 JSON-LD (parses, no Event/SportsTeam, home has Organization + WebSite), G6 no meta keywords,
 // G7 sitemap, G8 robots.txt, G9 noindex both ways, G10 TODO markers (indexable builds only, D-19).
 // Which pages are meant to be indexed comes from lib/seo.js, the predicate the templates use.
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
@@ -174,6 +175,59 @@ function checkShareTags(head, page, base, outDir, readSize, report) {
   }
 }
 
+// Types that must never appear in JSON-LD (D-14): Event markup (unconfirmed claims) and the
+// legacy sports-team type the old home page used.
+const forbiddenJsonLdTypes = ["Event", "SportsTeam"];
+
+// Inner text of every <script type="application/ld+json"> in html.
+function jsonLdScripts(html) {
+  return Array.from(html.matchAll(/<script\s[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/gi), (match) => match[1]);
+}
+
+// Every @type value anywhere in value (objects and arrays, recursively; array @types flattened).
+function jsonLdTypes(value, found = []) {
+  if (Array.isArray(value)) {
+    for (const item of value) jsonLdTypes(item, found);
+  } else if (value !== null && typeof value === "object") {
+    for (const [key, child] of Object.entries(value)) {
+      if (key === "@type") found.push(...[child].flat().filter((type) => typeof type === "string"));
+      jsonLdTypes(child, found);
+    }
+  }
+  return found;
+}
+
+// True when one parsed JSON-LD block (an @graph object, an array of nodes or a single node)
+// holds both an Organization and a WebSite node at its top level.
+function hasOrganizationAndWebsite(value) {
+  let nodes = [value];
+  if (Array.isArray(value)) nodes = value;
+  else if (value !== null && typeof value === "object" && Array.isArray(value["@graph"])) nodes = value["@graph"];
+  const types = nodes.flatMap((node) => (node !== null && typeof node === "object" ? [node["@type"]].flat() : []));
+  return types.includes("Organization") && types.includes("WebSite");
+}
+
+// G5 (SEO-05, D-14): every JSON-LD block parses and holds no forbidden @type anywhere; the home
+// page (index.html) carries at least one graph with both an Organization and a WebSite node.
+function checkJsonLd(html, isHome, report) {
+  let homeHasIdentity = false;
+  for (const text of jsonLdScripts(html)) {
+    let value;
+    try {
+      value = JSON.parse(text);
+    } catch (error) {
+      report(5, `invalid JSON-LD: ${error.message}`);
+      continue;
+    }
+    const types = new Set(jsonLdTypes(value));
+    for (const type of forbiddenJsonLdTypes) {
+      if (types.has(type)) report(5, `forbidden @type ${type}`);
+    }
+    if (hasOrganizationAndWebsite(value)) homeHasIdentity = true;
+  }
+  if (isHome && !homeHasIdentity) report(5, "home page lacks Organization + WebSite JSON-LD");
+}
+
 // G6: no <meta name="keywords"> anywhere (D-14).
 function checkNoKeywords(html, report) {
   if (/<meta\s[^>]*name="keywords"/i.test(html)) report(6, '<meta name="keywords"> must not be used (D-14)');
@@ -305,6 +359,7 @@ export function checkSite(outDir, site) {
     checkCanonical(head, page.absolute, report);
     checkShareTags(head, page, base, outDir, readSize, report);
     if (isIndexableUrl(page.url)) checkDescription(head, report);
+    checkJsonLd(page.html, page.relPath === "index.html", report);
     checkNoKeywords(page.html, report);
     checkNoindex(head, page.url, indexable, report);
   }

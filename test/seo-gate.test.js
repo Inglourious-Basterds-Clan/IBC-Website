@@ -69,21 +69,37 @@ function shareLines(base, href, og = {}) {
   return tags.filter(([, , value]) => value !== null).map(([attr, key, value]) => `<meta ${attr}="${key}" content="${value}">`);
 }
 
+// The smallest home graph G5 accepts: an Organization and a WebSite node in one @graph.
+// extraNodes are appended to the @graph; drop removes the node of that @type.
+function homeGraph(base, { extraNodes = [], drop } = {}) {
+  const nodes = [
+    { "@type": "Organization", "@id": `${base}#organization`, name: "Fixture Clan", url: base },
+    { "@type": "WebSite", "@id": `${base}#website`, name: "Fixture Clan", url: base, publisher: { "@id": `${base}#organization` } },
+    ...extraNodes,
+  ].filter((node) => node["@type"] !== drop);
+  return JSON.stringify({ "@context": "https://schema.org", "@graph": nodes });
+}
+
 // A minimal page that passes every gate rule implemented so far. url is the page.url ("/", "/o-nas/").
 // head replaces the default head lines; noindex defaults to true (a preview page).
 // title defaults to a title unique per url; description defaults to a non-empty one on
 // indexable urls and none elsewhere (D-04). null leaves the tag out. og overrides the
-// share tags (shareLines).
-function validPage(base, url, { canonical, noindex = true, head, title, description, og } = {}) {
+// share tags (shareLines). jsonLd is the text of one ld+json script, added after the head
+// lines; it defaults to homeGraph on the home page and none elsewhere (G5); null leaves it out.
+function validPage(base, url, { canonical, noindex = true, head, title, description, og, jsonLd } = {}) {
   const href = canonical === undefined ? base + url.slice(1) : canonical;
   const pageTitle = title === undefined ? `Fixture ${url}` : title;
   const pageDescription = description === undefined ? (isIndexableUrl(url) ? `Opis strony ${url}` : null) : description;
-  const lines = head ?? [
-    ...(pageTitle === null ? [] : [`<title>${pageTitle}</title>`]),
-    `<link rel="canonical" href="${href}">`,
-    ...(noindex ? [noindexTag] : []),
-    ...(pageDescription === null ? [] : [`<meta name="description" content="${pageDescription}">`]),
-    ...shareLines(base, href, og),
+  const pageJsonLd = jsonLd === undefined ? (url === "/" ? homeGraph(base) : null) : jsonLd;
+  const lines = [
+    ...(head ?? [
+      ...(pageTitle === null ? [] : [`<title>${pageTitle}</title>`]),
+      `<link rel="canonical" href="${href}">`,
+      ...(noindex ? [noindexTag] : []),
+      ...(pageDescription === null ? [] : [`<meta name="description" content="${pageDescription}">`]),
+      ...shareLines(base, href, og),
+    ]),
+    ...(pageJsonLd === null ? [] : [`<script type="application/ld+json">${pageJsonLd}</script>`]),
   ];
   return `<!DOCTYPE html>
 <html lang="pl">
@@ -382,6 +398,37 @@ test("G4 exempts 404.html and /_dev/ pages (D-04)", () => {
   });
   assert.ok(!problems.some((problem) => problem.includes(": G4 ")), problems.join("\n"));
   assert.deepEqual(problems, []);
+});
+
+// G5 fixtures (SEO-05, D-14): each breaks the JSON-LD of one page.
+function g5Problems(problems) {
+  return problems.filter((problem) => problem.includes(": G5 "));
+}
+
+test("G5 unparseable JSON-LD", () => {
+  const page = validPage(fixtureBase, "/about/", { jsonLd: '{"@context": "https://schema.org", "@type": "Organization",' });
+  const problems = check("g5-unparseable", { "about/index.html": page });
+  assertProblem(problems, "about/index.html: G5 invalid JSON-LD: ");
+  assert.equal(g5Problems(problems).length, 1, problems.join("\n"));
+});
+
+test("G5 Event nested inside the home @graph", () => {
+  const event = { "@type": "WebPage", about: { "@type": "Event", name: "Operacja" } };
+  const page = validPage(fixtureBase, "/", { jsonLd: homeGraph(fixtureBase, { extraNodes: [event] }) });
+  const problems = check("g5-event", { "index.html": page });
+  assert.deepEqual(g5Problems(problems), ["index.html: G5 forbidden @type Event"]);
+});
+
+test("G5 legacy SportsTeam JSON-LD", () => {
+  const legacy = JSON.stringify({ "@context": "https://schema.org", "@type": "SportsTeam", name: "Fixture Clan" });
+  const problems = check("g5-sportsteam", { "about/index.html": validPage(fixtureBase, "/about/", { jsonLd: legacy }) });
+  assert.deepEqual(g5Problems(problems), ["about/index.html: G5 forbidden @type SportsTeam"]);
+});
+
+test("G5 home page graph without the WebSite node", () => {
+  const page = validPage(fixtureBase, "/", { jsonLd: homeGraph(fixtureBase, { drop: "WebSite" }) });
+  const problems = check("g5-no-website", { "index.html": page });
+  assert.deepEqual(g5Problems(problems), ["index.html: G5 home page lacks Organization + WebSite JSON-LD"]);
 });
 
 test("G6 meta keywords", () => {

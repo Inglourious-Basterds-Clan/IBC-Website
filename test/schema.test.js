@@ -6,7 +6,7 @@ import { before, test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { join, relative } from "node:path";
-import { build, listFiles, read } from "./helpers.js";
+import { attrValues, block, build, listFiles, read, repoRoot } from "./helpers.js";
 import { buildSchemaGraph, jsonLd } from "../lib/schema.js";
 import { readImageSize } from "../lib/image-size.js";
 import site from "../src/_data/site.js";
@@ -172,3 +172,22 @@ for (const key of Object.keys(variants)) {
     }
   });
 }
+
+test("(footer) social icons come from site.social (D-13)", () => {
+  const footer = block(read(outDirs.root, "index.html"), "footer");
+  const icons = footer.match(/<a\s[^>]*class="social-icon"[^>]*>/g) || [];
+  assert.ok(icons.length >= 1, "footer has no social icons");
+  assert.ok(icons[0].includes(`href="${site.discord.invite}"`), "the Discord icon must stay first");
+
+  const socials = icons.slice(1);
+  assert.deepEqual(socials.map((tag) => attrValues(tag, "href")[0]), site.social.map((s) => s.url));
+  assert.deepEqual(socials.map((tag) => attrValues(tag, "aria-label")[0]), site.social.map((s) => s.label));
+  for (const tag of socials) {
+    assert.ok(tag.includes('target="_blank"'), `social icon must open in a new tab: ${tag}`);
+    assert.ok(tag.includes('rel="noopener noreferrer"'), `social icon without rel: ${tag}`);
+  }
+
+  // One list: footer.njk holds no social URL literal, so footer and sameAs cannot drift apart.
+  const source = readFileSync(join(repoRoot, "src/_includes/partials/footer.njk"), "utf8");
+  for (const s of site.social) assert.ok(!source.includes(s.url), `footer.njk hardcodes ${s.url}`);
+});

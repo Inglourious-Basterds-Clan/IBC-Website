@@ -13,8 +13,10 @@
 
       <div class="footer-socials">
         <a href="{{ site.discord.invite }}" target="_blank" class="social-icon" rel="noopener noreferrer" aria-label="Discord"><i class="fab fa-discord"></i></a>
-        <a href="https://www.youtube.com/@IBC_A3" target="_blank" class="social-icon" rel="noopener noreferrer" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
-        <a href="https://www.facebook.com/IBCA3" target="_blank" class="social-icon" rel="noopener noreferrer" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
+        {# D-13: the same list feeds the JSON-LD sameAs (lib/schema.js) #}
+        {% for s in site.social %}
+        <a href="{{ s.url }}" target="_blank" class="social-icon" rel="noopener noreferrer" aria-label="{{ s.label }}"><i class="fab fa-{{ s.id }}"></i></a>
+        {% endfor %}
       </div>
 
       <div class="copyright">
