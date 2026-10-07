@@ -1,0 +1,15 @@
+{
+  "name": "ibc-seo-images",
+  "private": true,
+  "type": "module",
+  "description": "One-off generator for the committed SEO images (OG card, icons, favicon.ico, JSON-LD logo); never used by the site build.",
+  "engines": {
+    "node": ">=22.19"
+  },
+  "scripts": {
+    "generate": "node make-seo-images.js"
+  },
+  "dependencies": {
+    "sharp": "0.35.4"
+  }
+}
