@@ -150,7 +150,7 @@ test("(d) absolute URLs come from SITE_URL (mutated build)", () => {
 
 test("(e) production values in the GitHub Pages build", () => {
   assert.equal(ogImage(read(out.prod, "index.html")), `https://${prodHost}/IBC-Website/assets/og/og-default-v1.jpg`);
-  for (const { path, text } of allFiles(out.prod, [".html", ".css", ".js", ".json", ".xml", ".txt"])) {
+  for (const { path, text } of allFiles(out.prod, [".html", ".css", ".js", ".json", ".xml", ".txt", ".webmanifest", ".config"])) {
     assert.ok(!text.includes(localHost), `${relative(out.prod, path)} contains ${localHost}`);
   }
   assert.ok(!existsSync(join(out.prod, "_dev")), "production build must not contain _dev/");

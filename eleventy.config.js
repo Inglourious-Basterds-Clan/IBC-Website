@@ -13,6 +13,8 @@ export default function (eleventyConfig) {
     "src/css": "css",
     "src/js": "js",
     "src/assets": "assets",
+    // Root favicon for browsers that request /favicon.ico on their own (fixes the Phase 1 404).
+    "src/favicon.ico": "favicon.ico",
   });
 
   // Dev-only pages (D-12): dropped from production builds, kept in serve/watch and when INCLUDE_DEV_PAGES=1.

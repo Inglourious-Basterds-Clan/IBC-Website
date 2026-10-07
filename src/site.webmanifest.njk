@@ -1,0 +1,21 @@
+---
+permalink: /site.webmanifest
+eleventyExcludeFromCollections: true
+---
+{#- Built as a dict and serialized with dump, so the output is always valid JSON (D-09).
+    display "browser": no service worker, not an installable PWA. Paths carry the pathPrefix. -#}
+{%- set manifest = {
+  "name": site.name,
+  "short_name": site.shortName,
+  "lang": "pl",
+  "start_url": "/" | htmlBaseUrl,
+  "scope": "/" | htmlBaseUrl,
+  "display": "browser",
+  "background_color": site.themeColor,
+  "theme_color": site.themeColor,
+  "icons": [
+    { "src": "/assets/icons/icon-192.png" | htmlBaseUrl, "sizes": "192x192", "type": "image/png" },
+    { "src": "/assets/icons/icon-512.png" | htmlBaseUrl, "sizes": "512x512", "type": "image/png" }
+  ]
+} -%}
+{{ manifest | dump(2) | safe }}

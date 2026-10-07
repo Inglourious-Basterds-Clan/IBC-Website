@@ -6,7 +6,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { join, relative } from "node:path";
 import { build, runBuild, cleanEnv, read, listFiles, block, repoRoot } from "./helpers.js";
-import { readImageSize } from "../lib/image-size.js";
+import { readIcoEntries, readImageSize } from "../lib/image-size.js";
 
 const noindexTag = '<meta name="robots" content="noindex">';
 
@@ -301,4 +301,47 @@ test("(l) ogImage front matter overrides the default (D-07)", () => {
   const layoutTest = read(root, "_dev/layout-test/index.html");
   assert.equal(meta(layoutTest, "property", "og:image"), "http://localhost:8080/assets/og/og-default-v1.jpg");
   assert.equal(meta(layoutTest, "property", "og:image:width"), "1200");
+});
+
+// The icon and manifest tags every page must carry (D-08, D-09), hrefs without the prefix.
+const iconTags = [
+  (prefix) => `<link rel="icon" href="${prefix}favicon.ico" sizes="32x32">`,
+  (prefix) => `<link rel="icon" href="${prefix}assets/icons/icon-192.png" type="image/png" sizes="192x192">`,
+  (prefix) => `<link rel="apple-touch-icon" href="${prefix}assets/icons/apple-touch-icon.png">`,
+  (prefix) => `<link rel="manifest" href="${prefix}site.webmanifest">`,
+];
+
+test("(m) favicons, manifest and theme-color (D-08, D-09)", () => {
+  for (const [dir, prefix] of [[rootBuild(), "/"], [prefixBuild(), "/IBC-Website/"]]) {
+    const entries = readIcoEntries(readFileSync(join(dir, "favicon.ico")));
+    assert.ok(entries, `${dir}: favicon.ico missing or unreadable at the output root`);
+    assert.equal(entries.length, 3, "favicon.ico must hold 3 images");
+
+    for (const { relPath, html } of htmlFiles(dir)) {
+      const head = block(html, "head");
+      for (const tag of iconTags) {
+        assert.equal(count(head, tag(prefix)), 1, `${relPath} lacks ${tag(prefix)}`);
+      }
+      assert.equal(count(head, '<meta name="theme-color" content="#080e11">'), 1, `${relPath} lacks theme-color`);
+    }
+
+    const manifest = JSON.parse(read(dir, "site.webmanifest"));
+    assert.equal(manifest.name, "Inglourious Basterds Clan");
+    assert.equal(manifest.short_name, "IBC");
+    assert.equal(manifest.lang, "pl");
+    assert.equal(manifest.display, "browser");
+    assert.equal(manifest.background_color, "#080e11");
+    assert.equal(manifest.theme_color, "#080e11");
+    assert.equal(manifest.start_url, prefix);
+    assert.equal(manifest.scope, prefix);
+    assert.equal(manifest.icons.length, 2);
+    for (const icon of manifest.icons) {
+      assert.ok(icon.src.startsWith(prefix), `manifest icon ${icon.src} lacks the prefix ${prefix}`);
+      assert.equal(icon.type, "image/png");
+      const size = readImageSize(readFileSync(join(dir, icon.src.slice(prefix.length))));
+      assert.ok(size, `manifest icon ${icon.src} is missing or unreadable`);
+      assert.equal(`${size.width}x${size.height}`, icon.sizes, `${icon.src} is not ${icon.sizes}`);
+    }
+    assert.ok(!read(dir, "sitemap.xml").includes("webmanifest"), "site.webmanifest is listed in sitemap.xml");
+  }
 });

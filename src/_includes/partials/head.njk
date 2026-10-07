@@ -41,6 +41,14 @@
   <meta name="twitter:image" content="{{ ogImageUrl }}">
   <meta name="twitter:image:alt" content="{{ ogImageAltText }}">
 
+  <!-- Icons, Manifest & Theme -->
+  {# D-08: rose on the dark tile; Google wants a square icon above 48 px and lists no SVG #}
+  <link rel="icon" href="/favicon.ico" sizes="32x32">
+  <link rel="icon" href="/assets/icons/icon-192.png" type="image/png" sizes="192x192">
+  <link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="{{ site.themeColor }}">
+
   <!-- Structured Data JSON-LD -->
   {% if page.url == "/" %}<script type="application/ld+json">
   {
