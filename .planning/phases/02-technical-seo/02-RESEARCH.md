@@ -592,19 +592,25 @@ const tile = Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" width="512" he
 | A7 | GitHub Pages serves `.webmanifest` with a manifest MIME type and serves `404.html` from the artifact root for missing paths under `/IBC-Website/` | 404 / manifest | Wrong 404 page on the preview. Checked manually after the first deploy |
 | A8 | Leaving out `<meta name="author">` is acceptable | Head sketch | None |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Do Discord's embed colours follow `theme-color` `#080e11`?**
+Resolved at planning time (plans 02-01..02-06, 2026-10-06; resolutions recorded 2026-10-07). Each resolution states what the plans adopted. None adds a decision beyond CONTEXT.md.
+
+1. **Do Discord's embed colours follow `theme-color` `#080e11`?** RESOLVED: theme-color stays `#080e11`.
    - What we know: D-09 locks `#080e11`. Discord reportedly uses `theme-color` for the embed stripe.
    - What's unclear: whether a near-black stripe looks good in Discord's dark theme.
    - Recommendation: ship D-09 as decided. Mention it at the visual checkpoint. A stripe change would need a user decision (it conflicts with D-09).
-2. **FACTS.md location**
+   - **Resolution (adopted):** theme-color stays `#080e11`, locked by D-09: `site.themeColor` in 02-01 Task 2, then `<meta name="theme-color">` and the manifest `background_color`/`theme_color` in 02-04 Task 3. The near-black stripe is flagged to the user at the 02-02 Task 3 human-check (item 4) and the 02-04 Task 3 human-check (item 3). No plan changes the colour. A different stripe needs a user decision that changes D-09.
+2. **FACTS.md location** RESOLVED: repo-root `FACTS.md`.
    - Recommendation: repo root `FACTS.md` (visible to the user, reused by Phase 4 CONT-06), with a README pointer. Rows: id, location, drafted text, status.
-3. **Should `og:title` drop the ` | IBC` suffix?**
+   - **Resolution (adopted):** 02-03 Task 2 creates `FACTS.md` at the repo root (Polish, D-05 lets the planner choose the location). It has the table `| ID | Gdzie | Tekst roboczy | Status |` (id, location, drafted text, status), the statuses `do potwierdzenia` / `potwierdzone` and row FACTS-01. `test/facts.test.js` keeps it in sync with the `TODO(FACTS-NN)` markers. 02-06 Task 1 adds row FACTS-02 (404 copy), and 02-06 Task 2 adds the README pointer section `## Teksty robocze (FACTS.md)`. Phase 4 (CONT-06) reuses the file.
+3. **Should `og:title` drop the ` | IBC` suffix?** RESOLVED: no, `og:title` stays identical to `<title>`.
    - Recommendation: keep it identical to `<title>` (simplest, consistent). Revisit in Phase 4 if subpage cards look cluttered.
-4. **Reach of the IIS release build**
+   - **Resolution (adopted):** 02-04 Task 1 sets `og:title` and `twitter:title` to `fullTitle`, the same string as `<title>`. On the home page that is the D-01 title without a suffix. Every other page gets title + ` | IBC` (D-02). Test (k) in `test/seo.test.js` asserts that `og:title` equals the `<title>` text. No Phase 2 plan drops the suffix. The Phase 4 revisit is still only a research suggestion, and no plan schedules it.
+4. **Reach of the IIS release build** RESOLVED: local build documented in the README, with no new CI workflow.
    - What we know: hosting is out of scope. The user builds locally with `SITE_URL` + `SITE_INDEXABLE=1` and copies `_site/`.
    - Recommendation: document the commands in the README (PowerShell + Git Bash, with `Remove-Item`). No new CI workflow.
+   - **Resolution (adopted):** 02-06 Task 2 documents the IIS release build in README.md. Section `## Indeksowanie w wyszukiwarkach (SITE_INDEXABLE)` has the PowerShell commands (with `Remove-Item Env:SITE_INDEXABLE`, `Env:SITE_URL` and `Env:PATH_PREFIX`) and the Git Bash commands. Section `## Przeniesienie na docelową domenę (IIS)` is the D-20 cutover checklist, including copying all of `_site/` with `web.config`. No CI workflow is added. `.github/workflows/pages.yml` gets a comment-only change and never sets the indexing variable (workflow test (i), D-15, D-18).
 
 ## Environment Availability
 
