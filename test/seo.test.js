@@ -124,3 +124,31 @@ test("(e) build helpers never inherit SITE_INDEXABLE", () => {
     else process.env.SITE_INDEXABLE = saved;
   }
 });
+
+function sitemapLocs(outDir) {
+  return Array.from(read(outDir, "sitemap.xml").matchAll(/<loc>([^<]*)<\/loc>/g), (match) => match[1]);
+}
+
+test("(f) sitemap lists exactly the indexable pages, sorted", () => {
+  const rootLocs = sitemapLocs(rootBuild());
+  assert.deepEqual(rootLocs, ["http://localhost:8080/"]);
+  assert.deepEqual(sitemapLocs(prefixBuild()), ["https://guard.example/IBC-Website/"]);
+  for (const locs of [rootLocs, sitemapLocs(indexableBuild())]) {
+    assert.deepEqual(locs, [...locs].sort(), "sitemap <loc> entries are not sorted");
+    for (const loc of locs) {
+      assert.ok(!loc.includes("_dev") && !loc.includes("404"), `non-indexable page in sitemap: ${loc}`);
+    }
+  }
+  assert.ok(read(rootDir, "sitemap.xml").startsWith("<?xml"), "sitemap.xml must start with the XML declaration");
+});
+
+test("(g) robots.txt never disallows and names the sitemap only when indexable", () => {
+  const rootRobots = read(rootBuild(), "robots.txt");
+  assert.ok(rootRobots.startsWith("User-agent: *"), `robots.txt must start with User-agent:\n${rootRobots}`);
+  assert.ok(!/^\s*Disallow/im.test(rootRobots), "robots.txt must never contain a Disallow line");
+  assert.ok(!/^\s*Sitemap:/im.test(rootRobots), "preview robots.txt must not name a sitemap");
+
+  const indexableRobots = read(indexableBuild(), "robots.txt");
+  assert.ok(indexableRobots.includes("Sitemap: https://example.org/sitemap.xml"), indexableRobots);
+  assert.ok(!/^\s*Disallow/im.test(indexableRobots), "robots.txt must never contain a Disallow line");
+});
