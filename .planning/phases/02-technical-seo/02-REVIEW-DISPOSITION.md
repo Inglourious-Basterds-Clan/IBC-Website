@@ -5,15 +5,15 @@ titles: json
 findings:
   - id: CR-01
     severity: critical
-    disposition: open
+    disposition: fixed
     title: "SEO gate silently skips itself (exit 0) when run through a symlinked or junction path"
   - id: CR-02
     severity: critical
-    disposition: open
+    disposition: fixed
     title: "A rejected build stays in `_site/` and the README says it cannot be deployed by mistake"
   - id: WR-01
     severity: warning
-    disposition: open
+    disposition: fixed
     title: "A page that overrides og:image gets the default card's alt text"
   - id: WR-02
     severity: warning
@@ -29,7 +29,7 @@ findings:
     title: "SITE_URL is validated through `new URL()` but emitted raw, so site.js accepts values the gate rejects"
   - id: WR-05
     severity: warning
-    disposition: open
+    disposition: fixed
     title: "G8 `Disallow: /` detection only matches one exact spelling"
   - id: IN-01
     severity: info
@@ -67,22 +67,22 @@ findings:
     severity: info
     disposition: open
     title: "Workflow actions are pinned to mutable major tags while deploy holds `id-token: write`"
-open: 16
+open: 12
 total: 16
-recorded: 2026-10-07T19:34:32.107Z
+recorded: 2026-10-08T19:12:56.228Z
 ---
 
 # Phase 02: Code Review Disposition
 
 | Finding | Severity | Disposition | Source |
 |---------|----------|-------------|--------|
-| CR-01 | critical | open | - |
-| CR-02 | critical | open | - |
-| WR-01 | warning | open | - |
+| CR-01 | critical | fixed | 02-REVIEW-FIX.md |
+| CR-02 | critical | fixed | 02-REVIEW-FIX.md |
+| WR-01 | warning | fixed | 02-REVIEW-FIX.md |
 | WR-02 | warning | open | - |
 | WR-03 | warning | open | - |
 | WR-04 | warning | open | - |
-| WR-05 | warning | open | - |
+| WR-05 | warning | fixed | 02-REVIEW-FIX.md |
 | IN-01 | info | open | - |
 | IN-02 | info | open | - |
 | IN-03 | info | open | - |
