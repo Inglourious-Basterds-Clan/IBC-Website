@@ -1,9 +1,9 @@
 ---
-status: partial
+status: diagnosed
 phase: 02-technical-seo
 source: [02-01-SUMMARY.md, 02-02-SUMMARY.md, 02-03-SUMMARY.md, 02-04-SUMMARY.md, 02-05-SUMMARY.md, 02-06-SUMMARY.md]
 started: 2026-10-08T20:07:47Z
-updated: 2026-10-08T20:23:10Z
+updated: 2026-10-08T20:33:00Z
 ---
 
 ## Current Test
@@ -196,5 +196,13 @@ blocked: 1
   reason: "User reported: pass but google reports \"Nieprawidłowy URL w polu \"logo\" (opcjonalnie)\" (schema.org validator and the rest of the graph passed; deployed logo URL https://inglourious-basterds-clan.github.io/IBC-Website/assets/brand/ibc-logo-512.png is absolute and returns 200 image/png)"
   severity: minor
   test: 5
-  artifacts: []
-  missing: []
+  root_cause: "Likely test-procedure input, not code: test 5 told the tester to paste JSON-LD from _site/index.html, which the dev server builds with localhost URLs (logo http://localhost:8080/assets/brand/ibc-logo-512.png); Google cannot fetch it. Deployed logo meets every Google Organization logo rule. Unconfirmed until RRT is re-run in URL mode on the deployed page; fallback: transient fetch failure minutes after first deploy of the image."
+  artifacts:
+    - path: ".planning/phases/02-technical-seo/02-UAT.md"
+      issue: "Test 5 procedure allows pasting dev-server _site JSON-LD (localhost URLs)"
+    - path: ".planning/phases/02-technical-seo/02-VALIDATION.md"
+      issue: "Line 86 carries the same paste-from-_site wording (from 02-05-PLAN.md:135, 02-RESEARCH.md:625)"
+  missing:
+    - "Re-run Rich Results Test in URL mode on the deployed page to confirm"
+    - "Reword the RRT procedure: deployed URL or a SITE_URL/PATH_PREFIX build, never the dev-server _site"
+  debug_session: .planning/debug/rich-results-logo-url.md
