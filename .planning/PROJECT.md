@@ -21,15 +21,19 @@ A Polish player searching for an Arma 3 milsim clan (or for "IBC" by name) finds
 - ✓ Animated recruitment "terminal" that links to Discord — existing
 - ✓ Scroll-spy navigation highlighting — existing
 - ✓ Footer easter egg (decryption overlay) — existing
-- ✓ Basic SEO: title, meta description, keywords, Open Graph tags, SportsTeam JSON-LD — existing
+- ✓ Basic SEO: title, meta description, keywords, Open Graph tags, SportsTeam JSON-LD — existing (superseded in Phase 2: keywords and SportsTeam removed)
 - ✓ Eleventy 3.1 build into `_site/` with documented deploy (GitHub Pages workflow + any static host) — Phase 1
 - ✓ Site URL is configured in one place (`SITE_URL`); production builds fail without it — Phase 1
 - ✓ Discord invite defined once (`src/_data/site.js`) — Phase 1
 - ✓ Shared layout (header, nav, footer, Discord CTA) and pathPrefix-safe links at root and under `/IBC-Website/` — Phase 1
+- ✓ Technical SEO: unique titles/descriptions, absolute canonicals, sitemap.xml + robots.txt, full absolute OG/Twitter cards with a 1200×630 card, favicons/manifest/theme-color, Organization + WebSite JSON-LD, Polish 404 — Phase 2
+- ✓ Post-build SEO gate (`scripts/check-seo.js`, rules G0–G10) fails broken output and unconfirmed TODO(FACTS-NN) drafts; rejected builds are moved to `_site.rejected/` — Phase 2
+- ✓ Indexing is opt-in (`SITE_INDEXABLE=1` on an https final host); every other host is `noindex`; IIS cutover checklist in README — Phase 2
 
 ### Active
 
-- [ ] Technical SEO is complete: canonical URLs, sitemap.xml, robots.txt, full OG/Twitter cards with absolute image URLs, favicons/manifest, structured data (Organization + WebSite + BreadcrumbList; no Event markup — Google doesn't support online/members-only events or show them in Poland; FAQPage gives no rich result since 2026-05)
+- [ ] Breadcrumbs: visible breadcrumbs + BreadcrumbList JSON-LD on subpages (SEO-06, Phase 4; rest of technical SEO validated in Phase 2)
+- [ ] Domain cutover: confirm FACTS-01/FACTS-02 drafts, build with `SITE_INDEXABLE=1`, deploy to IIS and run the 404/manifest `curl.exe` checks (backlog 999.1)
 - [ ] Lighthouse scores are high (target ≥ 90 in Performance, Accessibility, Best Practices, SEO on mobile)
 - [ ] Images optimized (WebP/AVIF, responsive sizes, explicit dimensions, lazy-loading)
 - [ ] Third-party weight reduced (Font Awesome full CDN → inline SVG icons; self-hosted/subset fonts)
@@ -81,7 +85,11 @@ A Polish player searching for an Arma 3 milsim clan (or for "IBC" by name) finds
 | Eleventy 3.1 + Nunjucks | Least-rewrite SSG, zero client JS, official image/icon plugins (research) | ✓ Good — Phase 1 (single dep, 56 node:test tests) |
 | Deploy `_site/` via GitHub Pages Actions; production host set only in pages.yml | Repo root no longer deployable; PRs never deploy; write perms only on deploy job | ✓ Good — Phase 1, live at inglourious-basterds-clan.github.io/IBC-Website/ |
 | Production build fails without SITE_URL (opt-out ALLOW_LOCAL_SITE_URL=1) | Prevents shipping localhost absolute URLs (review CR-01, UAT decision) | ✓ Good — Phase 1 (01-07) |
-| No Event JSON-LD | Google ineligibility for online/members-only events in PL | — Pending |
+| No Event JSON-LD | Google ineligibility for online/members-only events in PL | ✓ Good — Phase 2 (gate G5 bans Event at any depth) |
+| Indexing opt-in via SITE_INDEXABLE=1; GitHub Pages stays a noindex preview | Domain unknown; non-final hosts must never be indexed | ✓ Good — Phase 2 |
+| Post-build SEO gate in `npm run build`; no env switch skips it | Broken SEO or unconfirmed facts must never ship; IIS deploy is a manual copy of `_site/` | ✓ Good — Phase 2 (CR-01/CR-02 hardened) |
+| Drafted facts carry TODO(FACTS-NN) tracked in FACTS.md | Claude drafts copy, user confirms; G10 blocks indexable builds until confirmed | ✓ Good — Phase 2 |
+| SEO images generated once by isolated `tools/seo-images` (sharp pinned exactly, now 0.35.5) and committed | Keeps image libraries out of the site build and CI | ✓ Good — Phase 2 (sharp bump user-vetted 2026-10-08) |
 | Slugs /jak-dolaczyc/, /operacje/, /sklad/ | Match Polish search phrasing; fixed forever | — Pending |
 | Polish only | Target audience is Polish players | — Pending |
 
@@ -103,4 +111,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-10-06 after Phase 1*
+*Last updated: 2026-10-08 after Phase 2*

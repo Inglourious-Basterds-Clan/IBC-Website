@@ -1,43 +1,43 @@
 ---
 gsd_state_version: "1.0"
-current_phase: 02
-current_phase_name: Technical SEO
-status: verifying
-stopped_at: Completed 02-06-PLAN.md
-last_updated: "2026-10-08T20:56:13.822Z"
+current_phase: 3
+current_phase_name: Performance & Assets
+status: planning
+stopped_at: Phase 2 complete, ready to plan Phase 3
+last_updated: "2026-10-08T21:06:56.320Z"
 last_activity: 2026-10-08
-last_activity_desc: Phase 02 execution started
-state_head: 03ce0deb00b6d8e2c653b2c7e90d96db790146b7
+last_activity_desc: Phase 2 complete, transitioned to Phase 3
+state_head: cb6af5141c389dfa41b2d307fb5fd6f41eb971e1
 progress:
   total_phases: 5
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 13
   completed_plans: 13
-  percent: 20
+  percent: 40
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-10-06)
+See: .planning/PROJECT.md (updated 2026-10-08)
 
 **Core value:** A Polish player searching for an Arma 3 milsim clan (or for "IBC" by name) finds this site, understands what IBC is and how to join, and clicks through to Discord.
-**Current focus:** Phase 02 — Technical SEO
+**Current focus:** Phase 03 — Performance & Assets
 
 ## Current Position
 
-Phase: 02 (Technical SEO) — EXECUTING
-Plan: 6 of 6
-Status: Phase complete — ready for verification
-Last activity: 2026-10-08 - Completed quick task 261008-vmd: Bump sharp to 0.35.5 in tools/seo-images
+Phase: 3 — Performance & Assets
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-10-08 — Phase 2 complete, transitioned to Phase 3
 
-Progress: [██░░░░░░░░] 20%
+Progress: [████░░░░░░] 40%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 7
+- Total plans completed: 13
 - Average duration: -
 - Total execution time: 0.0 hours
 
@@ -46,6 +46,7 @@ Progress: [██░░░░░░░░] 20%
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01 | 7 | - | - |
+| 2 | 6 | - | - |
 
 **Recent Trend:**
 - Last 5 plans: -
@@ -118,12 +119,12 @@ Recent decisions affecting current work:
 
 ### Blockers/Concerns
 
-- [Phase 2]: Domain still unknown; site is live on the GitHub Pages subpath, so Phase 2 needs the noindex guard for non-final hosts.
-- [Phase 2]: favicon.ico 404 (pre-existing) and review warnings WR-01..03 / R2-* left open in 01-REVIEW-DISPOSITION.md.
+- [Cutover]: Domain still unknown. Before go-live: confirm FACTS-01/FACTS-02 (G10 blocks indexable builds until then), build with SITE_INDEXABLE=1, run the IIS 404/manifest curl.exe checks (backlog 999.1).
+- [Phase 2 advisory]: scripts/check-seo.js:72 — a crash inside checkSite fails the build but leaves _site/ in place; scripts/clean.js does not remove a stale _site.rejected/.
+- [Phase 2 docs]: 02-SECURITY.md T-02-ADV-01 row still describes sharp 0.35.4 (bumped to 0.35.5 in quick 261008-vmd).
 - [Phase 2+]: initEasterEgg still builds a line with innerHTML (constants only; not a sink) — candidate for textContent refactor.
 - [Phase 3/5]: Share Tech Mono has no Polish glyphs. Phase 3 self-hosts fonts with Polish coverage (interim mono if needed); the Phase 5 UI-SPEC makes the final HUD font choice.
 - [Phase 4]: Needs clan facts from the user (schedule, modpack, DLC, join steps, play style, honest member metric) to confirm in FACTS.md.
-- [Phase 2/4]: The TODO-marker gate (SEO-08) should fail production builds only, so Phase 4 drafting can still build in dev.
 - [Phase 5]: Run `/gsd-ui-phase` first (UI-SPEC: identity inventory, effect budget, HUD font).
 
 ### Quick Tasks Completed
@@ -142,6 +143,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-10-07T19:26:21.664Z
-Stopped at: Completed 02-06-PLAN.md
+Last session: 2026-10-08T21:07:27.378Z
+Stopped at: Phase 2 complete, ready to plan Phase 3
 Resume file: None
