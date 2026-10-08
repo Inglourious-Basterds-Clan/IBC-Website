@@ -6,7 +6,7 @@ import assert from "node:assert/strict";
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { build, read, attrValues, block, repoRoot } from "./helpers.js";
-import { checkSite } from "../scripts/check-seo.js";
+import { checkSite } from "../lib/check-seo.js";
 import site from "../src/_data/site.js";
 
 const activeNav = ' class="active-nav"';

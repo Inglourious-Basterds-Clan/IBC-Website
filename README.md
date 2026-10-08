@@ -235,7 +235,7 @@ src/_dev/                        strony testowe dla deweloperów, nigdy w buildz
 src/css/                         style
 src/js/                          skrypty przeglądarki
 src/assets/                      logo, zdjęcia, karta OG i ikony
-lib/                             funkcje SEO używane podczas buildu (indeksowanie, JSON-LD)
+lib/                             funkcje SEO używane podczas buildu (indeksowanie, JSON-LD, reguły kontroli SEO w lib/check-seo.js)
 scripts/clean.js                 czyści _site/ przed każdym buildem
 scripts/check-seo.js             kontrola SEO uruchamiana po każdym buildzie
 tools/seo-images/                jednorazowy generator karty OG i ikon (osobna instalacja sharp)

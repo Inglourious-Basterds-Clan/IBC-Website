@@ -1,13 +1,14 @@
-// SEO-08 gate checks: scripts/check-seo.js passes real builds and fails broken output.
+// SEO-08 gate checks: the gate (rules in lib/check-seo.js, CLI scripts/check-seo.js) passes real builds and fails broken output.
 // Real builds go to _test/seo-gate-*; hand-written fixture folders go to
 // _test/seo-gate-fixtures/<name>/, one per problem, each a valid site with one thing broken.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, rmdirSync, rmSync, symlinkSync, unlinkSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { build, cleanEnv, repoRoot } from "./helpers.js";
-import { checkSite } from "../scripts/check-seo.js";
+import { checkSite } from "../lib/check-seo.js";
 import { isIndexableUrl } from "../lib/seo.js";
 
 const fixtureSite = { url: "https://fixture.example", pathPrefix: "/", indexable: false };
@@ -221,6 +222,38 @@ test("CLI exits 0 on a real build and 1 on a broken one", () => {
   assert.equal(broken.status, 1, "gate accepted a relative canonical");
   assert.match(broken.stderr, /check-seo: index\.html: G2/);
   assert.match(broken.stderr, /must not be deployed/);
+});
+
+// CR-01: `npm run build` started from a symlinked or junctioned folder (a junctioned
+// Documents/OneDrive folder, a symlinked workspace) must still run every rule and fail.
+// Skipped where this machine cannot create a link.
+test("CLI still runs and fails when started through a junction or symlink path", (t) => {
+  const linkParent = mkdtempSync(join(tmpdir(), "ibc-gate-link-"));
+  const link = join(linkParent, "repo");
+  try {
+    symlinkSync(repoRoot, link, process.platform === "win32" ? "junction" : "dir");
+  } catch (error) {
+    rmdirSync(linkParent);
+    t.skip(`cannot create a junction or symlink here: ${error.code || error.message}`);
+    return;
+  }
+  try {
+    writeFixture("cli-broken-link", {
+      ...validFiles(),
+      "index.html": validPage(fixtureBase, "/", { canonical: "/" }),
+    });
+    // Same command line as the build script, with the cwd inside the link.
+    const result = spawnSync(process.execPath, ["scripts/check-seo.js", "--dir", "_test/seo-gate-fixtures/cli-broken-link"], {
+      cwd: link,
+      env: cleanEnv({ SITE_URL: fixtureSite.url }),
+      encoding: "utf8",
+    });
+    assert.equal(result.status, 1, `gate run through ${link} did not fail:\n${result.stdout}${result.stderr}`);
+    assert.match(result.stderr, /check-seo: index\.html: G2/);
+  } finally {
+    unlinkSync(link); // removes the link only, never the repository it points at
+    rmdirSync(linkParent);
+  }
 });
 
 test("CLI exits 1 when the build folder does not exist", () => {
