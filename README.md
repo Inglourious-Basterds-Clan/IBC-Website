@@ -56,7 +56,7 @@ MSYS_NO_PATHCONV=1 SITE_URL=https://<domena> PATH_PREFIX=/<podfolder>/ npm run b
 
 Dlaczego w Git Bash potrzebne jest `MSYS_NO_PATHCONV=1`, wyjaśnia sekcja „Podgląd pod podścieżką”.
 
-> **Bez `SITE_URL` build się nie uda, i tak ma być.** `npm run build` bez tej zmiennej celowo kończy się błędem `SITE_URL is not set…`, zamiast wpisać `http://localhost:8080` do `og:image` (obrazek w podglądzie linku na Discordzie i Facebooku). `npm run build` najpierw czyści `_site/`, więc po nieudanym buildzie nie ma czego wgrać na serwer.
+> **Bez `SITE_URL` build się nie uda, i tak ma być.** `npm run build` bez tej zmiennej celowo kończy się błędem `SITE_URL is not set…`, zamiast wpisać `http://localhost:8080` do `og:image` (obrazek w podglądzie linku na Discordzie i Facebooku). `npm run build` najpierw czyści `_site/`, a kontrola SEO usuwa z `_site/` każdy odrzucony wynik, więc po nieudanym buildzie nie ma czego wgrać na serwer.
 
 Jeśli chcesz tylko obejrzeć wynik buildu lokalnie, bez domeny, użyj `ALLOW_LOCAL_SITE_URL=1`. Takiego buildu nigdy nie wgrywaj na serwer, bo zawiera adresy `http://localhost:8080`.
 
@@ -82,7 +82,7 @@ ALLOW_LOCAL_SITE_URL=1 npm run build
 - `check-seo: preview build (noindex on every page) for ...`: podgląd ukryty przed wyszukiwarkami (np. GitHub Pages),
 - `check-seo: INDEXABLE build for ...`: build dla wyszukiwarek, tylko na docelową domenę.
 
-Jeśli coś jest nie tak, wypisuje po jednej linii `check-seo: ...` na każdy problem i przerywa build, więc takiego wyniku nie da się przez pomyłkę wgrać. Ta sama kontrola działa w GitHub Actions przy każdym pull requeście i pushu.
+Jeśli coś jest nie tak, wypisuje po jednej linii `check-seo: ...` na każdy problem, przerywa build i przenosi odrzucony wynik z `_site/` do `_site.rejected/`. Folder `_site/` wtedy nie istnieje, więc nie da się go przez pomyłkę skopiować na serwer. `_site.rejected/` służy tylko do sprawdzenia, co poszło nie tak: nigdy go nie wgrywaj (następny odrzucony build go zastępuje). Ta sama kontrola działa w GitHub Actions przy każdym pull requeście i pushu.
 
 **GitHub Pages:** workflow `.github/workflows/pages.yml` robi wszystko sam. Sam też ustawia `SITE_URL` i `PATH_PREFIX`, więc dla GitHub Pages nie musisz niczego ustawiać. Workflow:
 

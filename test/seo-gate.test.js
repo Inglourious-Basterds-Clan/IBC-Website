@@ -4,7 +4,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { mkdirSync, mkdtempSync, readFileSync, rmdirSync, rmSync, symlinkSync, unlinkSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmdirSync, rmSync, symlinkSync, unlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { build, cleanEnv, repoRoot } from "./helpers.js";
@@ -213,6 +213,7 @@ test("CLI exits 0 on a real build and 1 on a broken one", () => {
   const ok = runGate("_test/seo-gate-cli", prefixEnv);
   assert.equal(ok.status, 0, `gate failed on a real build:\n${ok.stderr}`);
   assert.match(ok.stdout, /check-seo: OK/);
+  assert.ok(existsSync(join(repoRoot, "_test", "seo-gate-cli", "index.html")), "a passing gate must leave the output in place");
 
   writeFixture("cli-broken", {
     ...validFiles(),
@@ -222,6 +223,25 @@ test("CLI exits 0 on a real build and 1 on a broken one", () => {
   assert.equal(broken.status, 1, "gate accepted a relative canonical");
   assert.match(broken.stderr, /check-seo: index\.html: G2/);
   assert.match(broken.stderr, /must not be deployed/);
+});
+
+// CR-02: the IIS cutover is a manual copy of _site/, so a rejected build must leave nothing
+// deployable. The typical case: an indexable build that fails only on G10 draft markers.
+test("CLI moves a rejected build aside so no deployable index.html is left", () => {
+  const dir = writeFixture("cli-rejected", todoFiles(true));
+  const rejected = `${dir}.rejected`;
+  const indexableEnv = { SITE_URL: fixtureSite.url, SITE_INDEXABLE: "1" };
+  // Twice: the second run must replace the .rejected folder the first one left.
+  for (let run = 1; run <= 2; run += 1) {
+    if (run === 2) writeFixture("cli-rejected", todoFiles(true));
+    const result = runGate("_test/seo-gate-fixtures/cli-rejected", indexableEnv);
+    assert.equal(result.status, 1, `run ${run}: gate accepted TODO markers on an indexable build:\n${result.stdout}`);
+    assert.match(result.stderr, /: G10 /);
+    assert.match(result.stderr, /must not be deployed; moved to _test\/seo-gate-fixtures\/cli-rejected\.rejected/);
+    assert.ok(!existsSync(join(dir, "index.html")), `run ${run}: rejected output still has a deployable index.html`);
+    assert.ok(!existsSync(dir), `run ${run}: the rejected output folder is still in place`);
+    assert.ok(existsSync(join(rejected, "index.html")), `run ${run}: the rejected output was not kept in ${rejected}`);
+  }
 });
 
 // CR-01: `npm run build` started from a symlinked or junctioned folder (a junctioned

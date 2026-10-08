@@ -1,6 +1,7 @@
 .planning/research/.cache/
 .planning/phases/*/baseline/lh/
 _site/
+_site.rejected/
 _test/
 node_modules/
 .cache/
