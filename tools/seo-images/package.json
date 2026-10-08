@@ -10,6 +10,6 @@
     "generate": "node make-seo-images.js"
   },
   "dependencies": {
-    "sharp": "0.35.4"
+    "sharp": "0.35.5"
   }
 }
