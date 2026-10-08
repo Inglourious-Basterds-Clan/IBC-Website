@@ -17,15 +17,15 @@ findings:
     title: "A page that overrides og:image gets the default card's alt text"
   - id: WR-02
     severity: warning
-    disposition: open
+    disposition: fixed
     title: "Indexable builds are allowed with a non-root PATH_PREFIX, where robots.txt and its Sitemap line are never read"
   - id: WR-03
     severity: warning
-    disposition: open
+    disposition: fixed
     title: "`isIndexableUrl` treats any collection URL as an indexable page, including future non-HTML outputs"
   - id: WR-04
     severity: warning
-    disposition: open
+    disposition: fixed
     title: "SITE_URL is validated through `new URL()` but emitted raw, so site.js accepts values the gate rejects"
   - id: WR-05
     severity: warning
@@ -67,9 +67,9 @@ findings:
     severity: info
     disposition: open
     title: "Workflow actions are pinned to mutable major tags while deploy holds `id-token: write`"
-open: 12
+open: 9
 total: 16
-recorded: 2026-10-08T19:12:56.228Z
+recorded: 2026-10-08T19:13:10.786Z
 ---
 
 # Phase 02: Code Review Disposition
@@ -79,9 +79,9 @@ recorded: 2026-10-08T19:12:56.228Z
 | CR-01 | critical | fixed | 02-REVIEW-FIX.md |
 | CR-02 | critical | fixed | 02-REVIEW-FIX.md |
 | WR-01 | warning | fixed | 02-REVIEW-FIX.md |
-| WR-02 | warning | open | - |
-| WR-03 | warning | open | - |
-| WR-04 | warning | open | - |
+| WR-02 | warning | fixed | 02-REVIEW-FIX.md |
+| WR-03 | warning | fixed | 02-REVIEW-FIX.md |
+| WR-04 | warning | fixed | 02-REVIEW-FIX.md |
 | WR-05 | warning | fixed | 02-REVIEW-FIX.md |
 | IN-01 | info | open | - |
 | IN-02 | info | open | - |
