@@ -1,14 +1,14 @@
 ---
-status: partial
+status: complete
 phase: 02-technical-seo
 source: [02-01-SUMMARY.md, 02-02-SUMMARY.md, 02-03-SUMMARY.md, 02-04-SUMMARY.md, 02-05-SUMMARY.md, 02-06-SUMMARY.md]
 started: 2026-10-08T20:07:47Z
-updated: 2026-10-08T20:36:01Z
+updated: 2026-10-08T21:02:15Z
 ---
 
 ## Current Test
 
-[testing paused — 1 items outstanding]
+[testing complete]
 
 ## Tests
 
@@ -39,9 +39,8 @@ result: pass
 
 ### 7. IIS 404 and manifest at cutover
 expected: On the real IIS host at cutover, `curl -I https://<domain>/nie-istnieje/` returns status 404 (not 200 or 500.19) and `curl -I https://<domain>/site.webmanifest` returns Content-Type application/manifest+json.
-result: blocked
-blocked_by: server
-reason: "blocked (needs the final IIS host at domain cutover)"
+result: skipped
+reason: "Deferred follow-up: skip - deferred to IIS cutover"
 
 ### 8. Polish README reads correctly
 expected: README.md's new sections (SEO gate after every build, SITE_INDEXABLE switch with PowerShell/Git Bash commands, 7-step IIS cutover checklist, FACTS.md, regenerating SEO images, Konfiguracja env overrides) read clearly and correctly in Polish and match how you will actually deploy.
@@ -185,8 +184,14 @@ total: 30
 passed: 29
 issues: 0
 pending: 0
-skipped: 0
-blocked: 1
+skipped: 1
+blocked: 0
+
+## Deferred Follow-Ups
+
+- test: 7
+  idea: "skip - deferred to IIS cutover"
+  deferred_at: 2026-10-08
 
 ## Gaps
 - gap_id: G-02-5
