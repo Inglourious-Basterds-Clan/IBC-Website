@@ -1,0 +1,9 @@
+# Keeps the SHA-pinned actions in .github/workflows/pages.yml current: Dependabot opens a pull
+# request that moves both the SHA and its "# vX.Y.Z" comment (IN-09). npm packages are not listed:
+# their versions are human-approved and pinned in package-lock.json.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly

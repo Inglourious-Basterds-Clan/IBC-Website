@@ -1,5 +1,6 @@
 # Builds and tests every pull request and push. Only a push to main deploys _site/ to GitHub Pages.
 # SITE_URL and PATH_PREFIX below set the GitHub Pages preview address; this preview is never opened to search engines (the final IIS host is built locally per the README cutover checklist).
+# Every action is pinned to a full commit SHA, with its release tag in the trailing comment, because the deploy job holds deploy rights; .github/dependabot.yml bumps the pins.
 name: Build and deploy
 
 on:
@@ -22,8 +23,8 @@ jobs:
       SITE_URL: https://inglourious-basterds-clan.github.io
       PATH_PREFIX: /IBC-Website/
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .nvmrc
           cache: npm
@@ -31,7 +32,7 @@ jobs:
       # Tests build into _test/, never _site/, so they cannot pollute the Pages artifact.
       - run: npm test
       - run: npm run build
-      - uses: actions/upload-pages-artifact@v5
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         if: github.event_name != 'pull_request'
         with:
           path: _site/
@@ -48,4 +49,4 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
-        uses: actions/deploy-pages@v5
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1

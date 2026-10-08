@@ -45,8 +45,8 @@ test("(c) build job: env, setup, npm ci -> npm test -> npm run build -> upload (
   for (const needle of [
     "SITE_URL: https://inglourious-basterds-clan.github.io",
     "PATH_PREFIX: /IBC-Website/",
-    "actions/checkout@v7",
-    "actions/setup-node@v7",
+    "actions/checkout@",
+    "actions/setup-node@",
     "node-version-file: .nvmrc",
     "cache: npm",
   ]) {
@@ -56,7 +56,7 @@ test("(c) build job: env, setup, npm ci -> npm test -> npm run build -> upload (
   const ci = indexOrFail(buildPart, "run: npm ci");
   const unitTests = indexOrFail(buildPart, "run: npm test");
   const siteBuild = indexOrFail(buildPart, "run: npm run build");
-  const upload = indexOrFail(buildPart, "actions/upload-pages-artifact@v5");
+  const upload = indexOrFail(buildPart, "actions/upload-pages-artifact@");
   assert.ok(ci < unitTests && unitTests < siteBuild && siteBuild < upload, "build steps are out of order");
 
   const uploadStep = buildPart.slice(upload);
@@ -75,12 +75,33 @@ test("(d) deploy job: main pushes only, least privilege, no npm and no setup-nod
     "id-token: write",
     "name: github-pages",
     "id: deployment",
-    "actions/deploy-pages@v5",
+    "actions/deploy-pages@",
   ]) {
     assert.ok(deployPart.includes(needle), `deploy job is missing: ${needle}`);
   }
   assert.ok(!deployPart.includes("npm "), "deploy job runs an npm command");
   assert.ok(!deployPart.includes("setup-node"), "deploy job uses setup-node (and its cache)");
+});
+
+// IN-09: the deploy job holds pages: write and id-token: write, so no action may follow a
+// movable tag. Each one is pinned to a full commit SHA with its release tag in a comment,
+// on the major versions this workflow was written for, and Dependabot bumps the pins.
+test("(d2) every action is pinned to a full commit SHA", () => {
+  const expected = {
+    "actions/checkout": "v7",
+    "actions/setup-node": "v7",
+    "actions/upload-pages-artifact": "v5",
+    "actions/deploy-pages": "v5",
+  };
+  const uses = lines.filter((line) => /^\s*(?:- )?uses:/.test(line));
+  assert.equal(uses.length, Object.keys(expected).length, `unexpected uses: lines:\n${uses.join("\n")}`);
+  for (const line of uses) {
+    const match = /uses: ([\w.-]+\/[\w.-]+)@([0-9a-f]{40}) # (v\d+)\.\d+\.\d+$/.exec(line);
+    assert.ok(match, `action is not pinned to a SHA with a # vX.Y.Z comment: ${line.trim()}`);
+    assert.equal(match[3], expected[match[1]], `${match[1]} is on ${match[3]}, expected ${expected[match[1]]}`);
+  }
+  const dependabot = readFileSync(path.join(repoRoot, ".github", "dependabot.yml"), "utf8");
+  assert.match(dependabot, /package-ecosystem: github-actions/);
 });
 
 test("(e) .nvmrc pins Node 24", () => {
