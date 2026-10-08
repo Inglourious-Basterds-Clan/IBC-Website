@@ -137,3 +137,13 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5. Phases 2 and 3 both 
 | 3. Performance & Assets | 0/TBD | Not started | - |
 | 4. Join & Operations Pages | 0/TBD | Not started | - |
 | 5. Accessibility & Visual Refresh | 0/TBD | Not started | - |
+
+## Backlog
+
+### Phase 999.1: Follow-up — Phase 02 deferred UAT follow-up: Test 7 (BACKLOG)
+
+**Goal:** Resolve the UAT checkpoint deferred during Phase 02 verification
+**Source phase:** 02
+**Deferred at:** 2026-10-08 during /gsd-verify-work 2 session completion
+**Follow-ups:**
+- [ ] Test 7: skip - deferred to IIS cutover (deferred 2026-10-08)
