@@ -282,6 +282,14 @@ test("CLI exits 1 when the build folder does not exist", () => {
   assert.match(result.stderr, /does not exist \(run eleventy first\)/);
 });
 
+test("CLI exits 1 with its own message when --dir is a file (IN-06)", () => {
+  writeFixture("cli-dir-is-file", { "robots.txt": "User-agent: *\n" });
+  const result = runGate("_test/seo-gate-fixtures/cli-dir-is-file/robots.txt", prefixEnv);
+  assert.equal(result.status, 1);
+  assert.match(result.stderr, /check-seo: _test\/seo-gate-fixtures\/cli-dir-is-file\/robots\.txt is not a folder/);
+  assert.ok(!/\n\s+at /.test(result.stderr), `gate printed a stack trace:\n${result.stderr}`);
+});
+
 test("CLI banner names the build kind", () => {
   prefixBuild();
   const preview = runGate("_test/seo-gate-prefix", prefixEnv);

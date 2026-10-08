@@ -8,7 +8,7 @@
 // This file is only ever run, never imported, so the CLI below runs unconditionally: a
 // main-module guard comparing import.meta.url with process.argv[1] failed open (exit 0,
 // no checks) when the repo was reached through a symlink or a Windows junction (CR-01).
-import { existsSync, renameSync, rmSync } from "node:fs";
+import { existsSync, renameSync, rmSync, statSync } from "node:fs";
 import { isAbsolute, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import site from "../src/_data/site.js";
@@ -63,6 +63,11 @@ function runCli(argv) {
   const outDir = resolve(repoRoot, dirArg);
   if (!dirArg || !existsSync(outDir)) {
     process.stderr.write(`check-seo: ${dirArg || "(no --dir value)"} does not exist (run eleventy first)\n`);
+    process.exit(1);
+  }
+  // A file instead of a folder gets the gate's own message, not a readdirSync stack trace (IN-06).
+  if (!statSync(outDir).isDirectory()) {
+    process.stderr.write(`check-seo: ${dirArg} is not a folder (point --dir at the build output folder)\n`);
     process.exit(1);
   }
 
