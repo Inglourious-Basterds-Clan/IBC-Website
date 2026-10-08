@@ -53,13 +53,13 @@ The outcome is appended to the existing `... this output must not be deployed` l
 
 No new permanent fixture was added, so as not to change the dev-page set that other tests enumerate. The optional G3 rule from the review was not added.
 
-### WR-02: Indexable builds are allowed with a non-root PATH_PREFIX
+### WR-02: Indexable builds are allowed with a non-root PATH_PREFIX, where robots.txt and its Sitemap line are never read
 
 **Files modified:** `src/_data/site.js`, `test/seo.test.js`, `README.md`
 **Commit:** c206270
 **Applied fix:** `site.js` now throws `SITE_INDEXABLE=1 needs PATH_PREFIX=/ (robots.txt is only read at the host root), got <prefix>` next to the https guard. The README "Indeksowanie" list documents the rule. New test "(c2)": an indexable build with `PATH_PREFIX=/foo/` fails with that message.
 
-### WR-03: `isIndexableUrl` treats any collection URL as an indexable page
+### WR-03: `isIndexableUrl` treats any collection URL as an indexable page, including future non-HTML outputs
 
 **Files modified:** `lib/seo.js`, `test/seo-gate.test.js`
 **Commit:** 65c75e0
@@ -67,7 +67,7 @@ No new permanent fixture was added, so as not to change the dev-page set that ot
 - A unit test of the predicate covering pages, `/feed.xml`, `/search.json`, `/robots.txt`, `/site.webmanifest`, `/404.html`, `/_dev/` and an empty string.
 - A G7 fixture whose sitemap lists an existing `feed.xml`. The gate now reports it; it passed before the fix.
 
-### WR-04: SITE_URL is validated through `new URL()` but emitted raw
+### WR-04: SITE_URL is validated through `new URL()` but emitted raw, so site.js accepts values the gate rejects
 
 **Files modified:** `src/_data/site.js`, `test/seo.test.js`
 **Commit:** 9209e00
