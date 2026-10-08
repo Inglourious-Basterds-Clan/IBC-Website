@@ -173,6 +173,22 @@ for (const key of Object.keys(variants)) {
   });
 }
 
+// IN-03: lib/schema.js copies the hero paragraph by hand, so editing either one alone fails here.
+test("(root build) Organization description is the hero paragraph verbatim", () => {
+  const html = read(outDirs.root, "index.html");
+  const hero = /<section id="hero"[\s\S]*?<\/section>/.exec(html);
+  assert.ok(hero, "home page has no #hero section");
+  const paragraph = /<p>([\s\S]*?)<\/p>/.exec(hero[0]);
+  assert.ok(paragraph, "#hero has no <p>");
+  const collapse = (text) => text.replace(/\s+/g, " ").trim();
+  const organization = nodeOfType(jsonLdBlocks(html)[0], "Organization");
+  assert.equal(
+    collapse(organization.description),
+    collapse(paragraph[1]),
+    "lib/schema.js organizationDescription and the hero paragraph in src/index.njk differ: update both together",
+  );
+});
+
 test("(footer) social icons come from site.social (D-13)", () => {
   const footer = block(read(outDirs.root, "index.html"), "footer");
   const icons = footer.match(/<a\s[^>]*class="social-icon"[^>]*>/g) || [];
