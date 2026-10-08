@@ -69,12 +69,12 @@ test("parsers return null for non-images", () => {
 
 test("the image tool is isolated from the site build (T-02-SC)", () => {
   const tool = readJson("tools/seo-images/package.json");
-  assert.equal(tool.dependencies.sharp, "0.35.4");
+  assert.equal(tool.dependencies.sharp, "0.35.5");
 
   const root = readJson("package.json");
   assert.equal(root.dependencies?.sharp, undefined, "sharp must not be a root dependency");
   assert.equal(root.devDependencies?.sharp, undefined, "sharp must not be a root devDependency");
 
   const lock = readJson("tools/seo-images/package-lock.json");
-  assert.equal(lock.packages["node_modules/sharp"].version, "0.35.4");
+  assert.equal(lock.packages["node_modules/sharp"].version, "0.35.5");
 });
