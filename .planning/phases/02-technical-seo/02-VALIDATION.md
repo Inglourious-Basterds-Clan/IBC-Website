@@ -83,7 +83,7 @@ Planned inside the tasks they verify (no separate stub wave):
 |----------|-------------|------------|-------------------|
 | Discord rich preview | SEO-03 | Third-party renderer | Paste deployed Pages URL into a private Discord channel; confirm title, description, 1200×630 image |
 | OG card visual quality | SEO-03 | Text layout/overflow is visual | Open generated OG image; headline fully inside frame, legible |
-| Rich Results / Schema validator | SEO-05 | External validator | Paste built `_site/index.html` into validator.schema.org; no errors |
+| Rich Results / Schema validator | SEO-05 | External validator | Paste the JSON-LD from the **deployed** page (view-source of the Pages URL), or from a build made with SITE_URL/PATH_PREFIX set, into validator.schema.org and the Rich Results Test **Code** tab; no errors. Never use the dev-server `_site` (localhost URLs; Google cannot fetch the logo), and RRT URL mode refuses the noindex preview |
 | IIS 404 status + httpErrors unlocked | SEO-07 | Production host only | From a remote machine: `curl -I https://<domena>/nie-istnieje` returns 404 with the Polish page |
 | sharp package legitimacy | T-02-SC | Trust decision, never auto-approved | 02-02 T1 blocking-human checkpoint before install |
 | Favicon in the tab, manifest panel | SEO-04 | Browser UI | 02-04 T3 human-check (dev server, light and dark theme) |

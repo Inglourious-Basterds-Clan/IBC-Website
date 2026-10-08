@@ -1,9 +1,9 @@
 ---
-status: diagnosed
+status: partial
 phase: 02-technical-seo
 source: [02-01-SUMMARY.md, 02-02-SUMMARY.md, 02-03-SUMMARY.md, 02-04-SUMMARY.md, 02-05-SUMMARY.md, 02-06-SUMMARY.md]
 started: 2026-10-08T20:07:47Z
-updated: 2026-10-08T20:33:00Z
+updated: 2026-10-08T20:36:01Z
 ---
 
 ## Current Test
@@ -29,10 +29,9 @@ expected: After pushing main so GitHub Pages redeploys, pasting the Pages URL in
 result: pass
 
 ### 5. Structured data validates
-expected: Paste the `<script type="application/ld+json">` block from the built _site/index.html (or the deployed URL) into https://validator.schema.org/ and https://search.google.com/test/rich-results. Both detect Organization and WebSite with no errors: alternateName includes "IBC", foundingDate 2018, three sameAs links. (The logo looks pale on white by design, D-12.)
-result: issue
-reported: "pass but google reports \"Nieprawidłowy URL w polu \"logo\" (opcjonalnie)\""
-severity: minor
+expected: Paste the JSON-LD from the DEPLOYED page (view-source of https://inglourious-basterds-clan.github.io/IBC-Website/) into https://validator.schema.org/ and the Code tab of https://search.google.com/test/rich-results (URL mode refuses the noindex preview; never paste the dev-server _site, which has localhost URLs). Both detect Organization and WebSite with no errors: alternateName includes "IBC", foundingDate 2018, three sameAs links. (The logo looks pale on white by design, D-12.)
+result: pass
+note: "First run pasted dev-server _site JSON-LD (logo http://localhost:8080/...) and got Nieprawidłowy URL w polu logo; re-run with the deployed snippet: user reported \"yeah. good now\""
 
 ### 6. Polish 404 page (FACTS-02)
 expected: With `npm run dev` running, open http://localhost:8080/nie-ma-takiej-strony/. You see the styled page in the site layout with heading "404 // UTRACONO SYGNAŁ", Polish letters render correctly, the home button goes to the home page and the Discord button opens the invite in a new tab. You are happy with the drafted FACTS-02 wording.
@@ -183,8 +182,8 @@ coverage_id: 02-06-D5
 ## Summary
 
 total: 30
-passed: 28
-issues: 1
+passed: 29
+issues: 0
 pending: 0
 skipped: 0
 blocked: 1
@@ -192,7 +191,9 @@ blocked: 1
 ## Gaps
 - gap_id: G-02-5
   truth: "Rich Results Test accepts the home Organization + WebSite graph with no errors or warnings, including the logo field"
-  status: failed
+  status: resolved
+  resolved_by: "Test-procedure correction (no code change): re-ran with deployed JSON-LD in RRT Code tab, no logo warning; 02-VALIDATION.md and UAT test 5 wording fixed"
+  resolved_at: 2026-10-08T20:36:01Z
   reason: "User reported: pass but google reports \"Nieprawidłowy URL w polu \"logo\" (opcjonalnie)\" (schema.org validator and the rest of the graph passed; deployed logo URL https://inglourious-basterds-clan.github.io/IBC-Website/assets/brand/ibc-logo-512.png is absolute and returns 200 image/png)"
   severity: minor
   test: 5
