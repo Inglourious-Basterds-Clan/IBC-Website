@@ -7,7 +7,11 @@
 // after a deploy, write it under a new name (og-default-v2.jpg) and update `ogImage`
 // in src/_data/site.js so the previews are fetched again.
 // Reads two fixed inputs, writes only the six fixed outputs below. No network access.
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+// The OG card text needs the Montserrat font (bold) installed on this machine: librsvg
+// takes fonts from the system, so the script stops instead of silently using a fallback
+// font (IN-05). The outputs are written all-or-nothing: every file is staged next to its
+// target first and renamed into place only after all six are staged.
+import { mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
@@ -59,10 +63,27 @@ function readRaster(path) {
   return buf;
 }
 
-function writeOutput(path, buf) {
-  mkdirSync(dirname(path), { recursive: true });
-  writeFileSync(path, buf);
-  process.stdout.write(`${path.slice(repoRoot.length + 1).replace(/\\/g, "/")} ${buf.length} bytes\n`);
+// IN-05: all-or-nothing write. Each buffer goes to <target>.tmp-<pid> in the target's folder
+// (same volume, so the rename cannot copy); only when all of them are staged are they renamed
+// over the committed files. A failure while staging deletes the staged files and leaves
+// every committed image untouched.
+function writeOutputs(entries) {
+  const staged = [];
+  try {
+    for (const [path, buf] of entries) {
+      mkdirSync(dirname(path), { recursive: true });
+      const tmp = `${path}.tmp-${process.pid}`;
+      writeFileSync(tmp, buf);
+      staged.push({ path, tmp, size: buf.length });
+    }
+  } catch (error) {
+    for (const { tmp } of staged) rmSync(tmp, { force: true });
+    fail(`could not stage the outputs, nothing was replaced: ${error.message}`);
+  }
+  for (const { path, tmp, size } of staged) {
+    renameSync(tmp, path);
+    process.stdout.write(`${path.slice(repoRoot.length + 1).replace(/\\/g, "/")} ${size} bytes\n`);
+  }
 }
 
 // PNG-embedded ICO: 6-byte header, one 16-byte entry per image, then the PNG files.
@@ -128,6 +149,24 @@ function overlaySvg() {
 </svg>`;
 }
 
+// IN-05: the card is designed for Montserrat bold. librsvg falls back silently when a family
+// is missing, so render a probe with Montserrat and with a family that cannot exist: equal
+// pixels mean Montserrat is not installed and the card would ship in a fallback font.
+async function checkCardFont() {
+  const probe = (family) =>
+    sharp(
+      Buffer.from(
+        `<svg xmlns="http://www.w3.org/2000/svg" width="600" height="120"><text x="10" y="90" font-family="${family}" font-weight="700" font-size="84">KLAN ARMA 3</text></svg>`
+      )
+    )
+      .raw()
+      .toBuffer();
+  const [montserrat, missing] = await Promise.all([probe("Montserrat"), probe("IBC-font-probe-not-installed")]);
+  if (montserrat.equals(missing)) {
+    fail("the Montserrat font (bold) is not installed, so the OG card text would use a fallback font; install it and rerun");
+  }
+}
+
 async function checkTextSafeArea() {
   const { data, info } = await sharp(Buffer.from(textSvg)).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
   if (info.width !== ogWidth || info.height !== ogHeight) fail(`text layer rendered at ${info.width}x${info.height}`);
@@ -145,6 +184,7 @@ async function checkTextSafeArea() {
 }
 
 async function makeOgCard(logoBuf, heroBuf) {
+  await checkCardFont();
   await checkTextSafeArea();
   const logo = await rose(logoBuf, logoBox.size);
   const jpeg = await sharp(heroBuf)
@@ -200,12 +240,14 @@ async function main() {
     .png()
     .toBuffer();
 
-  writeOutput(outputs.og, og);
-  writeOutput(outputs.appleTouch, appleTouch);
-  writeOutput(outputs.icon192, icon192);
-  writeOutput(outputs.icon512, master);
-  writeOutput(outputs.brandLogo, brandLogo);
-  writeOutput(outputs.favicon, favicon);
+  writeOutputs([
+    [outputs.og, og],
+    [outputs.appleTouch, appleTouch],
+    [outputs.icon192, icon192],
+    [outputs.icon512, master],
+    [outputs.brandLogo, brandLogo],
+    [outputs.favicon, favicon],
+  ]);
 }
 
 main().catch((error) => fail(error.message));

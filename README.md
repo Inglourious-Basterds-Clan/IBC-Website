@@ -217,6 +217,8 @@ npm --prefix tools/seo-images ci
 node tools/seo-images/make-seo-images.js
 ```
 
+Napis na karcie OG wymaga czcionki Montserrat (pogrubionej) zainstalowanej w systemie. Bez niej skrypt kończy się błędem, zamiast po cichu użyć innej czcionki. Skrypt podmienia pliki dopiero wtedy, gdy wszystkie sześć jest gotowych, więc błąd w trakcie nie zostawia mieszanki starych i nowych obrazków.
+
 **Zasada wersji karty OG:** Discord i Facebook zapamiętują obrazek po adresie. Jeśli karta zmienia się po wdrożeniu, zapisz ją pod nową nazwą (`og-default-v2.jpg`, potem `-v3` itd.) i popraw `ogImage` w `src/_data/site.js`. Wtedy podglądy pobiorą nowy obrazek.
 
 ## Struktura projektu
