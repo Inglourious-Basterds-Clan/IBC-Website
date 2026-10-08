@@ -5,7 +5,7 @@ Ten plik to rejestr tekstów roboczych napisanych przez Claude'a, które klan mu
 ## Znaczniki
 
 - W treści szablonu: komentarz HTML `<!-- TODO(FACTS-NN): krótki opis -->` obok tekstu roboczego.
-- W front matter strony: klucz `todo: "FACTS-NN"`. Nagłówek strony wypisuje go jako `<!-- TODO(FACTS-NN) -->`, dzięki czemu opis i podgląd linku na Discordzie zostają czyste.
+- W front matter strony: klucz `todo: "FACTS-NN"`. Jeśli strona ma kilka tekstów roboczych, podaj listę: `todo: ["FACTS-01", "FACTS-02"]`. Nagłówek strony wypisuje osobny komentarz `<!-- TODO(FACTS-NN) -->` dla każdego numeru, dzięki czemu opis i podgląd linku na Discordzie zostają czyste.
 
 `NN` to numer wiersza w tabeli poniżej. Komentarze Nunjucks `{# ... #}` nie są znacznikami: znikają z wyniku i bramka ich nie widzi.
 

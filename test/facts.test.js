@@ -1,10 +1,11 @@
 // D-05 / CONT-06: drafted-copy markers and FACTS.md stay in sync.
-// Markers are TODO(FACTS-NN) in a template (an HTML comment) or `todo: "FACTS-NN"` in front
-// matter, which the head renders as <!-- TODO(FACTS-NN) -->. No draft ID is pinned here:
+// Markers are TODO(FACTS-NN) in a template (an HTML comment) or `todo: "FACTS-NN"` (or a list
+// of ids) in front matter, which the head renders as one <!-- TODO(FACTS-NN) --> per id. No draft ID is pinned here:
 // the user confirms drafts and removes markers, and this suite must stay green through that.
 import { before, test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { createRequire } from "node:module";
 import { join, relative } from "node:path";
 import { build, listFiles, repoRoot } from "./helpers.js";
 
@@ -13,7 +14,7 @@ const sourceExts = [".njk", ".md", ".html", ".js", ".css", ".json"];
 const srcDir = join(repoRoot, "src");
 
 // head.njk prints front-matter markers with this expression; it is the renderer, not a draft.
-const markerRenderer = "TODO({{ todo }})";
+const markerRenderer = "TODO({{ id }})";
 
 let rows;
 let sources;
@@ -34,11 +35,27 @@ function parseFacts(text) {
   }));
 }
 
-// FACTS-NN IDs of every marker in text: TODO(FACTS-NN) anywhere, todo: "FACTS-NN" in front matter.
+// FACTS-NN IDs of every marker in text: TODO(FACTS-NN) anywhere, plus every FACTS-NN in the
+// value of the front-matter todo key (IN-08): quoted or not, a single id, a [flow, list] or
+// an indented "- FACTS-NN" block list.
 function markerIds(text) {
   const inline = Array.from(text.matchAll(/\bTODO\((FACTS-\d+)\)/g), (match) => match[1]);
-  const frontMatter = Array.from(text.matchAll(/^todo:\s*"(FACTS-\d+)"\s*$/gm), (match) => match[1]);
-  return [...inline, ...frontMatter];
+  return [...inline, ...frontMatterTodoIds(text)];
+}
+
+function frontMatterTodoIds(text) {
+  const frontMatter = /^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/.exec(text);
+  if (!frontMatter) return [];
+  const lines = frontMatter[1].split(/\r?\n/);
+  const start = lines.findIndex((line) => /^todo\s*:/.test(line));
+  if (start === -1) return [];
+  // The todo line, then its indented continuation lines (a block list).
+  const value = [lines[start]];
+  for (const line of lines.slice(start + 1)) {
+    if (!/^\s+\S/.test(line)) break;
+    value.push(line);
+  }
+  return Array.from(value.join("\n").matchAll(/FACTS-\d+/g), (match) => match[0]);
 }
 
 // Map of marker ID -> source files that carry it.
@@ -102,4 +119,30 @@ test("every source marker reaches the build output", () => {
   for (const [id, files] of sourceMarkers()) {
     assert.ok(outputIds.has(id), `${id} (in ${[...files].join(", ")}) does not reach the output HTML, so G10 cannot see it`);
   }
+});
+
+// IN-08: the front-matter forms markerIds must see, so no drafted page escapes this cross-check.
+test("markerIds reads every front-matter todo form", () => {
+  const page = (todo) => `---\nlayout: x\n${todo}\ntitle: "y"\n---\n<p>body</p>\n`;
+  assert.deepEqual(markerIds(page('todo: "FACTS-07"')), ["FACTS-07"]);
+  assert.deepEqual(markerIds(page("todo: 'FACTS-07'")), ["FACTS-07"]);
+  assert.deepEqual(markerIds(page("todo: FACTS-07")), ["FACTS-07"]);
+  assert.deepEqual(markerIds(page('todo: ["FACTS-07", FACTS-08]')), ["FACTS-07", "FACTS-08"]);
+  assert.deepEqual(markerIds(page("todo:\n  - FACTS-07\n  - \"FACTS-08\"")), ["FACTS-07", "FACTS-08"]);
+  assert.deepEqual(markerIds(page("other: FACTS-09")), [], "a FACTS id outside the todo key is not a marker");
+  assert.deepEqual(markerIds("<p>todo: FACTS-09</p>\n"), [], "body text is not front matter");
+});
+
+// IN-08: head.njk renders one TODO(FACTS-NN) comment per id, for a single id and for a list,
+// with the Nunjucks that Eleventy itself uses.
+test("head.njk renders one marker per front-matter todo id", () => {
+  const eleventyRequire = createRequire(join(repoRoot, "node_modules", "@11ty", "eleventy", "cmd.cjs"));
+  const nunjucks = eleventyRequire("nunjucks");
+  const head = readFileSync(join(srcDir, "_includes", "partials", "head.njk"), "utf8");
+  const line = head.split(/\r?\n/).find((text) => text.includes(markerRenderer));
+  assert.ok(line, `head.njk has no line with ${markerRenderer}`);
+  const render = (todo) => Array.from(nunjucks.renderString(line, { todo }).matchAll(/TODO\((FACTS-\d+)\)/g), (match) => match[1]);
+  assert.deepEqual(render("FACTS-07"), ["FACTS-07"]);
+  assert.deepEqual(render(["FACTS-07", "FACTS-08"]), ["FACTS-07", "FACTS-08"]);
+  assert.deepEqual(render(undefined), []);
 });
