@@ -7,7 +7,7 @@ eleventyExcludeFromCollections: true
     500.19 for a duplicate. No URL Rewrite, redirects or errorMode: those are server setup. -#}
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-  <!-- GitHub Pages ignores this file; IIS reads it (and never serves it). -->
+  <!-- Only IIS interprets this file (and IIS never serves it). GitHub Pages publishes it as a plain download, so never put secrets or internal paths here. -->
   <system.webServer>
     <httpErrors>
       <remove statusCode="404" subStatusCode="-1" />
