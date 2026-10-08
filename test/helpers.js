@@ -2,10 +2,15 @@
 // pull values out of the generated HTML. Eleventy is spawned directly with
 // node (never through a shell), so Git Bash cannot rewrite PATH_PREFIX.
 import { spawnSync } from "node:child_process";
-import { readdirSync, readFileSync, rmSync } from "node:fs";
-import { extname, join, resolve } from "node:path";
+import { readFileSync, rmSync } from "node:fs";
+import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import assert from "node:assert/strict";
+import { block, escapeRegExp, listFiles } from "../lib/html.js";
+
+// listFiles and block are the gate's own copies (lib/html.js, IN-02), re-exported so the
+// tests and the gate can never disagree on how the build output is read.
+export { block, listFiles };
 
 export const repoRoot = resolve(fileURLToPath(new URL("..", import.meta.url)));
 
@@ -24,10 +29,6 @@ const buildEnvKeys = [
   "ALLOW_LOCAL_SITE_URL",
   "SITE_INDEXABLE",
 ];
-
-function escapeRegExp(text) {
-  return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
 
 // Copy of process.env without any build env key (case-insensitive), plus the variant env.
 export function cleanEnv(env = {}) {
@@ -68,31 +69,9 @@ export function read(outDir, relPath) {
   return readFileSync(join(outDir, relPath), "utf8");
 }
 
-// Recursive list of absolute file paths under dir whose extension is in exts (e.g. [".html"]).
-export function listFiles(dir, exts) {
-  const found = [];
-  for (const entry of readdirSync(dir, { withFileTypes: true })) {
-    const full = join(dir, entry.name);
-    if (entry.isDirectory()) found.push(...listFiles(full, exts));
-    else if (exts.includes(extname(entry.name).toLowerCase())) found.push(full);
-  }
-  return found;
-}
-
 // Every double-quoted value of attribute attr. The name must follow whitespace,
 // so attrValues(html, "src") never returns data-src values.
 export function attrValues(html, attr) {
   const pattern = new RegExp(`\\s${escapeRegExp(attr)}="([^"]*)"`, "g");
   return Array.from(html.matchAll(pattern), (match) => match[1]);
-}
-
-// From the first <tag (followed by whitespace or ">") up to and including the first </tag>.
-// block(html, "head") never matches <header>. Returns "" when the tag is missing.
-export function block(html, tag) {
-  const open = new RegExp(`<${escapeRegExp(tag)}(?=[\\s>])`).exec(html);
-  if (!open) return "";
-  const closeTag = `</${tag}>`;
-  const end = html.indexOf(closeTag, open.index);
-  if (end === -1) return "";
-  return html.slice(open.index, end + closeTag.length);
 }

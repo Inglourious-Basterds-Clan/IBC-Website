@@ -7,6 +7,7 @@
 // eleventy.config.js imports this file, so pathPrefix has exactly one source.
 // SITE_INDEXABLE=1 (exactly "1") is the only way to let search engines index a build (D-15):
 // it is opt-in for the final cutover only, and the GitHub Pages workflow never sets it.
+import { localHosts } from "../../lib/seo.js";
 
 const localUrl = "http://localhost:8080";
 const rawUrl = (process.env.SITE_URL || "").trim();
@@ -60,7 +61,6 @@ if (rawPrefix && !rawPrefix.split("/").every(validSegment)) {
 
 // Strict "1", like ALLOW_LOCAL_SITE_URL: "true" or "yes" keep the build noindex.
 const indexable = process.env.SITE_INDEXABLE === "1";
-const localHosts = ["localhost", "127.0.0.1", "[::1]"];
 if (indexable && (parsedUrl.protocol !== "https:" || localHosts.includes(parsedUrl.hostname))) {
   throw new Error(
     `SITE_INDEXABLE=1 needs a real https SITE_URL; this build would let search engines index ${url} ` +

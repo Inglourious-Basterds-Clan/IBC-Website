@@ -12,10 +12,11 @@ import { existsSync, renameSync, rmSync } from "node:fs";
 import { isAbsolute, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import site from "../src/_data/site.js";
-import { checkSite, listFiles } from "../lib/check-seo.js";
+import { checkSite } from "../lib/check-seo.js";
+import { listFiles } from "../lib/html.js";
+import { localHosts } from "../lib/seo.js";
 
 const repoRoot = resolve(fileURLToPath(new URL("..", import.meta.url)));
-const localHosts = ["localhost", "127.0.0.1", "[::1]"];
 
 // One line naming the kind of build being checked (Pitfall 9, R2-WR-03).
 function banner(site) {
