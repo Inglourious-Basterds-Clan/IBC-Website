@@ -75,6 +75,15 @@ test("(a) one absolute canonical per page in root, prefix and mutated builds", (
   assert.equal(canonical(mutatedBuild(), "index.html"), "https://mutated.example/IBC-Website/");
 });
 
+test("(a2) SITE_URL is emitted as its normalised origin (WR-04)", () => {
+  const out = build("seo-mixed-case-url", { SITE_URL: "HTTPS://Guard.EXAMPLE:443/" });
+  const home = read(out, "index.html");
+  assert.equal(canonical(out, "index.html"), "https://guard.example/");
+  assert.ok(home.includes('<meta property="og:image" content="https://guard.example/assets/'), "og:image does not use the normalised origin");
+  assert.ok(!/HTTPS:|Guard\.EXAMPLE|:443/.test(home), "the raw SITE_URL spelling leaked into the page");
+  assert.ok(read(out, "sitemap.xml").includes("<loc>https://guard.example/</loc>"), "sitemap does not use the normalised origin");
+});
+
 test("(b) noindex everywhere unless SITE_INDEXABLE=1", () => {
   for (const { relPath } of htmlFiles(rootBuild())) {
     assert.equal(noindexCount(rootDir, relPath), 1, `${relPath} must carry the noindex tag exactly once`);

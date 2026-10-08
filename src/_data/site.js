@@ -17,13 +17,13 @@ if (!rawUrl && process.env.ELEVENTY_RUN_MODE === "build" && process.env.ALLOW_LO
       "or ALLOW_LOCAL_SITE_URL=1 for a local/test build that is never deployed.",
   );
 }
-const url = (rawUrl || localUrl).replace(/\/+$/, "");
+const candidateUrl = (rawUrl || localUrl).replace(/\/+$/, "");
 
 // SITE_URL must be an origin (WR-01): a path, query or hash would break every absolute URL.
 // Runs after the local default is applied, so the default is validated too.
 let parsedUrl = null;
 try {
-  parsedUrl = new URL(url);
+  parsedUrl = new URL(candidateUrl);
 } catch {
   parsedUrl = null;
 }
@@ -37,10 +37,13 @@ if (
   parsedUrl.password
 ) {
   throw new Error(
-    `SITE_URL "${rawUrl || url}" is not an origin like https://<domain>: use the scheme and domain only, ` +
+    `SITE_URL "${rawUrl || candidateUrl}" is not an origin like https://<domain>: use the scheme and domain only, ` +
       'with no path, query or hash (README.md, "Wdrożenie").',
   );
 }
+// Emit the normalised origin, not the raw value (WR-04): lowercase scheme and host, no
+// default port, no trailing slash. HTTPS://Example.ORG:443 becomes https://example.org.
+const url = parsedUrl.origin;
 
 const rawPrefix = (process.env.PATH_PREFIX || "").trim().replace(/^\/+|\/+$/g, "");
 const pathPrefix = rawPrefix ? `/${rawPrefix}/` : "/";
