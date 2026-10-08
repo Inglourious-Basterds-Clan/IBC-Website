@@ -379,6 +379,16 @@ test("G7 <loc> outside the base", () => {
   assertProblem(check("g7-foreign", { "sitemap.xml": sitemap }), "sitemap.xml: G7 <loc> https://evil.example/ is not under");
 });
 
+// IN-04: a <loc> with backslash ".." segments must not reach a page outside the build folder.
+// On Windows path.join reads "\" as a separator, so this <loc> resolves to a real indexable
+// page in a sibling folder; the gate must still report it.
+test("G7 <loc> with backslash .. segments escaping the build folder (IN-04)", () => {
+  writeFixture("g7-traversal-outside", { "index.html": validPage(fixtureBase, "/") });
+  const loc = `${fixtureBase}about\\..\\..\\g7-traversal-outside\\index.html`;
+  const sitemap = validSitemap(fixtureBase, ["/", "/about/"]).replace("</urlset>", `  <url><loc>${loc}</loc></url>\n</urlset>`);
+  assertProblem(check("g7-traversal", { "sitemap.xml": sitemap }), `sitemap.xml: G7 <loc> ${loc} points at`);
+});
+
 test("G8 missing robots.txt", () => {
   assertProblem(check("g8-missing", { "robots.txt": null }), "robots.txt: G8 missing");
 });
