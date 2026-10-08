@@ -113,7 +113,7 @@ Recent decisions affecting current work:
 
 ### Pending Todos
 
-None yet.
+- [2026-10-08] [general] Fix mobile LCP and render-blocking CSS in Phase 3 — [todo file](.planning/todos/pending/2026-10-08-fix-mobile-lcp-and-render-blocking-css-in-phase-3.md) — Needs Feed into Phase 3 planning, in this order:.
 
 ### Blockers/Concerns
 
