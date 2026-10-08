@@ -11,7 +11,7 @@ Ten plik to rejestr tekstów roboczych napisanych przez Claude'a, które klan mu
 
 ## Co blokuje znacznik
 
-- Build indeksowalny (`SITE_INDEXABLE=1`, docelowa domena) kończy się błędem, dopóki w wyniku jest jakikolwiek znacznik `TODO` (reguła G10 w `scripts/check-seo.js`).
+- Build indeksowalny (`SITE_INDEXABLE=1`, docelowa domena) kończy się błędem, dopóki w wyniku jest jakikolwiek znacznik `TODO` (reguła G10 w `lib/check-seo.js`, uruchamiana po buildzie przez `scripts/check-seo.js`).
 - Podgląd na GitHub Pages (zawsze `noindex`) i `npm run dev` działają z tekstami roboczymi, więc można je obejrzeć na żywo.
 
 ## Jak potwierdzić tekst
