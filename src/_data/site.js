@@ -64,6 +64,14 @@ if (indexable && (parsedUrl.protocol !== "https:" || localHosts.includes(parsedU
       "(README.md, cutover checklist).",
   );
 }
+// Crawlers read robots.txt (and its Sitemap line) only at the host root (WR-02), so an
+// indexable build under a subfolder would publish a robots.txt no crawler ever fetches.
+if (indexable && pathPrefix !== "/") {
+  throw new Error(
+    `SITE_INDEXABLE=1 needs PATH_PREFIX=/ (robots.txt is only read at the host root), got ${pathPrefix} ` +
+      "(README.md, cutover checklist).",
+  );
+}
 
 export default {
   url, // no trailing slash; absolute URLs = url + pathPrefix + page path

@@ -100,6 +100,7 @@ Każdy build ma na każdej stronie `<meta name="robots" content="noindex">`, czy
 - Workflow GitHub Pages nigdy nie ustawia `SITE_INDEXABLE`, więc strona na GitHub Pages zawsze jest podglądem z `noindex`.
 - `SITE_INDEXABLE=1` ustawiasz tylko przy buildzie na docelowy serwer IIS (patrz „Przeniesienie na docelową domenę (IIS)”).
 - Taki build wymaga prawdziwego adresu `https://` w `SITE_URL` (z `localhost` albo `http://` kończy się błędem).
+- Taki build wymaga `PATH_PREFIX=/` (z podfolderem kończy się błędem), bo wyszukiwarki czytają `robots.txt` tylko z katalogu głównego domeny.
 - Taki build kończy się błędem, dopóki w `FACTS.md` są niepotwierdzone teksty robocze (patrz „Teksty robocze (FACTS.md)”).
 
 **PowerShell:**

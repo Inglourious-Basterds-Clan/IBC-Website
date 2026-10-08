@@ -101,6 +101,12 @@ test("(c) SITE_INDEXABLE=1 refuses localhost and http", () => {
   }
 });
 
+test("(c2) SITE_INDEXABLE=1 refuses a non-root PATH_PREFIX (WR-02)", () => {
+  const { result } = runBuild("seo-indexable-prefix", { SITE_INDEXABLE: "1", SITE_URL: "https://example.org", PATH_PREFIX: "/foo/" });
+  assert.notEqual(result.status, 0, "an indexable build under /foo/ was accepted; crawlers never read /foo/robots.txt");
+  assert.ok(result.stderr.includes("SITE_INDEXABLE=1 needs PATH_PREFIX=/"), `guard message missing:\n${result.stderr}`);
+});
+
 test("(d) malformed SITE_URL or PATH_PREFIX fails the build", () => {
   const badUrls = ["ibc.example", "https://example.org/sub", "https://example.org/?x=1"];
   badUrls.forEach((siteUrl, index) => {
