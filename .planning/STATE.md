@@ -4,10 +4,10 @@ current_phase: 02
 current_phase_name: Technical SEO
 status: verifying
 stopped_at: Completed 02-06-PLAN.md
-last_updated: "2026-10-07T19:26:21.718Z"
-last_activity: 2026-10-07
+last_updated: "2026-10-08T20:56:13.822Z"
+last_activity: 2026-10-08
 last_activity_desc: Phase 02 execution started
-state_head: 60b1ef883b51d6cf2e75a376469dfea6219be7a9
+state_head: 03ce0deb00b6d8e2c653b2c7e90d96db790146b7
 progress:
   total_phases: 5
   completed_phases: 1
@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-10-06)
 Phase: 02 (Technical SEO) — EXECUTING
 Plan: 6 of 6
 Status: Phase complete — ready for verification
-Last activity: 2026-10-07 — Phase 02 execution started
+Last activity: 2026-10-08 - Completed quick task 261008-vmd: Bump sharp to 0.35.5 in tools/seo-images
 
 Progress: [██░░░░░░░░] 20%
 
@@ -99,6 +99,7 @@ Recent decisions affecting current work:
 - [Phase 02]: check-seo gate output is '<relPath>: G<n> <text>' sorted by file then rule; banner (LOCAL/INDEXABLE/preview) printed on every run
 - [Phase 02]: Indexing is opt-in only: SITE_INDEXABLE exactly "1" on an https non-local SITE_URL; site.js holds the SEO config contract (shortName, locale, themeColor, indexable, ogImage, ogImageAlt, social)
 - [Phase 02]: 02-02: kept human-approved sharp 0.35.4 despite GHSA-wq5f-xc86-pv6w (fixed in 0.35.5); tool decodes only self-built SVG, inputs signature-checked; upgrade needs user vetting of 0.35.5
+- [Quick 261008-vmd]: sharp bumped to user-vetted 0.35.5 in tools/seo-images (supersedes the 0.35.4 decision above, closes T-02-ADV-01); committed SEO images not regenerated
 - [Phase 02]: 02-02: lib/image-size.js is the shared header reader for committed SEO images (tests, 02-04 G3, 02-05 logo check)
 - [Phase 02]: Home title falls back to site.name so <title> is never empty (SEO-01 empty edge)
 - [Phase 02]: G10 problems are <relPath>:<line>: G10 unconfirmed draft marker TODO(FACTS-NN); gate output sorted by file, rule, text
@@ -124,6 +125,12 @@ Recent decisions affecting current work:
 - [Phase 4]: Needs clan facts from the user (schedule, modpack, DLC, join steps, play style, honest member metric) to confirm in FACTS.md.
 - [Phase 2/4]: The TODO-marker gate (SEO-08) should fail production builds only, so Phase 4 drafting can still build in dev.
 - [Phase 5]: Run `/gsd-ui-phase` first (UI-SPEC: identity inventory, effect budget, HUD font).
+
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 261008-vmd | Bump sharp to 0.35.5 in tools/seo-images | 2026-10-08 | 03ce0de | [261008-vmd-bump-sharp-to-0-35-5-in-tools-seo-images](./quick/261008-vmd-bump-sharp-to-0-35-5-in-tools-seo-images/) |
 
 ## Deferred Items
 
