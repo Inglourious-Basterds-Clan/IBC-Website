@@ -387,6 +387,16 @@ test("G8 Disallow: / line", () => {
   assertProblem(check("g8-disallow", { "robots.txt": "User-agent: *\nDisallow: /\n" }), "robots.txt: G8");
 });
 
+test("G8 other spellings that block the whole site (WR-05)", () => {
+  const spellings = ["Disallow:/", "Disallow: /*", "Disallow:  /", "disallow : /", "Disallow: / # preview"];
+  spellings.forEach((line, index) => {
+    const problems = check(`g8-disallow-${index}`, { "robots.txt": `User-agent: *\n${line}\n` });
+    assertProblem(problems, 'robots.txt: G8 "Disallow: /" hides the noindex');
+  });
+  // A rule for one folder does not block the site.
+  assert.deepEqual(check("g8-disallow-folder", { "robots.txt": "User-agent: *\nDisallow: /_dev/\n" }), []);
+});
+
 test("G8 indexable site without the Sitemap line", () => {
   const problems = check("g8-no-sitemap-line", { "robots.txt": validRobots(fixtureBase, false) }, indexableSite);
   assertProblem(problems, "robots.txt: G8 missing \"Sitemap:");
