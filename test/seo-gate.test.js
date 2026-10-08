@@ -361,6 +361,19 @@ test("G7 <loc> pointing at a non-indexable page", () => {
   assertProblem(check("g7-404", { "sitemap.xml": sitemap }), `sitemap.xml: G7 <loc> ${fixtureBase}404.html points at`);
 });
 
+test("isIndexableUrl accepts HTML pages only (WR-03)", () => {
+  for (const url of ["/", "/o-nas/", "/strona.html"]) assert.equal(isIndexableUrl(url), true, url);
+  for (const url of ["/feed.xml", "/search.json", "/robots.txt", "/site.webmanifest", "/404.html", "/_dev/og/", ""]) {
+    assert.equal(isIndexableUrl(url), false, url);
+  }
+});
+
+test("G7 <loc> pointing at a non-HTML output (WR-03)", () => {
+  const sitemap = validSitemap(fixtureBase, ["/", "/about/", "/feed.xml"]);
+  const problems = check("g7-feed", { "sitemap.xml": sitemap, "feed.xml": '<?xml version="1.0"?><feed/>\n' });
+  assertProblem(problems, `sitemap.xml: G7 <loc> ${fixtureBase}feed.xml points at`);
+});
+
 test("G7 <loc> outside the base", () => {
   const sitemap = validSitemap(fixtureBase, ["/", "/about/"]).replace("</urlset>", "  <url><loc>https://evil.example/</loc></url>\n</urlset>");
   assertProblem(check("g7-foreign", { "sitemap.xml": sitemap }), "sitemap.xml: G7 <loc> https://evil.example/ is not under");
