@@ -620,6 +620,15 @@ test("G3 declared og:image:width does not match the file", () => {
   assertProblem(g3About("g3-width", { width: "1000" }), "about/index.html: G3 og:image:width 1000 does not match assets/og.png (1200)");
 });
 
+test("G3 duplicate og:image:width/height tags, even when the first one matches (IN-07)", () => {
+  const extraSize = ['<meta property="og:image:width" content="1000">', '<meta property="og:image:height" content="630">'];
+  const page = validPage(fixtureBase, "/about/").replace("</head>", `  ${extraSize.join("\n  ")}\n</head>`);
+  const problems = check("g3-duplicate-size", { "about/index.html": page });
+  assertProblem(problems, "about/index.html: G3 2 og:image:width tags, expected at most one");
+  assertProblem(problems, "about/index.html: G3 2 og:image:height tags, expected at most one");
+  assert.equal(problems.length, 2, problems.join("\n"));
+});
+
 test("G3 indexable page needs a 1200x630 og:image; a /_dev/ page may use another size", () => {
   const small = { image: fixtureBase + "assets/small.png", width: null, height: null };
   const problems = check("g3-small", {
