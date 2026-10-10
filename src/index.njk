@@ -6,7 +6,9 @@ todo: "FACTS-01"
 ---
     <!-- HERO SECTION -->
     <section id="hero" class="hero">
-      <div class="hero-image-bg"></div>
+      <div class="hero-image-bg">
+        {% picture images.hero, { "alt": "", "class": "hero-img", "sizes": "100vw", "loading": "eager", "fetchpriority": "high", "decoding": "async" } %}
+      </div>
       <div class="hero-container">
         <!-- Hero Text -->
         <div class="hero-text">

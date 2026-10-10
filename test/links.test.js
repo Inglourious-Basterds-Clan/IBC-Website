@@ -38,10 +38,15 @@ const resolverVariants = [
   { name: "prefix", prefix: "/IBC-Website/" },
 ];
 
-// href, src and data-src values plus the URL token of every srcset candidate.
+// href, src, data-src and data-lightbox-* values plus the URL token of every srcset and
+// imagesrcset candidate. imagesrcset and data-* are not rewritten by HtmlBasePlugin (Pitfall 1),
+// so they are the prefix-sensitive URLs most likely to break under /IBC-Website/.
 function urlValues(html) {
   const values = [...attrValues(html, "href"), ...attrValues(html, "src"), ...attrValues(html, "data-src")];
-  for (const srcset of attrValues(html, "srcset")) {
+  for (const attr of ["data-lightbox-avif", "data-lightbox-webp", "data-lightbox-jpeg"]) {
+    values.push(...attrValues(html, attr));
+  }
+  for (const srcset of [...attrValues(html, "srcset"), ...attrValues(html, "imagesrcset")]) {
     for (const candidate of srcset.split(",")) {
       const token = candidate.trim().split(/\s+/)[0];
       if (token) values.push(token);
@@ -109,7 +114,7 @@ test("(b) CSS url() targets resolve from css/ in both builds", () => {
     const targets = Array.from(css.matchAll(/url\(\s*(['"]?)([^'")]+)\1\s*\)/g), (match) => match[2].trim()).filter(
       (value) => !/^(https?:|data:)/i.test(value),
     );
-    assert.ok(targets.length >= 1, `${variant.name}: no local url() found in css/style.css`);
+    // No minimum count: the hero was the stylesheet's only url() (03-01); 03-05 restores it with the font url().
     for (const value of targets) {
       const target = resolve(outDir, "css", value.replace(/[#?].*$/, ""));
       assert.ok(existsSync(target), `${variant.name}: css url(${value}) points at a missing file`);

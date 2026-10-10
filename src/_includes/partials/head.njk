@@ -18,6 +18,11 @@
   {# D-04: description comes from front matter only, no site-wide fallback #}
   {% if description %}<meta name="description" content="{{ description }}">{% endif %}
 
+  {#- D-03: preload the hero (LCP) on the home page only. Typed AVIF only: several typed preloads would all
+      download. HtmlBasePlugin never rewrites <link imagesrcset>, so each URL goes through htmlBaseUrl once (Pitfall 1).
+      imagesizes must equal the img sizes, or the browser fetches a second candidate. #}
+  {% if isHome %}<link rel="preload" as="image" type="image/avif" fetchpriority="high" imagesizes="100vw" imagesrcset="{% for e in images.hero.avif %}{{ e.url | htmlBaseUrl }} {{ e.width }}w{% if not loop.last %}, {% endif %}{% endfor %}">
+  {% endif %}
   <!-- Stylesheets & Preconnect -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
