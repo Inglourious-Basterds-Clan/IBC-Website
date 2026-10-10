@@ -19,8 +19,8 @@ import sharp from "sharp";
 const repoRoot = resolve(fileURLToPath(new URL("../..", import.meta.url)));
 
 const inputs = {
-  logo: join(repoRoot, "src/assets/logo.png"),
-  hero: join(repoRoot, "src/assets/hero-bg.jpg"),
+  logo: join(repoRoot, "src/images/logo.png"),
+  hero: join(repoRoot, "src/images/hero-bg.jpg"),
 };
 
 const outputs = {
