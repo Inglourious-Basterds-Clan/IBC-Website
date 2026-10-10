@@ -259,6 +259,14 @@ a:hover {
   box-shadow: 0 0 15px var(--accent-glow-strong);
 }
 
+/* Inline SVG icons (D-11): Font Awesome's own SVG sizing rule, so glyph, size and baseline match the old webfont (D-15) */
+.icon {
+  display: inline-block;
+  height: 1em;
+  overflow: visible;
+  vertical-align: -0.125em;
+}
+
 /* --- HEADER / NAVIGATION --- */
 header {
   position: fixed;

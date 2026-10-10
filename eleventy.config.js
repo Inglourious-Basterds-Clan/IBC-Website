@@ -6,6 +6,7 @@ import site from "./src/_data/site.js";
 import { isIndexableUrl } from "./lib/seo.js";
 import { buildSchemaGraph, jsonLd } from "./lib/schema.js";
 import { processImages } from "./lib/images.js";
+import { renderIcon } from "./lib/icons.js";
 
 export default function (eleventyConfig) {
   // Rewrites root-relative href/src/srcset with pathPrefix and provides the htmlBaseUrl filter.
@@ -23,6 +24,9 @@ export default function (eleventyConfig) {
   eleventyConfig.addGlobalData("images", async () => (await processImages()).images);
   // Sync on purpose (D-01): async shortcodes break inside Nunjucks {% for %} and macros.
   eleventyConfig.addShortcode("picture", (metadata, attrs) => Image.generateHTML(metadata, attrs));
+  // Inline SVG icons (D-11): lib/icons.js holds the paths; an unknown name throws and fails the build.
+  // Sync like picture, so it works inside the footer {% for %} loop.
+  eleventyConfig.addShortcode("icon", renderIcon);
   // Copy exactly the variants the pages use into <output>/img/ (respects --output). .cache/img is
   // never passthrough-copied: it can hold stale variants from earlier presets (T-03-03).
   eleventyConfig.on("eleventy.after", async ({ directories }) => {
