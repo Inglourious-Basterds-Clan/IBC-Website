@@ -8,6 +8,7 @@
   "scripts": {
     "dev": "eleventy --serve",
     "build": "node scripts/clean.js && eleventy && node scripts/check-seo.js",
+    "pretest": "node scripts/warm-images.js",
     "test": "node --test \"test/*.test.js\""
   },
   "devDependencies": {
