@@ -3,16 +3,16 @@ gsd_state_version: "1.0"
 current_phase: 03
 current_phase_name: performance-assets
 status: executing
-stopped_at: Completed 03-06-PLAN.md
-last_updated: "2026-10-10T20:38:08.019Z"
+stopped_at: Completed 03-07-PLAN.md
+last_updated: "2026-10-10T20:45:57.912Z"
 last_activity: 2026-10-10
 last_activity_desc: Phase 2 complete, transitioned to Phase 3
-state_head: d3f94a88a0b3e37c022b47fd28a66fc935518e9f
+state_head: 5ef8f7e4d6c9416f5545879dee9da0321e58e39f
 progress:
   total_phases: 5
   completed_phases: 2
   total_plans: 24
-  completed_plans: 19
+  completed_plans: 20
   percent: 40
 ---
 
@@ -28,9 +28,9 @@ See: .planning/PROJECT.md (updated 2026-10-08)
 ## Current Position
 
 Phase: 03 (performance-assets) — EXECUTING
-Plan: 7 of 11
-Status: Executing (03-06 complete)
-Last activity: 2026-10-10 — Completed 03-06 (originals moved to unshipped src/images/, duplicate hero.jpg deleted, never-ship guards)
+Plan: 8 of 11
+Status: Executing (03-07 complete)
+Last activity: 2026-10-10 — Completed 03-07 (Font Awesome CDN replaced by inline aria-hidden SVG icons from lib/icons.js via {% icon %})
 
 Progress: [████░░░░░░] 40%
 
@@ -76,6 +76,7 @@ Progress: [████░░░░░░] 40%
 | Phase 03 P04 | 7 min | 2 tasks | 7 files |
 | Phase 03 P05 | 33 min | 2 tasks | 7 files |
 | Phase 03 P06 | 5 min | 2 tasks | 14 files |
+| Phase 03 P07 | 5 min | 2 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -132,6 +133,9 @@ Recent decisions affecting current work:
 - [Phase 03]: 03-05: font preload sits directly before the stylesheets with crossorigin (fetched once; HtmlBasePlugin prefixes it); glyph coverage check also decodes numeric character references
 - [Phase 03]: 03-05: until 03-07 the Network Font filter also shows fa-brands-400.woff2 from the Font Awesome CDN; the only text font is the local Montserrat woff2 and nothing loads from Google font hosts
 - [Phase 03]: 03-06: originals live in unshipped src/images/ (git mv); anything under src/assets/ is published as is; never-ship tests compare output base names to git ls-files src/images
+- [Phase 03]: 03-07: renderIcon takes no label; accessible names stay on the links (aria-label or visible text) and every SVG is aria-hidden/focusable=false
+- [Phase 03]: 03-07: icon names checked with Object.hasOwn on a frozen table (inherited names throw); extra class must match ^[a-z0-9-]+$ (T-03-14)
+- [Phase 03]: 03-07: no-Font-Awesome guard scans every shipped text file for cdnjs, the literal font-awesome and fab/fa-* tokens
 
 ### Pending Todos
 
@@ -163,6 +167,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-10-10T20:38:07.897Z
-Stopped at: Completed 03-06-PLAN.md
+Last session: 2026-10-10T20:45:57.794Z
+Stopped at: Completed 03-07-PLAN.md
 Resume file: None
