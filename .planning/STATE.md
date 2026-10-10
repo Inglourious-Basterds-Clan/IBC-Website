@@ -3,16 +3,16 @@ gsd_state_version: "1.0"
 current_phase: 03
 current_phase_name: performance-assets
 status: executing
-stopped_at: Phase 03 UI-SPEC approved
-last_updated: "2026-10-10T20:31:07.121Z"
+stopped_at: Completed 03-06-PLAN.md
+last_updated: "2026-10-10T20:38:08.019Z"
 last_activity: 2026-10-10
 last_activity_desc: Phase 2 complete, transitioned to Phase 3
-state_head: dc0e4d0b00e7d9ad986fe46e3fd9781c2e89021a
+state_head: d3f94a88a0b3e37c022b47fd28a66fc935518e9f
 progress:
   total_phases: 5
   completed_phases: 2
   total_plans: 24
-  completed_plans: 18
+  completed_plans: 19
   percent: 40
 ---
 
@@ -28,9 +28,9 @@ See: .planning/PROJECT.md (updated 2026-10-08)
 ## Current Position
 
 Phase: 03 (performance-assets) — EXECUTING
-Plan: 6 of 11
-Status: Executing (03-05 complete)
-Last activity: 2026-10-10 — Completed 03-05 (self-hosted Montserrat, build-output font guards, IIS MIME types)
+Plan: 7 of 11
+Status: Executing (03-06 complete)
+Last activity: 2026-10-10 — Completed 03-06 (originals moved to unshipped src/images/, duplicate hero.jpg deleted, never-ship guards)
 
 Progress: [████░░░░░░] 40%
 
@@ -75,6 +75,7 @@ Progress: [████░░░░░░] 40%
 | Phase 03 P03 | 9 min | 2 tasks | 5 files |
 | Phase 03 P04 | 7 min | 2 tasks | 7 files |
 | Phase 03 P05 | 33 min | 2 tasks | 7 files |
+| Phase 03 P06 | 5 min | 2 tasks | 14 files |
 
 ## Accumulated Context
 
@@ -130,6 +131,7 @@ Recent decisions affecting current work:
 - [Phase 03]: 03-04: header logo is a 50/100 w AVIF/WebP/PNG picture with loading=lazy (D-16 wins over Pitfall 10); SEO images untouched (D-06)
 - [Phase 03]: 03-05: font preload sits directly before the stylesheets with crossorigin (fetched once; HtmlBasePlugin prefixes it); glyph coverage check also decodes numeric character references
 - [Phase 03]: 03-05: until 03-07 the Network Font filter also shows fa-brands-400.woff2 from the Font Awesome CDN; the only text font is the local Montserrat woff2 and nothing loads from Google font hosts
+- [Phase 03]: 03-06: originals live in unshipped src/images/ (git mv); anything under src/assets/ is published as is; never-ship tests compare output base names to git ls-files src/images
 
 ### Pending Todos
 
@@ -161,6 +163,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-10-10T20:31:06.983Z
-Stopped at: Phase 03 UI-SPEC approved
-Resume file: .planning/phases/03-performance-assets/03-UI-SPEC.md
+Last session: 2026-10-10T20:38:07.897Z
+Stopped at: Completed 03-06-PLAN.md
+Resume file: None

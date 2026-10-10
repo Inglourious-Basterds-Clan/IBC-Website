@@ -93,7 +93,7 @@ Plans:
   4. Each page loads a single minified CSS bundle, and the built HTML contains no inline `style=` attributes.
   5. JS features load as ES modules through `data-js` hooks. A page without the gallery, terminal or easter egg loads with no console errors and doesn't run that feature's code.
 
-**Plans**: 5/11 plans executed
+**Plans**: 6/11 plans executed
 
 Plans:
 **Wave 1**
@@ -106,7 +106,7 @@ Plans:
 - [x] 03-05-PLAN.md — Self-hosted font wired in (no Google Fonts), build-output glyph/preload guards, IIS MIME types (wave 2)
 
 **Wave 3** *(blocked on Wave 2 completion)*
-- [ ] 03-06-PLAN.md — Originals moved to unshipped src/images/, hero.jpg deleted, SEO tool and og-override follow; never-ship guards (wave 3)
+- [x] 03-06-PLAN.md — Originals moved to unshipped src/images/, hero.jpg deleted, SEO tool and og-override follow; never-ship guards (wave 3)
 - [ ] 03-07-PLAN.md — Inline SVG icons via {% icon %} with accessible names; Font Awesome CDN removed (wave 3)
 
 **Wave 4** *(blocked on Wave 3 completion)*
@@ -160,7 +160,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5. Phases 2 and 3 both 
 |-------|----------------|--------|-----------|
 | 1. Eleventy Foundation | 7/7 | Complete    | 2026-10-06 |
 | 2. Technical SEO | 6/6 | Complete    | 2026-10-08 |
-| 3. Performance & Assets | 5/11 | In Progress | - |
+| 3. Performance & Assets | 6/11 | In Progress | - |
 | 4. Join & Operations Pages | 0/TBD | Not started | - |
 | 5. Accessibility & Visual Refresh | 0/TBD | Not started | - |
 
