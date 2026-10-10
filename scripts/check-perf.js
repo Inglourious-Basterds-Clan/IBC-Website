@@ -14,7 +14,7 @@ import { existsSync, statSync } from "node:fs";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import site from "../src/_data/site.js";
-import { checkPerf } from "../lib/check-perf.js";
+import { BUDGET, checkPerf, measurePerf } from "../lib/check-perf.js";
 import { listFiles } from "../lib/html.js";
 import { removeRejectedOutput } from "../lib/reject-output.js";
 
@@ -43,8 +43,10 @@ function runCli(argv) {
   }
 
   let problems;
+  let sizes;
   try {
     problems = checkPerf(outDir, site);
+    if (problems.length === 0) sizes = measurePerf(outDir, site);
   } catch (error) {
     // T-03-09: a crash is a failed check, not a pass; the output is rejected like any other.
     reject(outDir, [`crashed: ${error && error.message ? error.message : String(error)}`], "the gate crashed");
@@ -53,6 +55,14 @@ function runCli(argv) {
 
   const pageCount = listFiles(outDir, [".html"]).length;
   process.stdout.write(`check-perf: OK, ${pageCount} page(s) checked\n`);
+  // The measured sizes against their caps, so 03-11 and later phases see the headroom (D-17).
+  process.stdout.write(
+    `check-perf: css ${sizes.cssGzipBytes} B gz (cap ${BUDGET.cssGzipMaxBytes}), ` +
+      `initial js ${sizes.initialJsGzipBytes} B gz (cap ${BUDGET.initialJsGzipMaxBytes}), ` +
+      `font ${sizes.fontBytes} B (cap ${BUDGET.fontMaxBytes}), ` +
+      `hero mobile max ${sizes.heroMobileMaxBytes} B (cap ${BUDGET.heroMobileMaxBytes}), ` +
+      `lightbox max ${sizes.lightboxMaxBytes} B (cap ${BUDGET.lightboxMaxBytes})\n`,
+  );
 }
 
 runCli(process.argv.slice(2));
