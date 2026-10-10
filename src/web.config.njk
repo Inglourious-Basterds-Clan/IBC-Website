@@ -3,8 +3,10 @@ permalink: /web.config
 eleventyExcludeFromCollections: true
 ---
 {#- D-16 minimal IIS config: the 404 page (pathPrefix-aware, server-relative as ExecuteURL needs)
-    and the .webmanifest MIME type. Each entry is preceded by a <remove>, so IIS never answers
-    500.19 for a duplicate. No URL Rewrite, redirects or errorMode: those are server setup. -#}
+    and the MIME types IIS lacks: .webmanifest, plus .avif, .webp and .woff2 for the Phase 3 images
+    and font (research A3; IIS answers 404.3 for an unmapped extension). Each entry is preceded by
+    a <remove>, so IIS never answers 500.19 where a mapping already exists. No URL Rewrite,
+    redirects or errorMode: those are server setup. -#}
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
   <!-- Only IIS interprets this file (and IIS never serves it). GitHub Pages publishes it as a plain download, so never put secrets or internal paths here. -->
@@ -16,6 +18,12 @@ eleventyExcludeFromCollections: true
     <staticContent>
       <remove fileExtension=".webmanifest" />
       <mimeMap fileExtension=".webmanifest" mimeType="application/manifest+json" />
+      <remove fileExtension=".avif" />
+      <mimeMap fileExtension=".avif" mimeType="image/avif" />
+      <remove fileExtension=".webp" />
+      <mimeMap fileExtension=".webp" mimeType="image/webp" />
+      <remove fileExtension=".woff2" />
+      <mimeMap fileExtension=".woff2" mimeType="font/woff2" />
     </staticContent>
   </system.webServer>
 </configuration>
