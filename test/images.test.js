@@ -2,7 +2,8 @@
 // The hero is a high-priority <picture> (D-03), the home head preloads its AVIF set with
 // prefix-safe URLs (Pitfall 1), every mobile candidate fits the 120 KB budget, the gallery
 // thumbnails are lazy responsive pictures, the lightbox targets are 1600 w variants under
-// 300 KB (D-04) and img/ ships only the variants some page references (T-03-03).
+// 300 KB (D-04), the header logo ships at 50/100 w and img/ ships only the variants some
+// page references (T-03-03).
 import { before, test } from "node:test";
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
@@ -203,6 +204,29 @@ test("the lightbox loads nothing at rest", () => {
   assert.equal(attr(img, "width"), "1600");
   assert.equal(attr(img, "height"), "900");
   assert.equal(attr(img, "loading"), "lazy");
+});
+
+test("logo is served at its display size (PERF-03)", () => {
+  for (const [name, outDir] of Object.entries(out)) {
+    const header = block(read(outDir, "index.html"), "header");
+    const pictures = header.match(/<picture>[\s\S]*?<\/picture>/g) || [];
+    assert.equal(pictures.length, 1, `${name}: expected one picture in the header, found ${pictures.length}`);
+    const [picture] = pictures;
+    assert.ok(picture.includes('<source type="image/avif"'), `${name}: logo picture has no image/avif source`);
+    assert.ok(picture.includes('<source type="image/webp"'), `${name}: logo picture has no image/webp source`);
+    const [img] = tags(picture, "img");
+    assert.ok(img, `${name}: logo picture has no img`);
+    assert.equal(attr(img, "class"), "logo-img");
+    assert.equal(attr(img, "alt"), "IBC Logo");
+    assert.equal(attr(img, "loading"), "lazy", "the logo is a non-hero image, so it loads lazily (D-16)");
+    assert.match(attr(img, "width") || "", /^\d+$/, `${name}: logo img has no width`);
+    assert.match(attr(img, "height") || "", /^\d+$/, `${name}: logo img has no height`);
+    assert.match(attr(img, "src"), /\.png$/, `${name}: logo img src must be the PNG fallback (transparency)`);
+    const urls = [attr(img, "src"), ...tags(picture, "source").flatMap((source) => candidates(attr(source, "srcset")).map(({ url }) => url))];
+    for (const url of urls) {
+      assert.match(url, /-(50|100)\.(avif|webp|png)$/, `${name}: logo variant "${url}" is not a 50 w or 100 w variant`);
+    }
+  }
 });
 
 test("img/ ships only referenced variants", () => {

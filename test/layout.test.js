@@ -111,7 +111,10 @@ test("home page keeps its Polish copy and its new head title (D-01, D-14)", () =
 });
 
 test("prefix build puts every internal URL under the prefix", () => {
-  assert.ok(prefixHtml.includes(`src="${prefix}assets/logo.png"`), "logo src missing the prefix");
+  const logoImg = (block(prefixHtml, "header").match(/<img\s[^>]*>/g) || []).find((tag) => tag.includes('class="logo-img"'));
+  assert.ok(logoImg, "header logo img missing");
+  const [logoSrc] = attrValues(logoImg, "src");
+  assert.ok(logoSrc && logoSrc.startsWith(`${prefix}img/`), `logo img src "${logoSrc}" does not start with ${prefix}img/`);
 
   const gallery = prefixHtml.slice(prefixHtml.indexOf('<div class="gallery-grid">'), prefixHtml.indexOf('id="recruitment"'));
   const gallerySrcs = attrValues(gallery, "src");
