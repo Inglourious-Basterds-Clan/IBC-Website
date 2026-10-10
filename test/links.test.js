@@ -11,9 +11,8 @@ import site from "../src/_data/site.js";
 const prodHost = "inglourious-basterds-clan.github.io";
 const localHost = "localhost:8080";
 const mutatedBase = "https://mutated.example/IBC-Website/";
+// The Google font hosts are gone (PERF-04, D-07): a reintroduced font URL fails test (d).
 const allowedHosts = [
-  "fonts.googleapis.com",
-  "fonts.gstatic.com",
   "cdnjs.cloudflare.com",
   "discord.gg",
   "www.youtube.com",
@@ -114,7 +113,12 @@ test("(b) CSS url() targets resolve from css/ in both builds", () => {
     const targets = Array.from(css.matchAll(/url\(\s*(['"]?)([^'")]+)\1\s*\)/g), (match) => match[2].trim()).filter(
       (value) => !/^(https?:|data:)/i.test(value),
     );
-    // No minimum count: the hero was the stylesheet's only url() (03-01); 03-05 restores it with the font url().
+    // The self-hosted font (03-05) is the stylesheet's url() since the hero became a <picture> (03-01).
+    assert.ok(targets.length >= 1, `${variant.name}: expected at least one local url() in css/style.css`);
+    assert.ok(
+      targets.includes("../fonts/montserrat-latin-ext.var.woff2"),
+      `${variant.name}: css/style.css does not reference ../fonts/montserrat-latin-ext.var.woff2`,
+    );
     for (const value of targets) {
       const target = resolve(outDir, "css", value.replace(/[#?].*$/, ""));
       assert.ok(existsSync(target), `${variant.name}: css url(${value}) points at a missing file`);

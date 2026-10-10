@@ -36,6 +36,8 @@ export default function (eleventyConfig) {
     "src/css": "css",
     "src/js": "js",
     "src/assets": "assets",
+    // Self-hosted Montserrat (D-09): the woff2 and its OFL licence ship together, unchanged.
+    "src/fonts": "fonts",
     // Root favicon for browsers that request /favicon.ico on their own (fixes the Phase 1 404).
     "src/favicon.ico": "favicon.ico",
   });

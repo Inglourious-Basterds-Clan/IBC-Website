@@ -1,4 +1,24 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@300;400;500;600;700;800;900&family=Share+Tech+Mono&display=swap');
+/* --- FONTS --- */
+/* Self-hosted variable Montserrat (D-07, D-09). The url is relative to the output css/style.css,
+   so it works at the root and under any path prefix. */
+@font-face {
+  font-family: "Montserrat";
+  src: url("../fonts/montserrat-latin-ext.var.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0100-017F, U+2000-206F, U+20AC, U+2122, U+2190-2193, U+2212;
+}
+
+/* Metric-matched local face shown until the woff2 arrives; limits the layout shift on swap. */
+@font-face {
+  font-family: "Montserrat Fallback";
+  src: local("Arial");
+  size-adjust: 110.38%;
+  ascent-override: 87.70%;
+  descent-override: 22.74%;
+  line-gap-override: 0%;
+}
 
 /* --- CUSTOM VARIABLES --- */
 :root {
@@ -22,8 +42,8 @@
   --text-secondary: #cbb18a; /* Figma Sand */
   --text-muted: #8e9fa9; /* WCAG AA compliant contrast > 4.5:1 */
   
-  --font-hud: 'Montserrat', 'Share Tech Mono', monospace;
-  --font-body: 'Montserrat', 'Inter', sans-serif;
+  --font-hud: 'Montserrat', 'Montserrat Fallback', monospace;
+  --font-body: 'Montserrat', 'Montserrat Fallback', sans-serif;
   
   --border-color: rgba(203, 177, 138, 0.2);
   --border-hover: rgba(203, 177, 138, 0.6);
