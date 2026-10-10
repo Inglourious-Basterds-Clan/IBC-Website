@@ -1093,6 +1093,11 @@ textarea.form-control {
   display: none;
 }
 
+/* Recruitment Discord button icon: the 1.3rem the old inline style gave the webfont icon (D-15) */
+.recruitment-cta-icon {
+  font-size: 1.3rem;
+}
+
 /* --- FOOTER --- */
 footer {
   border-top: 1px solid var(--border-color);

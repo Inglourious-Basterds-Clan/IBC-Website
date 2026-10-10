@@ -11,9 +11,9 @@ import site from "../src/_data/site.js";
 const prodHost = "inglourious-basterds-clan.github.io";
 const localHost = "localhost:8080";
 const mutatedBase = "https://mutated.example/IBC-Website/";
-// The Google font hosts are gone (PERF-04, D-07): a reintroduced font URL fails test (d).
+// The Google font hosts (PERF-04, D-07) and the Font Awesome CDN (PERF-05, D-11) are gone:
+// a reintroduced font or icon CDN URL fails test (d).
 const allowedHosts = [
-  "cdnjs.cloudflare.com",
   "discord.gg",
   "www.youtube.com",
   "www.facebook.com",
