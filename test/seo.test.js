@@ -299,16 +299,18 @@ function frontMatterValue(relPath, key) {
 test("(l) ogImage front matter overrides the default (D-07)", () => {
   const root = rootBuild();
   const override = read(root, "_dev/og-override/index.html");
-  const heroUrl = "http://localhost:8080/assets/hero-bg.jpg";
+  // The originals no longer ship (D-02), so the dev page overrides with the shipped brand logo.
+  const logoUrl = "http://localhost:8080/assets/brand/ibc-logo-512.png";
   // SEO-03 precedence edge: the override wins and the default is not emitted as a second tag.
-  assert.deepEqual(metas(override, "property", "og:image"), [heroUrl]);
-  assert.deepEqual(metas(override, "name", "twitter:image"), [heroUrl]);
+  assert.deepEqual(metas(override, "property", "og:image"), [logoUrl]);
+  assert.deepEqual(metas(override, "name", "twitter:image"), [logoUrl]);
   assert.ok(!override.includes("og-default-v1.jpg"), "override page still mentions the default card");
 
-  const hero = readImageSize(readFileSync(join(root, "assets", "hero-bg.jpg")));
-  assert.ok(hero, "assets/hero-bg.jpg header not recognised");
-  assert.equal(meta(override, "property", "og:image:width"), String(hero.width));
-  assert.equal(meta(override, "property", "og:image:height"), String(hero.height));
+  const logo = readImageSize(readFileSync(join(root, "assets", "brand", "ibc-logo-512.png")));
+  assert.ok(logo, "assets/brand/ibc-logo-512.png header not recognised");
+  assert.deepEqual([logo.width, logo.height], [512, 512]);
+  assert.equal(meta(override, "property", "og:image:width"), String(logo.width));
+  assert.equal(meta(override, "property", "og:image:height"), String(logo.height));
   const alt = frontMatterValue("src/_dev/og-override.njk", "ogImageAlt");
   assert.equal(meta(override, "property", "og:image:alt"), alt);
   assert.equal(meta(override, "name", "twitter:image:alt"), alt);

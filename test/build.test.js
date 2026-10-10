@@ -9,7 +9,8 @@ import { pathToFileURL } from "node:url";
 import { build, runBuild, cleanEnv, repoRoot, read, listFiles, attrValues, block } from "./helpers.js";
 import site from "../src/_data/site.js";
 
-const assetFiles = [
+// The file names that used to sit in src/assets/ (now src/images/, D-02; hero.jpg deleted, PERF-02).
+const originalNames = [
   "cos.png",
   "funny.png",
   "hero-bg.jpg",
@@ -41,9 +42,11 @@ test("default build emits the site", () => {
   for (const rel of ["index.html", "css/style.css", "js/main.js"]) {
     assert.ok(existsSync(join(out, rel)), `missing ${rel}`);
   }
-  for (const name of assetFiles) {
-    assert.ok(existsSync(join(out, "assets", name)), `missing assets/${name}`);
+  // Originals stay out of the output (D-02); the pipeline's variants ship under img/.
+  for (const name of originalNames) {
+    assert.ok(!existsSync(join(out, "assets", name)), `original assets/${name} ships in the output`);
   }
+  assert.ok(listFiles(join(out, "img"), [".avif"]).length > 0, "no AVIF variant under img/");
   const html = read(out, "index.html");
   assert.ok(html.includes('href="/css/style.css"'), "stylesheet is not root-relative");
   assert.ok(html.includes('src="/js/main.js"'), "script is not root-relative");
