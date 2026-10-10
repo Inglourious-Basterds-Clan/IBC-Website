@@ -3,16 +3,16 @@ gsd_state_version: "1.0"
 current_phase: 03
 current_phase_name: performance-assets
 status: executing
-stopped_at: Completed 03-03-PLAN.md
-last_updated: "2026-10-10T19:14:01.674Z"
+stopped_at: Completed 03-04-PLAN.md
+last_updated: "2026-10-10T19:27:59.537Z"
 last_activity: 2026-10-10
 last_activity_desc: Phase 2 complete, transitioned to Phase 3
-state_head: 7bf21fa578df6fb474e70287122fdd9503bc83bb
+state_head: 001ad8fa0d0292b9d94d9df553907e948b76a03b
 progress:
   total_phases: 5
   completed_phases: 2
   total_plans: 24
-  completed_plans: 16
+  completed_plans: 17
   percent: 40
 ---
 
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-10-08)
 ## Current Position
 
 Phase: 03 (performance-assets) — EXECUTING
-Plan: 4 of 11
+Plan: 5 of 11
 Status: Executing (03-01 complete)
 Last activity: 2026-10-10 — Completed 03-01 (hero image pipeline, eleventy-img tracer)
 
@@ -73,6 +73,7 @@ Progress: [████░░░░░░] 40%
 | Phase 03 P01 | 5 min | 2 tasks | 12 files |
 | Phase 03 P02 | 3 min | 2 tasks | 6 files |
 | Phase 03 P03 | 9 min | 2 tasks | 5 files |
+| Phase 03 P04 | 7 min | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -123,6 +124,9 @@ Recent decisions affecting current work:
 - [Phase 03]: 03-03: perf gate is a sibling of check-seo (lib/check-perf.js rules P0-P11 + scripts/check-perf.js CLI); reject-and-move lives in lib/reject-output.js shared by both gates
 - [Phase 03]: 03-03: every perf cap lives in the frozen BUDGET object; checkPerf options.budget merges over it; 03-11 resets CSS/JS/font caps from measured sizes
 - [Phase 03]: 03-03: perf gate resolves every HTML URL inside the build folder only (resolveLocal); unprefixed or ../ URLs are reported as outside the build output and never read
+- [Phase 03]: 03-04: gallery content lives in src/_data/gallery.js; lib/images.js imports it, so the template loop and the image step read one list
+- [Phase 03]: 03-04: lightbox <picture> ships with no <source> and no src; ensureSources() inserts avif/webp sources on first open and img.src (JPEG) is set last
+- [Phase 03]: 03-04: header logo is a 50/100 w AVIF/WebP/PNG picture with loading=lazy (D-16 wins over Pitfall 10); SEO images untouched (D-06)
 
 ### Pending Todos
 
@@ -154,6 +158,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-10-10T19:14:01.550Z
-Stopped at: Completed 03-03-PLAN.md
+Last session: 2026-10-10T19:27:59.413Z
+Stopped at: Completed 03-04-PLAN.md
 Resume file: None
