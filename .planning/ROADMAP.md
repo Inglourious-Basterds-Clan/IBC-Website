@@ -93,7 +93,28 @@ Plans:
   4. Each page loads a single minified CSS bundle, and the built HTML contains no inline `style=` attributes.
   5. JS features load as ES modules through `data-js` hooks. A page without the gallery, terminal or easter egg loads with no console errors and doesn't run that feature's code.
 
-**Plans**: TBD
+**Plans**: 8 plans
+
+Plans:
+**Wave 1**
+- [ ] 03-01-PLAN.md — Tracer: hero LCP through eleventy-img (AVIF/WebP/JPEG picture, typed preload, shared .cache/img, pretest warm, sharp 0.35.5 guard) (wave 1)
+- [ ] 03-02-PLAN.md — Self-hosted variable Montserrat woff2 subset with OFL licence and cmap glyph test (fonttools legitimacy checkpoint) (wave 1)
+- [ ] 03-03-PLAN.md — Perf gate CLI + rules P0-P11 and the BUDGET object, fixture-tested; shared reject helper (wave 1)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [ ] 03-04-PLAN.md — Gallery thumbnails, sub-300 KB lightbox variants, logo at display size; originals moved to unshipped src/images/, hero.jpg deleted (wave 2)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+- [ ] 03-05-PLAN.md — Font wiring (no Google Fonts) + inline SVG icons via {% icon %} (no Font Awesome CDN); IIS MIME types (wave 3)
+
+**Wave 4** *(blocked on Wave 3 completion)*
+- [ ] 03-06-PLAN.md — Lightning CSS bundle (one cache-busted stylesheet), 17 partials, dead CSS removed, inline styles to classes (wave 4)
+
+**Wave 5** *(blocked on Wave 4 completion)*
+- [ ] 03-07-PLAN.md — ES module entry + data-js hooks for menu, lightbox, terminal, scroll-spy, easter egg; runtime styles to classes (wave 5)
+
+**Wave 6** *(blocked on Wave 5 completion)*
+- [ ] 03-08-PLAN.md — Perf gate chained into npm run build with measured caps, README, pangram dev page, D-15 parity screenshots and D-18 PSI record (wave 6)
 
 ### Phase 4: Join & Operations Pages
 
