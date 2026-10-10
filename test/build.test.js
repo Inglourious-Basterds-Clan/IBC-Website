@@ -3,8 +3,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { existsSync, readFileSync } from "node:fs";
-import { join } from "node:path";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { basename, join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { build, runBuild, cleanEnv, repoRoot, read, listFiles, attrValues, block } from "./helpers.js";
 import site from "../src/_data/site.js";
@@ -37,6 +37,29 @@ function allHtml(outDir) {
   return listFiles(outDir, [".html"]).map((file) => readFileSync(file, "utf8"));
 }
 
+// The originals the pipeline reads (D-02): every file tracked under src/images/.
+function trackedOriginals() {
+  const result = spawnSync("git", ["ls-files", "-z", "src/images"], { cwd: repoRoot, encoding: "utf8" });
+  assert.equal(result.status, 0, `git ls-files failed:\n${result.stderr || result.error}`);
+  return result.stdout.split("\0").filter(Boolean);
+}
+
+// Output files (any depth) whose base name equals an original's name, case-insensitive.
+function shippedOriginals(outputFiles, originalFiles) {
+  const names = new Set(originalFiles.map((file) => basename(file).toLowerCase()));
+  return outputFiles.filter((file) => names.has(basename(file).toLowerCase()));
+}
+
+function allFiles(dir) {
+  const found = [];
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const full = join(dir, entry.name);
+    if (entry.isDirectory()) found.push(...allFiles(full));
+    else found.push(full);
+  }
+  return found;
+}
+
 test("default build emits the site", () => {
   const out = build("build-root");
   for (const rel of ["index.html", "css/style.css", "js/main.js"]) {
@@ -65,6 +88,55 @@ test("prefix build rewrites root-relative URLs", () => {
     assert.ok(!page.includes("Program%20Files"), "output contains Program%20Files");
     assert.ok(!drivePathPattern.test(page), "output contains a drive-letter path");
   }
+});
+
+test("originals never ship (D-02, PERF-02)", () => {
+  const originals = trackedOriginals();
+  assert.ok(originals.length > 0, "no original tracked under src/images/");
+  for (const out of [build("build-root"), build("build-prefix", { PATH_PREFIX: "/IBC-Website/" })]) {
+    const shipped = shippedOriginals(allFiles(out), originals);
+    assert.deepEqual(shipped, [], `originals ship in ${out}`);
+  }
+});
+
+test("the never-ship check reports a shipped original (negative control)", () => {
+  const out = join(repoRoot, "_test", "fake-output");
+  const files = [join(out, "index.html"), join(out, "img", "Ab12cd-1600.avif"), join(out, "media", "HERO-BG.JPG")];
+  assert.deepEqual(shippedOriginals(files, ["src/images/hero-bg.jpg", "src/images/logo.png"]), [files[2]]);
+});
+
+test("the duplicate hero.jpg is gone (PERF-02)", () => {
+  assert.ok(!existsSync(join(repoRoot, "src", "assets", "hero.jpg")), "src/assets/hero.jpg still exists");
+  const tracked = spawnSync("git", ["ls-files", "--", "src/assets/hero.jpg"], { cwd: repoRoot, encoding: "utf8" });
+  assert.equal(tracked.status, 0, `git ls-files failed:\n${tracked.stderr || tracked.error}`);
+  assert.equal(tracked.stdout.trim(), "", "src/assets/hero.jpg is still tracked");
+  for (const out of [build("build-root"), build("build-prefix", { PATH_PREFIX: "/IBC-Website/" })]) {
+    assert.ok(!existsSync(join(out, "assets", "hero.jpg")), `assets/hero.jpg ships in ${out}`);
+  }
+});
+
+test("originals stay in git (D-02)", () => {
+  const names = trackedOriginals().map((file) => file.replace(/^src\/images\//, "")).sort();
+  assert.deepEqual(names, [
+    "cos.png",
+    "funny.png",
+    "hero-bg.jpg",
+    "jo_1967.png",
+    "logo.png",
+    "op_patrol.jpg",
+    "patrol.jpg",
+    "sniper.jpg",
+  ]);
+});
+
+// The SEO image tool is never run by the build (D-06), so only its source can show where it reads.
+test("the SEO image tool reads its two inputs from src/images (D-06)", () => {
+  const source = readFileSync(join(repoRoot, "tools", "seo-images", "make-seo-images.js"), "utf8");
+  const inputsBlock = /const inputs = \{([\s\S]*?)\};/.exec(source);
+  assert.ok(inputsBlock, "no `const inputs = { ... }` block in make-seo-images.js");
+  const paths = Array.from(inputsBlock[1].matchAll(/join\(repoRoot, "([^"]+)"\)/g), (match) => match[1]);
+  assert.deepEqual(paths, ["src/images/logo.png", "src/images/hero-bg.jpg"]);
+  for (const path of paths) assert.ok(existsSync(join(repoRoot, path)), `SEO tool input ${path} does not exist`);
 });
 
 test("SITE_URL and PATH_PREFIX are normalized", () => {
