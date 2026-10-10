@@ -74,6 +74,8 @@ test("the image tool is isolated from the site build (T-02-SC)", () => {
   const root = readJson("package.json");
   assert.equal(root.dependencies?.sharp, undefined, "sharp must not be a root dependency");
   assert.equal(root.devDependencies?.sharp, undefined, "sharp must not be a root devDependency");
+  // The site build gets sharp through @11ty/eleventy-img (D-01); the override keeps it on the tool's vetted version.
+  assert.equal(root.overrides?.sharp, tool.dependencies.sharp, "root overrides.sharp must equal the tool's vetted sharp");
 
   const lock = readJson("tools/seo-images/package-lock.json");
   assert.equal(lock.packages["node_modules/sharp"].version, "0.35.5");
