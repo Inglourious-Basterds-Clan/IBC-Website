@@ -3,16 +3,16 @@ gsd_state_version: "1.0"
 current_phase: 03
 current_phase_name: performance-assets
 status: executing
-stopped_at: Completed 03-04-PLAN.md
-last_updated: "2026-10-10T19:27:59.537Z"
+stopped_at: Completed 03-05-PLAN.md
+last_updated: "2026-10-10T20:03:39.302Z"
 last_activity: 2026-10-10
 last_activity_desc: Phase 2 complete, transitioned to Phase 3
-state_head: 001ad8fa0d0292b9d94d9df553907e948b76a03b
+state_head: af325ff674ab9455afb0a65c8f555049e9ca5838
 progress:
   total_phases: 5
   completed_phases: 2
   total_plans: 24
-  completed_plans: 17
+  completed_plans: 18
   percent: 40
 ---
 
@@ -28,9 +28,9 @@ See: .planning/PROJECT.md (updated 2026-10-08)
 ## Current Position
 
 Phase: 03 (performance-assets) — EXECUTING
-Plan: 5 of 11
-Status: Executing (03-01 complete)
-Last activity: 2026-10-10 — Completed 03-01 (hero image pipeline, eleventy-img tracer)
+Plan: 6 of 11
+Status: Executing (03-05 complete)
+Last activity: 2026-10-10 — Completed 03-05 (self-hosted Montserrat, build-output font guards, IIS MIME types)
 
 Progress: [████░░░░░░] 40%
 
@@ -74,6 +74,7 @@ Progress: [████░░░░░░] 40%
 | Phase 03 P02 | 3 min | 2 tasks | 6 files |
 | Phase 03 P03 | 9 min | 2 tasks | 5 files |
 | Phase 03 P04 | 7 min | 2 tasks | 7 files |
+| Phase 03 P05 | 33 min | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -127,6 +128,8 @@ Recent decisions affecting current work:
 - [Phase 03]: 03-04: gallery content lives in src/_data/gallery.js; lib/images.js imports it, so the template loop and the image step read one list
 - [Phase 03]: 03-04: lightbox <picture> ships with no <source> and no src; ensureSources() inserts avif/webp sources on first open and img.src (JPEG) is set last
 - [Phase 03]: 03-04: header logo is a 50/100 w AVIF/WebP/PNG picture with loading=lazy (D-16 wins over Pitfall 10); SEO images untouched (D-06)
+- [Phase 03]: 03-05: font preload sits directly before the stylesheets with crossorigin (fetched once; HtmlBasePlugin prefixes it); glyph coverage check also decodes numeric character references
+- [Phase 03]: 03-05: until 03-07 the Network Font filter also shows fa-brands-400.woff2 from the Font Awesome CDN; the only text font is the local Montserrat woff2 and nothing loads from Google font hosts
 
 ### Pending Todos
 
@@ -158,6 +161,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-10-10T19:27:59.413Z
-Stopped at: Completed 03-04-PLAN.md
+Last session: 2026-10-10T20:03:39.179Z
+Stopped at: Completed 03-05-PLAN.md
 Resume file: None
