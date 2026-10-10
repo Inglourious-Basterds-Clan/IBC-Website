@@ -623,16 +623,19 @@ export const BUDGET = {
 | A6 | `sizes="auto, …"` fallback list is honoured (Chrome) and ignored gracefully elsewhere | Pattern 3 | Slightly larger thumbnail download. No visual change. |
 | A7 | Python `fonttools`/`brotli` installs are acceptable as a one-off in a throwaway venv (seam flagged both SUS for missing download data) | Standard Stack | Needs a human checkpoint before install. The committed woff2 is the only artefact. |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Cold image generation time in CI.**
+1. **Cold image generation time in CI.** RESOLVED: no `.cache` caching in CI.
    - What we know: about 21 s locally for every variant (hero 3.7 s, gallery 16 s, logo 1.1 s), once per `npm test` (pretest warm) and reused by `npm run build` in the same job.
    - What's unclear: ubuntu runner timing.
    - Recommendation: no `.cache` caching in CI at first (deterministic, one less moving part). Add `actions/cache` keyed on `hashFiles('src/images/**', 'lib/images.js', 'package-lock.json')` only if the job exceeds a few minutes.
-2. **Should OFL.txt be shipped in `_site/fonts/` or only committed?**
+   - Decision: adopted as recommended. 03-01 Task 2 adds `scripts/warm-images.js` as the npm `pretest` step, so CI encodes every variant once per job and `npm run build` reuses the warm cache; `.github/workflows/pages.yml` gets no cache step (03-01 flagged assumption). 03-11 Task 1 keeps the workflow contract (`npm ci`, `npm test`, `npm run build`) under test.
+2. **Should OFL.txt be shipped in `_site/fonts/` or only committed?** RESOLVED: shipped next to the woff2.
    - Recommendation: ship it next to the woff2. It is 4.4 KB, OFL wants the licence to accompany redistributed font files, and the G10 scan is clean.
-3. **Easter-egg module eager vs on-interaction import.**
+   - Decision: adopted as recommended. 03-02 Task 2 commits `src/fonts/OFL.txt` beside the font and tests it; 03-05 Task 1 passthrough-copies `src/fonts` to `fonts/`, and 03-05 Task 2 tests that `fonts/OFL.txt` ships byte-identical in the root and `/IBC-Website/` builds.
+3. **Easter-egg module eager vs on-interaction import.** RESOLVED: eager import through its `data-js` hook.
    - Recommendation: eager via its hook (it is on every page through the footer, and small). Lazy-on-click is a later optimisation.
+   - Decision: adopted as recommended. 03-09 Task 2 puts `data-js="easter-egg"` on the footer `#easteregg-trigger` and adds `easter-egg` to the literal loader map, so the module loads on every page through its hook; its gzip size counts toward the initial-JS cap that 03-11 sets.
 
 ## Environment Availability
 

@@ -93,7 +93,7 @@ Plans:
   4. Each page loads a single minified CSS bundle, and the built HTML contains no inline `style=` attributes.
   5. JS features load as ES modules through `data-js` hooks. A page without the gallery, terminal or easter egg loads with no console errors and doesn't run that feature's code.
 
-**Plans**: 8 plans
+**Plans**: 11 plans
 
 Plans:
 **Wave 1**
@@ -102,19 +102,24 @@ Plans:
 - [ ] 03-03-PLAN.md — Perf gate CLI + rules P0-P11 and the BUDGET object, fixture-tested; shared reject helper (wave 1)
 
 **Wave 2** *(blocked on Wave 1 completion)*
-- [ ] 03-04-PLAN.md — Gallery thumbnails, sub-300 KB lightbox variants, logo at display size; originals moved to unshipped src/images/, hero.jpg deleted (wave 2)
+- [ ] 03-04-PLAN.md — Gallery thumbnails, sub-300 KB lightbox variants, logo at display size (wave 2)
+- [ ] 03-05-PLAN.md — Self-hosted font wired in (no Google Fonts), build-output glyph/preload guards, IIS MIME types (wave 2)
 
 **Wave 3** *(blocked on Wave 2 completion)*
-- [ ] 03-05-PLAN.md — Font wiring (no Google Fonts) + inline SVG icons via {% icon %} (no Font Awesome CDN); IIS MIME types (wave 3)
+- [ ] 03-06-PLAN.md — Originals moved to unshipped src/images/, hero.jpg deleted, SEO tool and og-override follow; never-ship guards (wave 3)
+- [ ] 03-07-PLAN.md — Inline SVG icons via {% icon %} with accessible names; Font Awesome CDN removed (wave 3)
 
 **Wave 4** *(blocked on Wave 3 completion)*
-- [ ] 03-06-PLAN.md — Lightning CSS bundle (one cache-busted stylesheet), 17 partials, dead CSS removed, inline styles to classes (wave 4)
+- [ ] 03-08-PLAN.md — Lightning CSS bundle (one cache-busted minified stylesheet) and inline styles converted to classes (wave 4)
 
 **Wave 5** *(blocked on Wave 4 completion)*
-- [ ] 03-07-PLAN.md — ES module entry + data-js hooks for menu, lightbox, terminal, scroll-spy, easter egg; runtime styles to classes (wave 5)
+- [ ] 03-09-PLAN.md — ES module entry + data-js hooks for menu, lightbox, terminal, scroll-spy, easter egg; runtime styles to classes (wave 5)
 
 **Wave 6** *(blocked on Wave 5 completion)*
-- [ ] 03-08-PLAN.md — Perf gate chained into npm run build with measured caps, README, pangram dev page, D-15 parity screenshots and D-18 PSI record (wave 6)
+- [ ] 03-10-PLAN.md — Dead CSS removed; stylesheet split into 10 partials with a byte-identical bundle (wave 6)
+
+**Wave 7** *(blocked on Wave 6 completion)*
+- [ ] 03-11-PLAN.md — Perf gate chained into npm run build with measured caps, README, pangram dev page, D-15 parity screenshots and D-18 PSI record (wave 7)
 
 ### Phase 4: Join & Operations Pages
 
