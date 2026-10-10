@@ -1,6 +1,7 @@
 // SEO-07 404 page and D-16 web.config checks: _site/404.html renders in the shared layout,
 // survives being served for any missing path (GitHub Pages), is never indexed or listed,
-// and _site/web.config maps 404 to it (pathPrefix-aware) plus the .webmanifest MIME type for IIS.
+// and _site/web.config maps 404 to it (pathPrefix-aware) plus the .webmanifest, .avif, .webp and
+// .woff2 MIME types for IIS.
 import { before, test } from "node:test";
 import assert from "node:assert/strict";
 import { existsSync, readFileSync } from "node:fs";
@@ -100,7 +101,15 @@ test("(c) 404 is noindex, unlisted and marked as a draft", () => {
   }
 });
 
-test("(d) web.config maps 404 and the manifest MIME type (D-16)", () => {
+// IIS answers 404.3 for an extension it has no MIME type for (research A3).
+const mimeTypes = {
+  ".webmanifest": "application/manifest+json",
+  ".avif": "image/avif",
+  ".webp": "image/webp",
+  ".woff2": "font/woff2",
+};
+
+test("(d) web.config maps 404 and the MIME types (D-16, research A3)", () => {
   const expectedPaths = { root: 'path="/404.html" responseMode="ExecuteURL"', prefix: 'path="/IBC-Website/404.html" responseMode="ExecuteURL"' };
   for (const [name, expected] of Object.entries(expectedPaths)) {
     const { outDir } = variants[name];
@@ -108,11 +117,16 @@ test("(d) web.config maps 404 and the manifest MIME type (D-16)", () => {
     const config = read(outDir, "web.config");
     assert.ok(config.startsWith("<?xml"), `${name}: web.config does not start with the XML declaration`);
     assert.ok(config.includes(expected), `${name}: web.config lacks ${expected}`);
-    for (const needle of ['<remove statusCode="404"', '<remove fileExtension=".webmanifest" />', 'mimeType="application/manifest+json"']) {
-      assert.ok(config.includes(needle), `${name}: web.config lacks ${needle}`);
-    }
+    assert.ok(config.includes('<remove statusCode="404"'), `${name}: web.config lacks <remove statusCode="404"`);
     assert.ok(config.indexOf('<remove statusCode="404"') < config.indexOf('<error statusCode="404"'), `${name}: <remove> must precede <error>`);
-    assert.ok(config.indexOf('<remove fileExtension=".webmanifest"') < config.indexOf("<mimeMap"), `${name}: <remove> must precede <mimeMap>`);
+    for (const [ext, type] of Object.entries(mimeTypes)) {
+      const remove = `<remove fileExtension="${ext}" />`;
+      const mimeMap = `<mimeMap fileExtension="${ext}" mimeType="${type}" />`;
+      assert.ok(config.includes(remove), `${name}: web.config lacks ${remove}`);
+      assert.ok(config.includes(mimeMap), `${name}: web.config lacks ${mimeMap}`);
+      // The remove first, so IIS never answers 500.19 where the type is already mapped.
+      assert.ok(config.indexOf(remove) < config.indexOf(mimeMap), `${name}: ${remove} must precede its <mimeMap>`);
+    }
     for (const forbidden of ["<rewrite", "errorMode", "redirect"]) {
       assert.ok(!config.includes(forbidden), `${name}: web.config must not contain ${forbidden} (D-16)`);
     }
