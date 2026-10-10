@@ -10,7 +10,7 @@ const prefix = "/IBC-Website/";
 const navLabels = ["System", "O nas", "Galeria", "Rekrutacja"];
 const navHrefs = ["/#hero", "/#about", "/#gallery", "/#recruitment"];
 const inviteDomainPattern = /https?:\/\/(?:www\.)?discord(?:\.gg|(?:app)?\.com\/invite)\/[A-Za-z0-9-]+/g;
-const galleryFiles = ["op_patrol.jpg", "jo_1967.png", "cos.png", "funny.png"];
+const lightboxAttrs = ["data-lightbox-avif", "data-lightbox-webp", "data-lightbox-jpeg"];
 
 const polishCopy = [
   "Profil Działalności",
@@ -113,17 +113,20 @@ test("home page keeps its Polish copy and its new head title (D-01, D-14)", () =
 test("prefix build puts every internal URL under the prefix", () => {
   assert.ok(prefixHtml.includes(`src="${prefix}assets/logo.png"`), "logo src missing the prefix");
 
-  const srcs = attrValues(prefixHtml, "src");
-  const dataSrcs = attrValues(prefixHtml, "data-src");
-  for (const file of galleryFiles) {
-    assert.ok(srcs.includes(`${prefix}assets/${file}`), `gallery img src for ${file} missing the prefix`);
-    assert.ok(dataSrcs.includes(`${prefix}assets/${file}`), `gallery data-src for ${file} missing the prefix`);
+  const gallery = prefixHtml.slice(prefixHtml.indexOf('<div class="gallery-grid">'), prefixHtml.indexOf('id="recruitment"'));
+  const gallerySrcs = attrValues(gallery, "src");
+  assert.equal(gallerySrcs.length, 4, "expected 4 gallery img src values");
+  for (const value of gallerySrcs) assert.ok(value.startsWith(`${prefix}img/`), `gallery img src "${value}" missing the prefix`);
+  for (const attr of lightboxAttrs) {
+    const values = attrValues(gallery, attr);
+    assert.equal(values.length, 4, `expected 4 ${attr} values`);
+    for (const value of values) assert.ok(value.startsWith(`${prefix}img/`), `${attr}="${value}" missing the prefix`);
   }
 
   assert.ok(attrValues(prefixHtml, "href").includes(`${prefix}#about`), "nav hrefs missing the prefix");
   assert.ok(!prefixHtml.includes('src="."'), 'output contains src="."');
 
-  for (const attr of ["href", "src", "data-src"]) {
+  for (const attr of ["href", "src", ...lightboxAttrs]) {
     for (const value of attrValues(prefixHtml, attr)) {
       if (value.startsWith("/")) assert.ok(value.startsWith(prefix), `${attr}="${value}" is not under ${prefix}`);
     }

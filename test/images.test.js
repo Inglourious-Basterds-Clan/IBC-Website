@@ -1,7 +1,8 @@
 // PERF-01/02/03 image checks: build output in the root and the /IBC-Website/ build.
 // The hero is a high-priority <picture> (D-03), the home head preloads its AVIF set with
-// prefix-safe URLs (Pitfall 1), every mobile candidate fits the 120 KB budget and img/
-// ships only the variants some page references (T-03-03).
+// prefix-safe URLs (Pitfall 1), every mobile candidate fits the 120 KB budget, the gallery
+// thumbnails are lazy responsive pictures, the lightbox targets are 1600 w variants under
+// 300 KB (D-04) and img/ ships only the variants some page references (T-03-03).
 import { before, test } from "node:test";
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
@@ -12,6 +13,8 @@ import { build, read, listFiles, attrValues, block, repoRoot } from "./helpers.j
 const prefix = "/IBC-Website/";
 const heroBudget = 122880;
 const mobileMaxWidth = 1280;
+const lightboxBudget = 307200;
+const lightboxAttrs = ["data-lightbox-avif", "data-lightbox-webp", "data-lightbox-jpeg"];
 const urlAttrs = ["src", "data-lightbox-avif", "data-lightbox-webp", "data-lightbox-jpeg"];
 const srcsetAttrs = ["srcset", "imagesrcset"];
 
@@ -52,6 +55,25 @@ function heroPicture(html) {
   const picture = (html.match(/<picture>[\s\S]*?<\/picture>/g) || []).find((block) => block.includes(img));
   assert.ok(picture, "the hero img is not inside a <picture>");
   return picture;
+}
+
+// The opening tag of every .gallery-item.
+function galleryItems(html) {
+  return tags(html, "div").filter((tag) => tag.includes('class="gallery-item hud-border"'));
+}
+
+// Every <picture>...</picture> inside the gallery grid, in document order.
+function galleryPictures(html) {
+  const start = html.indexOf('<div class="gallery-grid">');
+  assert.ok(start !== -1, "gallery grid missing");
+  const end = html.indexOf("</section>", start);
+  return html.slice(start, end).match(/<picture>[\s\S]*?<\/picture>/g) || [];
+}
+
+function lightboxPicture(html) {
+  const match = /<picture class="lightbox-picture">[\s\S]*?<\/picture>/.exec(html);
+  assert.ok(match, "lightbox picture missing");
+  return match[0];
 }
 
 function imagePreloads(html) {
@@ -125,6 +147,62 @@ test("hero mobile candidates fit 120 KB (D-03)", () => {
       assert.ok(size <= heroBudget, `${format} ${width} w is ${size} bytes, over the ${heroBudget}-byte budget`);
     }
   }
+});
+
+test("gallery thumbnails are lazy AVIF/WebP pictures with a JPEG fallback (PERF-01)", () => {
+  const html = read(out.root, "index.html");
+  assert.equal(galleryItems(html).length, 4, "expected 4 gallery items");
+  const pictures = galleryPictures(html);
+  assert.equal(pictures.length, 4, `expected 4 gallery pictures, found ${pictures.length}`);
+  for (const picture of pictures) {
+    assert.ok(picture.includes('<source type="image/avif"'), "gallery picture has no image/avif source");
+    assert.ok(picture.includes('<source type="image/webp"'), "gallery picture has no image/webp source");
+    for (const source of tags(picture, "source")) {
+      assert.ok(candidates(attr(source, "srcset")).length >= 2, "gallery source needs a responsive srcset");
+      assert.ok(attr(source, "sizes"), "gallery source has no sizes");
+    }
+    const [img] = tags(picture, "img");
+    assert.ok(img, "gallery picture has no img");
+    assert.equal(attr(img, "loading"), "lazy");
+    assert.equal(attr(img, "decoding"), "async");
+    assert.match(attr(img, "width") || "", /^\d+$/, "gallery img has no width");
+    assert.match(attr(img, "height") || "", /^\d+$/, "gallery img has no height");
+    assert.ok(attr(img, "alt"), "gallery img has no alt text");
+    assert.match(attr(img, "src"), /\.jpeg$/, "gallery img src must be the JPEG fallback (D-05, Pitfall 3)");
+  }
+});
+
+test("lightbox targets are 1600 w and under 300 KB (PERF-03, D-04)", () => {
+  for (const [name, outDir] of Object.entries(out)) {
+    const buildPrefix = name === "prefix" ? prefix : "/";
+    const items = galleryItems(read(outDir, "index.html"));
+    assert.equal(items.length, 4, `${name}: expected 4 gallery items`);
+    for (const item of items) {
+      for (const attrName of lightboxAttrs) {
+        const url = attr(item, attrName);
+        const format = attrName.slice("data-lightbox-".length);
+        assert.ok(url, `${name}: gallery item has no ${attrName}`);
+        assert.ok(url.startsWith(`${buildPrefix}img/`), `${name}: ${attrName}="${url}" does not start with ${buildPrefix}img/`);
+        assert.ok(url.endsWith(`-1600.${format}`), `${name}: ${attrName}="${url}" is not the 1600 w ${format} variant`);
+        const path = outputPath(outDir, buildPrefix, url);
+        assert.ok(existsSync(path), `${name}: ${attrName}="${url}" points at a missing file`);
+        const { size } = statSync(path);
+        assert.ok(size < lightboxBudget, `${name}: ${url} is ${size} bytes, not under ${lightboxBudget}`);
+      }
+    }
+  }
+});
+
+test("the lightbox loads nothing at rest", () => {
+  const picture = lightboxPicture(read(out.root, "index.html"));
+  assert.ok(!picture.includes("<source"), "lightbox picture must ship without <source>");
+  const [img] = tags(picture, "img");
+  assert.ok(img, "lightbox picture has no img");
+  assert.ok(!/\ssrc=/.test(img), "lightbox img must have no src at rest");
+  assert.ok(!/\ssrcset=/.test(img), "lightbox img must have no srcset at rest");
+  assert.equal(attr(img, "width"), "1600");
+  assert.equal(attr(img, "height"), "900");
+  assert.equal(attr(img, "loading"), "lazy");
 });
 
 test("img/ ships only referenced variants", () => {

@@ -76,41 +76,15 @@ todo: "FACTS-01"
         </div>
 
         <div class="gallery-grid">
-          <!-- Gallery Item 1 -->
-          <div class="gallery-item hud-border" data-src="{{ '/assets/op_patrol.jpg' | htmlBaseUrl }}" role="button" tabindex="0" aria-label="Powiększ zdjęcie: Patrol Bojowy">
-            <img src="/assets/op_patrol.jpg" alt="Patrol Bojowy sekcji Alpha w rejonie operacji" loading="lazy" decoding="async" width="600" height="338">
+          {% for g in images.gallery %}
+          <div class="gallery-item hud-border" role="button" tabindex="0" aria-label="Powiększ zdjęcie: {{ g.title }}" data-lightbox-avif="{{ g.lightbox.avif[0].url | htmlBaseUrl }}" data-lightbox-webp="{{ g.lightbox.webp[0].url | htmlBaseUrl }}" data-lightbox-jpeg="{{ g.lightbox.jpeg[0].url | htmlBaseUrl }}">
+            {% picture g.thumb, { "alt": g.alt, "loading": "lazy", "decoding": "async", "sizes": "auto, (min-width: 1240px) 285px, (min-width: 660px) 50vw, 100vw" } %}
             <div class="gallery-overlay">
-              <h3>Patrol Bojowy</h3>
-              <p>Sekcja Alpha w rejonie operacji</p>
+              <h3>{{ g.title }}</h3>
+              <p>{{ g.desc }}</p>
             </div>
           </div>
-
-          <!-- Gallery Item 2 -->
-          <div class="gallery-item hud-border" data-src="{{ '/assets/jo_1967.png' | htmlBaseUrl }}" role="button" tabindex="0" aria-label="Powiększ zdjęcie: Operacja Crimson Dawn">
-            <img src="/assets/jo_1967.png" alt="Atak plutonu na pozycje Chedaki JO 1967" loading="lazy" decoding="async" width="600" height="338">
-            <div class="gallery-overlay">
-              <h3>Operacja Crimson Dawn</h3>
-              <p>Joint Operations 1967 // Wsparcie CAS</p>
-            </div>
-          </div>
-
-          <!-- Gallery Item 3 -->
-          <div class="gallery-item hud-border" data-src="{{ '/assets/cos.png' | htmlBaseUrl }}" role="button" tabindex="0" aria-label="Powiększ zdjęcie: Punkt Obserwacyjny">
-            <img src="/assets/cos.png" alt="Zwiad optyczny na klifie z widokiem na wybrzeże przeciwnika" loading="lazy" decoding="async" width="600" height="338">
-            <div class="gallery-overlay">
-              <h3>Punkt Obserwacyjny</h3>
-              <p>Zwiad optyczny i naprowadzanie</p>
-            </div>
-          </div>
-
-          <!-- Gallery Item 4 -->
-          <div class="gallery-item hud-border" data-src="{{ '/assets/funny.png' | htmlBaseUrl }}" role="button" tabindex="0" aria-label="Powiększ zdjęcie: Chwila Wytchnienia">
-            <img src="/assets/funny.png" alt="Humorystyczny moment z przygotowań do nocnego desantu" loading="lazy" decoding="async" width="600" height="338">
-            <div class="gallery-overlay">
-              <h3>Chwila Wytchnienia</h3>
-              <p>Misja Prima Aprilisowa</p>
-            </div>
-          </div>
+          {% endfor %}
         </div>
       </div>
     </section>
@@ -176,7 +150,7 @@ todo: "FACTS-01"
     <div class="lightbox-content">
       <button class="lightbox-close" aria-label="Zamknij podgląd">[ X ] ZAMKNIJ</button>
       <button class="lightbox-nav lightbox-prev" aria-label="Poprzednie zdjęcie">&lt;</button>
-      <img alt="Lightbox image">
+      <picture class="lightbox-picture"><img alt="Lightbox image" width="1600" height="900" loading="lazy" decoding="async"></picture>
       <button class="lightbox-nav lightbox-next" aria-label="Następne zdjęcie">&gt;</button>
       <div class="lightbox-caption"></div>
     </div>

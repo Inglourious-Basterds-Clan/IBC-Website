@@ -49,14 +49,32 @@ function initLightbox() {
   const nextBtn = document.querySelector('.lightbox-next');
   const items = document.querySelectorAll('.gallery-item');
   
-  if (!lightbox || items.length === 0) return;
+  if (!lightbox || !imgEl || !captionEl || !closeBtn || !prevBtn || !nextBtn || items.length === 0) return;
 
   let currentIndex = 0;
+  let avifSource = null;
+  let webpSource = null;
   const imageSources = Array.from(items).map(item => ({
-    src: item.getAttribute('data-src'),
+    avif: item.getAttribute('data-lightbox-avif'),
+    webp: item.getAttribute('data-lightbox-webp'),
+    jpeg: item.getAttribute('data-lightbox-jpeg'),
     title: item.querySelector('h3').textContent,
     desc: item.querySelector('p').textContent
   }));
+
+  // The lightbox <picture> ships without <source>s so nothing downloads before the first open.
+  function ensureSources() {
+    if (avifSource) return;
+    const types = ['image/avif', 'image/webp'];
+    const created = types.map(type => {
+      const source = document.createElement('source');
+      source.type = type;
+      imgEl.parentNode.insertBefore(source, imgEl);
+      return source;
+    });
+    avifSource = created[0];
+    webpSource = created[1];
+  }
 
   function openLightbox(index) {
     currentIndex = index;
@@ -67,7 +85,11 @@ function initLightbox() {
 
   function updateLightboxContent() {
     const data = imageSources[currentIndex];
-    imgEl.src = data.src;
+    ensureSources();
+    avifSource.srcset = data.avif;
+    webpSource.srcset = data.webp;
+    // Set the img src last: changing it makes the browser pick a source again.
+    imgEl.src = data.jpeg;
     captionEl.textContent = `${data.title} // ${data.desc}`;
   }
 
