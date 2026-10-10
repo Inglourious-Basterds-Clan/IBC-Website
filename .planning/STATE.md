@@ -3,16 +3,16 @@ gsd_state_version: "1.0"
 current_phase: 03
 current_phase_name: performance-assets
 status: executing
-stopped_at: Completed 03-02-PLAN.md
-last_updated: "2026-10-10T19:02:18.327Z"
+stopped_at: Completed 03-03-PLAN.md
+last_updated: "2026-10-10T19:14:01.674Z"
 last_activity: 2026-10-10
 last_activity_desc: Phase 2 complete, transitioned to Phase 3
-state_head: 01e90d72e0062dcce8e00af08ec939b5c8e77a46
+state_head: 7bf21fa578df6fb474e70287122fdd9503bc83bb
 progress:
   total_phases: 5
   completed_phases: 2
   total_plans: 24
-  completed_plans: 15
+  completed_plans: 16
   percent: 40
 ---
 
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-10-08)
 ## Current Position
 
 Phase: 03 (performance-assets) — EXECUTING
-Plan: 3 of 11
+Plan: 4 of 11
 Status: Executing (03-01 complete)
 Last activity: 2026-10-10 — Completed 03-01 (hero image pipeline, eleventy-img tracer)
 
@@ -72,6 +72,7 @@ Progress: [████░░░░░░] 40%
 | Phase 02 P06 | 4min | 2 tasks | 9 files |
 | Phase 03 P01 | 5 min | 2 tasks | 12 files |
 | Phase 03 P02 | 3 min | 2 tasks | 6 files |
+| Phase 03 P03 | 9 min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -119,6 +120,9 @@ Recent decisions affecting current work:
 - [Phase 03]: 03-01: image variants live in the shared .cache/img; eleventy.after copies only used variants; npm pretest warms the cache
 - [Phase 03]: 03-02: Montserrat pinned to google/fonts 8b0a1d0; fontTools 4.66.1 + Brotli 1.2.0 used once in a throwaway venv outside the repo after human approval, never a project dependency
 - [Phase 03]: 03-02: lib/woff2.js cmap reader throws on truncated or non-WOFF2 input instead of returning a partial set; ASCII-only fixture is the negative control
+- [Phase 03]: 03-03: perf gate is a sibling of check-seo (lib/check-perf.js rules P0-P11 + scripts/check-perf.js CLI); reject-and-move lives in lib/reject-output.js shared by both gates
+- [Phase 03]: 03-03: every perf cap lives in the frozen BUDGET object; checkPerf options.budget merges over it; 03-11 resets CSS/JS/font caps from measured sizes
+- [Phase 03]: 03-03: perf gate resolves every HTML URL inside the build folder only (resolveLocal); unprefixed or ../ URLs are reported as outside the build output and never read
 
 ### Pending Todos
 
@@ -150,6 +154,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-10-10T19:02:18.208Z
-Stopped at: Completed 03-02-PLAN.md
+Last session: 2026-10-10T19:14:01.550Z
+Stopped at: Completed 03-03-PLAN.md
 Resume file: None
