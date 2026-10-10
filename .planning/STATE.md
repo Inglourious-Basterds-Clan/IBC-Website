@@ -3,16 +3,16 @@ gsd_state_version: "1.0"
 current_phase: 03
 current_phase_name: performance-assets
 status: executing
-stopped_at: Phase 3 context gathered
-last_updated: "2026-10-10T18:13:15.861Z"
+stopped_at: Completed 03-01-PLAN.md
+last_updated: "2026-10-10T18:55:45.296Z"
 last_activity: 2026-10-08
 last_activity_desc: Phase 2 complete, transitioned to Phase 3
-state_head: 5d34b9fff3038bd9c236c3c543637aee49c4dbd0
+state_head: 2cee568b34c621aa1a3038ea7bb74f0607a28051
 progress:
   total_phases: 5
   completed_phases: 2
   total_plans: 24
-  completed_plans: 13
+  completed_plans: 14
   percent: 40
 ---
 
@@ -27,10 +27,10 @@ See: .planning/PROJECT.md (updated 2026-10-08)
 
 ## Current Position
 
-Phase: 03 (performance-assets) — READY TO EXECUTE
-Plan: Not started
-Status: Ready to execute
-Last activity: 2026-10-08 — Phase 2 complete, transitioned to Phase 3
+Phase: 03 (performance-assets) — EXECUTING
+Plan: 2 of 11
+Status: Executing (03-01 complete)
+Last activity: 2026-10-10 — Completed 03-01 (hero image pipeline, eleventy-img tracer)
 
 Progress: [████░░░░░░] 40%
 
@@ -70,6 +70,7 @@ Progress: [████░░░░░░] 40%
 | Phase 02 P04 | 4min | 3 tasks | 9 files |
 | Phase 02 P05 | 3min | 2 tasks | 8 files |
 | Phase 02 P06 | 4min | 2 tasks | 9 files |
+| Phase 03 P01 | 5 min | 2 tasks | 12 files |
 
 ## Accumulated Context
 
@@ -112,6 +113,9 @@ Recent decisions affecting current work:
 - [Phase 02]: 02-05: site.social is the single social list; footer loop and JSON-LD sameAs (social then Discord invite) both read it
 - [Phase 02]: 02-06: 404 writes its own Discord hud-btn (discord-cta.njk is the header variant)
 - [Phase 02]: 02-06: README cutover targets a local IIS build with SITE_INDEXABLE=1; the Pages workflow stays the noindex preview and is never pointed at the final domain (D-18, R2-WR-02)
+- [Phase 03]: 03-01: sharp pinned via package.json overrides to the vetted 0.35.5 (never a direct root dep); test/deps.test.js guards it
+- [Phase 03]: 03-01: hero preload is a single typed AVIF preload with imagesizes=100vw; imagesrcset URLs pass through htmlBaseUrl once
+- [Phase 03]: 03-01: image variants live in the shared .cache/img; eleventy.after copies only used variants; npm pretest warms the cache
 
 ### Pending Todos
 
@@ -143,6 +147,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-10-08T21:18:58.585Z
-Stopped at: Phase 3 context gathered
-Resume file: .planning/phases/03-performance-assets/03-CONTEXT.md
+Last session: 2026-10-10T18:55:31.138Z
+Stopped at: Completed 03-01-PLAN.md
+Resume file: None
