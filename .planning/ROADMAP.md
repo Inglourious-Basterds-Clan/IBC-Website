@@ -93,7 +93,7 @@ Plans:
   4. Each page loads a single minified CSS bundle, and the built HTML contains no inline `style=` attributes.
   5. JS features load as ES modules through `data-js` hooks. A page without the gallery, terminal or easter egg loads with no console errors and doesn't run that feature's code.
 
-**Plans**: 7/11 plans executed
+**Plans**: 8/11 plans executed
 
 Plans:
 **Wave 1**
@@ -110,7 +110,7 @@ Plans:
 - [x] 03-07-PLAN.md — Inline SVG icons via {% icon %} with accessible names; Font Awesome CDN removed (wave 3)
 
 **Wave 4** *(blocked on Wave 3 completion)*
-- [ ] 03-08-PLAN.md — Lightning CSS bundle (one cache-busted minified stylesheet) and inline styles converted to classes (wave 4)
+- [x] 03-08-PLAN.md — Lightning CSS bundle (one cache-busted minified stylesheet) and inline styles converted to classes (wave 4)
 
 **Wave 5** *(blocked on Wave 4 completion)*
 - [ ] 03-09-PLAN.md — ES module entry + data-js hooks for menu, lightbox, terminal, scroll-spy, easter egg; runtime styles to classes (wave 5)
@@ -160,7 +160,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5. Phases 2 and 3 both 
 |-------|----------------|--------|-----------|
 | 1. Eleventy Foundation | 7/7 | Complete    | 2026-10-06 |
 | 2. Technical SEO | 6/6 | Complete    | 2026-10-08 |
-| 3. Performance & Assets | 7/11 | In Progress | - |
+| 3. Performance & Assets | 8/11 | In Progress | - |
 | 4. Join & Operations Pages | 0/TBD | Not started | - |
 | 5. Accessibility & Visual Refresh | 0/TBD | Not started | - |
 

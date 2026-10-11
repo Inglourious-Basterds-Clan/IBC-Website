@@ -3,16 +3,16 @@ gsd_state_version: "1.0"
 current_phase: 03
 current_phase_name: performance-assets
 status: executing
-stopped_at: Completed 03-07-PLAN.md
-last_updated: "2026-10-10T20:45:57.912Z"
+stopped_at: Completed 03-08-PLAN.md
+last_updated: "2026-10-11T09:25:31.783Z"
 last_activity: 2026-10-10
 last_activity_desc: Phase 2 complete, transitioned to Phase 3
-state_head: 5ef8f7e4d6c9416f5545879dee9da0321e58e39f
+state_head: 4f757f04da8f0c4123c15a3bd8f7a855e839bd2a
 progress:
   total_phases: 5
   completed_phases: 2
   total_plans: 24
-  completed_plans: 20
+  completed_plans: 21
   percent: 40
 ---
 
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-10-08)
 ## Current Position
 
 Phase: 03 (performance-assets) — EXECUTING
-Plan: 8 of 11
+Plan: 9 of 11
 Status: Executing (03-07 complete)
 Last activity: 2026-10-10 — Completed 03-07 (Font Awesome CDN replaced by inline aria-hidden SVG icons from lib/icons.js via {% icon %})
 
@@ -77,6 +77,7 @@ Progress: [████░░░░░░] 40%
 | Phase 03 P05 | 33 min | 2 tasks | 7 files |
 | Phase 03 P06 | 5 min | 2 tasks | 14 files |
 | Phase 03 P07 | 5 min | 2 tasks | 10 files |
+| Phase 03 P08 | 15 min | 2 tasks | 12 files |
 
 ## Accumulated Context
 
@@ -136,6 +137,8 @@ Recent decisions affecting current work:
 - [Phase 03]: 03-07: renderIcon takes no label; accessible names stay on the links (aria-label or visible text) and every SVG is aria-hidden/focusable=false
 - [Phase 03]: 03-07: icon names checked with Object.hasOwn on a frozen table (inherited names throw); extra class must match ^[a-z0-9-]+$ (T-03-14)
 - [Phase 03]: 03-07: no-Font-Awesome guard scans every shipped text file for cdnjs, the literal font-awesome and fab/fa-* tokens
+- [Phase 03]: 03-08: ?v= hash is sha256[0..10] of the exact Lightning CSS bytes; the 11ty.js template and the head share one memoized bundle reset in eleventy.before
+- [Phase 03]: 03-08: former inline styles are (0,2,0) ancestor-class + class rules at the end of their section, outranking every competing rule incl. the 480px .hud-btn; parity proven by headless-Chrome computed-style diff (0 of 501 props)
 
 ### Pending Todos
 
@@ -167,6 +170,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-10-10T20:45:57.794Z
-Stopped at: Completed 03-07-PLAN.md
+Last session: 2026-10-11T09:25:31.683Z
+Stopped at: Completed 03-08-PLAN.md
 Resume file: None
