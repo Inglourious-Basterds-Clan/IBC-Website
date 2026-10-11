@@ -3,9 +3,9 @@ phase: "03"
 slug: "performance-assets"
 # status lifecycle: draft (seeded by plan-phase) → validated (set by validate-phase §6)
 # audit-milestone §5.5 distinguishes NOT-VALIDATED (draft) from PARTIAL (validated + nyquist_compliant: false) (#2117)
-status: draft
-nyquist_compliant: false
-wave_0_complete: false
+status: validated
+nyquist_compliant: true
+wave_0_complete: true
 created: "2026-10-10"
 ---
 
@@ -40,31 +40,31 @@ created: "2026-10-10"
 
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| 03-01-01 | 01 | 1 | PERF-02, PERF-01 | T-03-SC, T-03-01, T-03-02, T-03-04 | sharp pinned to vetted 0.35.5; only repo-local image sources decoded; preload URLs prefix-safe | build-output | `SITE_URL=https://guard.example npm run build && … && npm test` (hero picture, AVIF preload, prefixed imagesrcset) | ✅ (existing suites) | ⬜ pending |
-| 03-01-02 | 01 | 1 | PERF-02 | T-03-SC, T-03-03 | lockfile guard (sharp ≥ 0.35.5, single copy, linux binaries); img/ ships only referenced variants | unit + build-output | `node --test test/images.test.js test/deps.test.js test/seo-assets.test.js && npm test` | ❌ created in task | ⬜ pending |
-| 03-02-01 | 02 | 1 | PERF-04 | T-03-SC | blocking human legitimacy check of fonttools/Brotli before any install | registry query | `curl -fsSL https://pypi.org/pypi/fonttools/4.66.1/json \| grep -q …` | n/a | ⬜ pending |
-| 03-02-02 | 02 | 1 | PERF-04 | T-03-05, T-03-06 | pinned upstream source + hashes; OFL shipped | unit (cmap + negative control) | `node --test test/fonts.test.js` | ❌ created in task | ⬜ pending |
-| 03-03-01 | 03 | 1 | PERF-01..07 (verification coverage: gate) | T-03-07, T-03-09 | failed or crashed gate moves output to `.rejected` | unit (fixtures) + CLI | `node --test test/perf-gate.test.js test/seo-gate.test.js` | ❌ created in task | ⬜ pending |
-| 03-03-02 | 03 | 1 | PERF-01..07 (verification coverage: gate) | T-03-08 | URL resolution stays inside the build folder | unit (one fixture per rule) | `node --test test/perf-gate.test.js test/seo-gate.test.js` | ✅ (from 03-03-01) | ⬜ pending |
-| 03-04-01 | 04 | 2 | PERF-01, PERF-03 | T-03-11 | data-lightbox-* values only reach srcset/src properties | build-output | `node --test test/images.test.js test/layout.test.js test/links.test.js && npm test` | ✅ | ⬜ pending |
-| 03-04-02 | 04 | 2 | PERF-03 | — | SEO images byte-identical (D-06) | build-output + repo | `node --test test/images.test.js test/layout.test.js test/devpages.test.js && npm test && git diff --quiet 03ce0de -- src/assets/og …` | ✅ | ⬜ pending |
-| 03-05-01 | 05 | 2 | PERF-04 | T-03-13 | no Google font hosts; prefix-safe font preload | build-output | `node --test test/links.test.js test/fonts.test.js && npm test && … grep -q 'href="/IBC-Website/fonts/…' _site/index.html && test -f _site/fonts/OFL.txt …` | ✅ | ⬜ pending |
-| 03-05-02 | 05 | 2 | PERF-04 | T-03-13, T-03-15 | font ships unchanged and covers every shipped character; IIS MIME entries | unit + build-output | `node --test test/fonts.test.js test/seo-files.test.js && npm test` | ✅ (extend) | ⬜ pending |
-| 03-06-01 | 06 | 3 | PERF-02, PERF-01 | T-03-10 | no originals shipped; hero.jpg deleted | build-output + repo | `node --test test/build.test.js test/seo.test.js test/images.test.js && npm test && … npm run build && test ! -e _site/assets/hero-bg.jpg …` | ✅ | ⬜ pending |
-| 03-06-02 | 06 | 3 | PERF-02 | T-03-10, T-03-12 | originals never ship and stay in git; SEO images byte-identical | build-output + repo | `node --test test/build.test.js test/seo-assets.test.js && npm test && node --check tools/seo-images/make-seo-images.js && git diff --quiet 03ce0de -- …` | ✅ | ⬜ pending |
-| 03-07-01 | 07 | 3 | PERF-05 | T-03-14 | icon names validated; SVGs aria-hidden in named links | unit + build-output | `node --test test/icons.test.js test/layout.test.js && npm test && … grep -q 'class="icon icon-youtube' _site/404.html …` | ❌ created in task | ⬜ pending |
-| 03-07-02 | 07 | 3 | PERF-05 | T-03-24 | no FA/cdnjs in output; every svg hidden | unit + build-output | `node --test test/icons.test.js test/links.test.js test/layout.test.js && npm test && …` | ✅ (from 03-07-01) | ⬜ pending |
-| 03-08-01 | 08 | 4 | PERF-06 | T-03-SC, T-03-17 | lightningcss pinned; ?v= content hash | build-output | `node --test test/css.test.js test/build.test.js test/deps.test.js test/links.test.js && npm test && …` | ❌ created in task | ⬜ pending |
-| 03-08-02 | 08 | 4 | PERF-06 | — | N/A | build-output | `node --test test/css.test.js test/layout.test.js && npm test && SITE_URL=https://guard.example npm run build` | ✅ | ⬜ pending |
-| 03-09-01 | 09 | 5 | PERF-07 | T-03-18 | literal import() map | unit (ESM stubs) + build-output | `node --test test/client.test.js test/build.test.js test/devpages.test.js && npm test && … grep -q '<script type="module" src="/IBC-Website/js/main.js">'` | ✅ (rewritten) | ⬜ pending |
-| 03-09-02 | 09 | 5 | PERF-07 | T-03-18, T-03-20 | unknown hooks load nothing; every hook has its module | unit + build-output | `node --test test/modules.test.js test/client.test.js test/layout.test.js test/devpages.test.js && npm test` | ❌ created in task | ⬜ pending |
-| 03-09-03 | 09 | 5 | PERF-07 | T-03-19 | no HTML-string DOM writes | unit + static | `node --test test/modules.test.js test/client.test.js test/css.test.js && npm test && …` | ✅ | ⬜ pending |
-| 03-10-01 | 10 | 6 | PERF-06 | T-03-16 | bundle byte-identical through @import | build + byte compare | `npm test && SITE_URL=https://guard.example npm run build && cmp _test/css-split/reference-1.css _site/css/style.css && …` | ✅ | ⬜ pending |
-| 03-10-02 | 10 | 6 | PERF-06 (D-13) | — | N/A | build-output | `node --test test/css.test.js test/links.test.js && npm test && SITE_URL=https://guard.example npm run build` | ✅ | ⬜ pending |
-| 03-10-03 | 10 | 6 | PERF-06 | T-03-16 | entry imports only ./partials/*.css | build-output + byte compare | `node --test test/css.test.js test/links.test.js && npm test && … && cmp _test/css-split/reference-2.css _site/css/style.css` | ✅ | ⬜ pending |
-| 03-11-01 | 11 | 7 | PERF-01..07 (verification coverage: gate in build) | T-03-21, T-03-22 | gate chained in npm run build; caps from measurements | build + unit | `npm test && out=$(SITE_URL=https://guard.example npm run build) && echo "$out" \| grep -q 'check-perf: OK' && …` | ✅ | ⬜ pending |
-| 03-11-02 | 11 | 7 | PERF-04 (D-10 UAT) | — | N/A | unit + build-output | `node --test test/docs.test.js test/devpages.test.js test/css.test.js test/modules.test.js test/fonts.test.js && npm test && …` | ✅ | ⬜ pending |
-| 03-11-03 | 11 | 7 | D-15, D-18 | T-03-23 | N/A | evidence files + manual | `test -f …/parity/parity.md && test "$(ls …/parity/after/*.png \| wc -l)" -ge 15 …` | n/a | ⬜ pending |
+| 03-01-01 | 01 | 1 | PERF-02, PERF-01 | T-03-SC, T-03-01, T-03-02, T-03-04 | sharp pinned to vetted 0.35.5; only repo-local image sources decoded; preload URLs prefix-safe | build-output | `SITE_URL=https://guard.example npm run build && … && npm test` (hero picture, AVIF preload, prefixed imagesrcset) | ✅ (existing suites) | ✅ green |
+| 03-01-02 | 01 | 1 | PERF-02 | T-03-SC, T-03-03 | lockfile guard (sharp ≥ 0.35.5, single copy, linux binaries); img/ ships only referenced variants | unit + build-output | `node --test test/images.test.js test/deps.test.js test/seo-assets.test.js && npm test` | ✅ | ✅ green |
+| 03-02-01 | 02 | 1 | PERF-04 | T-03-SC | blocking human legitimacy check of fonttools/Brotli before any install | registry query | `curl -fsSL https://pypi.org/pypi/fonttools/4.66.1/json \| grep -q …` | n/a | ✅ green |
+| 03-02-02 | 02 | 1 | PERF-04 | T-03-05, T-03-06 | pinned upstream source + hashes; OFL shipped | unit (cmap + negative control) | `node --test test/fonts.test.js` | ✅ | ✅ green |
+| 03-03-01 | 03 | 1 | PERF-01..07 (verification coverage: gate) | T-03-07, T-03-09 | failed or crashed gate moves output to `.rejected` | unit (fixtures) + CLI | `node --test test/perf-gate.test.js test/seo-gate.test.js` | ✅ | ✅ green |
+| 03-03-02 | 03 | 1 | PERF-01..07 (verification coverage: gate) | T-03-08 | URL resolution stays inside the build folder | unit (one fixture per rule) | `node --test test/perf-gate.test.js test/seo-gate.test.js` | ✅ (from 03-03-01) | ✅ green |
+| 03-04-01 | 04 | 2 | PERF-01, PERF-03 | T-03-11 | data-lightbox-* values only reach srcset/src properties | build-output | `node --test test/images.test.js test/layout.test.js test/links.test.js && npm test` | ✅ | ✅ green |
+| 03-04-02 | 04 | 2 | PERF-03 | — | SEO images byte-identical (D-06) | build-output + repo | `node --test test/images.test.js test/layout.test.js test/devpages.test.js && npm test && git diff --quiet 03ce0de -- src/assets/og …` | ✅ | ✅ green |
+| 03-05-01 | 05 | 2 | PERF-04 | T-03-13 | no Google font hosts; prefix-safe font preload | build-output | `node --test test/links.test.js test/fonts.test.js && npm test && … grep -q 'href="/IBC-Website/fonts/…' _site/index.html && test -f _site/fonts/OFL.txt …` | ✅ | ✅ green |
+| 03-05-02 | 05 | 2 | PERF-04 | T-03-13, T-03-15 | font ships unchanged and covers every shipped character; IIS MIME entries | unit + build-output | `node --test test/fonts.test.js test/seo-files.test.js && npm test` | ✅ (extend) | ✅ green |
+| 03-06-01 | 06 | 3 | PERF-02, PERF-01 | T-03-10 | no originals shipped; hero.jpg deleted | build-output + repo | `node --test test/build.test.js test/seo.test.js test/images.test.js && npm test && … npm run build && test ! -e _site/assets/hero-bg.jpg …` | ✅ | ✅ green |
+| 03-06-02 | 06 | 3 | PERF-02 | T-03-10, T-03-12 | originals never ship and stay in git; SEO images byte-identical | build-output + repo | `node --test test/build.test.js test/seo-assets.test.js && npm test && node --check tools/seo-images/make-seo-images.js && git diff --quiet 03ce0de -- …` | ✅ | ✅ green |
+| 03-07-01 | 07 | 3 | PERF-05 | T-03-14 | icon names validated; SVGs aria-hidden in named links | unit + build-output | `node --test test/icons.test.js test/layout.test.js && npm test && … grep -q 'class="icon icon-youtube' _site/404.html …` | ✅ | ✅ green |
+| 03-07-02 | 07 | 3 | PERF-05 | T-03-24 | no FA/cdnjs in output; every svg hidden | unit + build-output | `node --test test/icons.test.js test/links.test.js test/layout.test.js && npm test && …` | ✅ (from 03-07-01) | ✅ green |
+| 03-08-01 | 08 | 4 | PERF-06 | T-03-SC, T-03-17 | lightningcss pinned; ?v= content hash | build-output | `node --test test/css.test.js test/build.test.js test/deps.test.js test/links.test.js && npm test && …` | ✅ | ✅ green |
+| 03-08-02 | 08 | 4 | PERF-06 | — | N/A | build-output | `node --test test/css.test.js test/layout.test.js && npm test && SITE_URL=https://guard.example npm run build` | ✅ | ✅ green |
+| 03-09-01 | 09 | 5 | PERF-07 | T-03-18 | literal import() map | unit (ESM stubs) + build-output | `node --test test/client.test.js test/build.test.js test/devpages.test.js && npm test && … grep -q '<script type="module" src="/IBC-Website/js/main.js">'` | ✅ (rewritten) | ✅ green |
+| 03-09-02 | 09 | 5 | PERF-07 | T-03-18, T-03-20 | unknown hooks load nothing; every hook has its module | unit + build-output | `node --test test/modules.test.js test/client.test.js test/layout.test.js test/devpages.test.js && npm test` | ✅ | ✅ green |
+| 03-09-03 | 09 | 5 | PERF-07 | T-03-19 | no HTML-string DOM writes | unit + static | `node --test test/modules.test.js test/client.test.js test/css.test.js && npm test && …` | ✅ | ✅ green |
+| 03-10-01 | 10 | 6 | PERF-06 | T-03-16 | bundle byte-identical through @import | build + byte compare | `npm test && SITE_URL=https://guard.example npm run build && cmp _test/css-split/reference-1.css _site/css/style.css && …` | ✅ | ✅ green |
+| 03-10-02 | 10 | 6 | PERF-06 (D-13) | — | N/A | build-output | `node --test test/css.test.js test/links.test.js && npm test && SITE_URL=https://guard.example npm run build` | ✅ | ✅ green |
+| 03-10-03 | 10 | 6 | PERF-06 | T-03-16 | entry imports only ./partials/*.css | build-output + byte compare | `node --test test/css.test.js test/links.test.js && npm test && … && cmp _test/css-split/reference-2.css _site/css/style.css` | ✅ | ✅ green |
+| 03-11-01 | 11 | 7 | PERF-01..07 (verification coverage: gate in build) | T-03-21, T-03-22 | gate chained in npm run build; caps from measurements | build + unit | `npm test && out=$(SITE_URL=https://guard.example npm run build) && echo "$out" \| grep -q 'check-perf: OK' && …` | ✅ | ✅ green |
+| 03-11-02 | 11 | 7 | PERF-04 (D-10 UAT) | — | N/A | unit + build-output | `node --test test/docs.test.js test/devpages.test.js test/css.test.js test/modules.test.js test/fonts.test.js && npm test && …` | ✅ | ✅ green |
+| 03-11-03 | 11 | 7 | D-15, D-18 | T-03-23 | N/A | evidence files + manual | `test -f …/parity/parity.md && test "$(ls …/parity/after/*.png \| wc -l)" -ge 15 …` | n/a | ✅ green (evidence files); PSI median pending (manual-only) |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 
@@ -73,14 +73,14 @@ created: "2026-10-10"
 ## Wave 0 Requirements
 
 No separate Wave 0: each new suite is created by the task that first needs it (no `MISSING` verify placeholders). Created along the way:
-- [ ] `scripts/warm-images.js` + `pretest` — 03-01 (Pitfall 5, parallel builds share `.cache/img/`)
-- [ ] `test/images.test.js`, `test/deps.test.js` — 03-01 (PERF-01/02/03, D-01)
-- [ ] `test/fonts.test.js` + `lib/woff2.js` + `test/fixtures/montserrat-ascii.var.woff2` — 03-02 (PERF-04, D-10)
-- [ ] `test/perf-gate.test.js` — 03-03 (D-16/D-17)
-- [ ] `test/icons.test.js` — 03-07 (PERF-05)
-- [ ] `test/css.test.js` — 03-08 (PERF-06; 03-10 adds the partial and dead-CSS checks)
-- [ ] `test/modules.test.js` + rewritten `test/client.test.js` — 03-09 (PERF-07)
-- [ ] Updated pinned-layout suites: `test/build.test.js`, `test/layout.test.js`, `test/seo.test.js` (l), `test/links.test.js`, `test/seo-files.test.js`, `test/seo-assets.test.js`, `test/docs.test.js`, `test/workflow.test.js`
+- [x] `scripts/warm-images.js` + `pretest` — 03-01 (Pitfall 5, parallel builds share `.cache/img/`)
+- [x] `test/images.test.js`, `test/deps.test.js` — 03-01 (PERF-01/02/03, D-01)
+- [x] `test/fonts.test.js` + `lib/woff2.js` + `test/fixtures/montserrat-ascii.var.woff2` — 03-02 (PERF-04, D-10)
+- [x] `test/perf-gate.test.js` — 03-03 (D-16/D-17)
+- [x] `test/icons.test.js` — 03-07 (PERF-05)
+- [x] `test/css.test.js` — 03-08 (PERF-06; 03-10 adds the partial and dead-CSS checks)
+- [x] `test/modules.test.js` + rewritten `test/client.test.js` — 03-09 (PERF-07)
+- [x] Updated pinned-layout suites: `test/build.test.js`, `test/layout.test.js`, `test/seo.test.js` (l), `test/links.test.js`, `test/seo-files.test.js`, `test/seo-assets.test.js`, `test/docs.test.js`, `test/workflow.test.js`
 
 ---
 
@@ -101,7 +101,15 @@ No separate Wave 0: each new suite is created by the task that first needs it (n
 - [x] Sampling continuity: no 3 consecutive tasks without automated verify
 - [x] Wave 0 covers all MISSING references (none used)
 - [x] No watch-mode flags
-- [ ] Feedback latency < 120 s (confirm during execution)
-- [ ] `nyquist_compliant: true` set in frontmatter
+- [x] Feedback latency < 120 s (full suite measured at 31 s on 2026-10-11)
+- [x] `nyquist_compliant: true` set in frontmatter
 
-**Approval:** {pending / approved YYYY-MM-DD}
+**Approval:** approved 2026-10-11
+
+## Validation Audit 2026-10-11
+
+| Metric | Count |
+|---|---|
+| Gaps found | 0 |
+| Resolved | 0 |
+| Escalated | 0 |
