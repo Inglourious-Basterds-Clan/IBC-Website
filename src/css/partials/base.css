@@ -58,6 +58,13 @@ picture {
   display: contents;
 }
 
+/* ...and its sources get no box: Chrome does not hide source by default, so under display:
+   contents each one became a 0x0 flex item of the parent and took a gap (the header logo sat
+   24 px right of the pre-Phase-3 position) */
+picture > source {
+  display: none;
+}
+
 /* --- TACTICAL SCREEN OVERLAYS --- */
 body::before {
   content: "";

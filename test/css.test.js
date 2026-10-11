@@ -78,6 +78,14 @@ test("the bundle is minified and keeps the Safari prefixes (Pitfall 2)", () => {
   }
 });
 
+// D-15 (03-11 parity): picture is display: contents, so its source elements would become flex
+// items of the header logo link and each take its 12 px gap unless they are hidden.
+test("picture sources never form a box (D-15)", () => {
+  const css = cssBytes(out["css-root"]).toString("utf8");
+  assert.ok(css.includes("picture{display:contents}"), "the picture display: contents rule is gone");
+  assert.ok(css.includes("picture>source{display:none}"), "picture > source is not display: none, so sources shift flex layouts");
+});
+
 test("root and prefix builds produce the same bytes (PERF-06 concurrency edge)", () => {
   const root = cssBytes(out["css-root"]);
   const prefix = cssBytes(out["css-prefix"]);
