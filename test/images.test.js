@@ -65,7 +65,7 @@ function galleryItems(html) {
 
 // Every <picture>...</picture> inside the gallery grid, in document order.
 function galleryPictures(html) {
-  const start = html.indexOf('<div class="gallery-grid">');
+  const start = html.indexOf('<div class="gallery-grid"');
   assert.ok(start !== -1, "gallery grid missing");
   const end = html.indexOf("</section>", start);
   return html.slice(start, end).match(/<picture>[\s\S]*?<\/picture>/g) || [];

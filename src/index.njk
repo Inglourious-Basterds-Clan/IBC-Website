@@ -75,7 +75,7 @@ todo: "FACTS-01"
           <p>Status // Zapisy fotograficzne z pola walki</p>
         </div>
 
-        <div class="gallery-grid">
+        <div class="gallery-grid" data-js="lightbox">
           {% for g in images.gallery %}
           <div class="gallery-item hud-border" role="button" tabindex="0" aria-label="Powiększ zdjęcie: {{ g.title }}" data-lightbox-avif="{{ g.lightbox.avif[0].url | htmlBaseUrl }}" data-lightbox-webp="{{ g.lightbox.webp[0].url | htmlBaseUrl }}" data-lightbox-jpeg="{{ g.lightbox.jpeg[0].url | htmlBaseUrl }}">
             {% picture g.thumb, { "alt": g.alt, "loading": "lazy", "decoding": "async", "sizes": "auto, (min-width: 1240px) 285px, (min-width: 660px) 50vw, 100vw" } %}

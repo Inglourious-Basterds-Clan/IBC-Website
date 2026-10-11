@@ -116,7 +116,7 @@ test("prefix build puts every internal URL under the prefix", () => {
   const [logoSrc] = attrValues(logoImg, "src");
   assert.ok(logoSrc && logoSrc.startsWith(`${prefix}img/`), `logo img src "${logoSrc}" does not start with ${prefix}img/`);
 
-  const gallery = prefixHtml.slice(prefixHtml.indexOf('<div class="gallery-grid">'), prefixHtml.indexOf('id="recruitment"'));
+  const gallery = prefixHtml.slice(prefixHtml.indexOf('<div class="gallery-grid"'), prefixHtml.indexOf('id="recruitment"'));
   const gallerySrcs = attrValues(gallery, "src");
   assert.equal(gallerySrcs.length, 4, "expected 4 gallery img src values");
   for (const value of gallerySrcs) assert.ok(value.startsWith(`${prefix}img/`), `gallery img src "${value}" missing the prefix`);
