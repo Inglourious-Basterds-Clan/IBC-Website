@@ -114,3 +114,50 @@ test("no inline styles anywhere (D-12)", () => {
     assert.equal(styled.length, 0, `${file} has inline styles: ${styled.join(" ")}`);
   }
 });
+
+// Class names in the selectors of a (minified) bundle. url(...) contents are dropped first, then each
+// rule prelude (the text before a "{" back to the previous "}", "{" or ";") is scanned; at-rule
+// preludes (@media, @keyframes, @font-face) carry no class selectors and are skipped.
+function selectorClasses(css) {
+  const pieces = css.replace(/url\([^)]*\)/g, "url()").split("{");
+  const names = new Set();
+  for (const piece of pieces.slice(0, -1)) {
+    const prelude = piece.slice(Math.max(piece.lastIndexOf("}"), piece.lastIndexOf(";")) + 1).trim();
+    if (prelude.startsWith("@")) continue;
+    for (const match of prelude.matchAll(/\.(-?[_a-zA-Z][\w-]*)/g)) names.add(match[1]);
+  }
+  return [...names].sort();
+}
+
+// The text of every file a class can come from (D-13): .njk and .js under src/ (recursive, so
+// src/js/modules/ and src/_data/ count) and .js under lib/ (icons.js writes class="icon").
+function classSources() {
+  const files = [...listFiles(join(repoRoot, "src"), [".njk", ".js"]), ...listFiles(join(repoRoot, "lib"), [".js"])];
+  assert.ok(files.length > 0, "no .njk or .js sources found");
+  return files.map((path) => readFileSync(path, "utf8"));
+}
+
+// The bundle's class names that occur as a whole word (not inside a longer hyphenated name) in none of the sources.
+function unusedClasses(css, sources) {
+  return selectorClasses(css).filter((name) => {
+    const word = new RegExp(`(?<![\\w-])${name.replace(/[-]/g, "\\-")}(?![\\w-])`);
+    return !sources.some((text) => word.test(text));
+  });
+}
+
+test("no dead roster, calendar, status, countdown or form CSS ships (D-13)", () => {
+  const classes = selectorClasses(cssBytes(out["css-root"]).toString("utf8"));
+  assert.ok(classes.length > 0, "no class selectors found in css/style.css");
+  const dead = classes.filter((name) => /^(roster|calendar|countdown|timer|status-panel|form-control|member-)/.test(name));
+  assert.deepEqual(dead, [], `css/style.css still styles dead classes: ${dead.join(", ")}`);
+});
+
+test("every class selector in the bundle is used by a template or script (D-13)", () => {
+  const unused = unusedClasses(cssBytes(out["css-root"]).toString("utf8"), classSources());
+  assert.deepEqual(unused, [], `css/style.css styles classes no .njk or .js file uses: ${unused.join(", ")}`);
+});
+
+test("the every-class-used check reports an invented class (negative control)", () => {
+  const css = `${cssBytes(out["css-root"]).toString("utf8")}.zz-invented-class:hover .hud-border{color:red}`;
+  assert.deepEqual(unusedClasses(css, classSources()).filter((name) => name.startsWith("zz-")), ["zz-invented-class"]);
+});
