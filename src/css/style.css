@@ -1,24 +1,9 @@
-/* --- FONTS --- */
-/* Self-hosted variable Montserrat (D-07, D-09). The url is relative to the output css/style.css,
-   so it works at the root and under any path prefix. */
-@font-face {
-  font-family: "Montserrat";
-  src: url("../fonts/montserrat-latin-ext.var.woff2") format("woff2");
-  font-weight: 100 900;
-  font-style: normal;
-  font-display: swap;
-  unicode-range: U+0000-00FF, U+0100-017F, U+2000-206F, U+20AC, U+2122, U+2190-2193, U+2212;
-}
-
-/* Metric-matched local face shown until the woff2 arrives; limits the layout shift on swap. */
-@font-face {
-  font-family: "Montserrat Fallback";
-  src: local("Arial");
-  size-adjust: 110.38%;
-  ascent-override: 87.70%;
-  descent-override: 22.74%;
-  line-gap-override: 0%;
-}
+/* Stylesheet entry (D-12). lib/css.js bundles this file with Lightning CSS, which follows the
+   @import lines below in order and emits one minified css/style.css. The partials are imported
+   in cascade order, so a rule's position in the bundle is its position in this list.
+   Every url() in a partial is written relative to the output css/style.css, because Lightning
+   CSS does not rebase url() values from imported files. */
+@import "./partials/fonts.css";
 
 /* --- CUSTOM VARIABLES --- */
 :root {
