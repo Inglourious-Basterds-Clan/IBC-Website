@@ -133,11 +133,11 @@ Plans:
   4. Every fact Claude drafted is marked TODO and listed in `FACTS.md`. The production build stays blocked until the user confirms each one and the markers are removed.
   5. The home page shows a live Discord members/online badge. It falls back to a static number when the request fails or JS is off, and its label doesn't contradict the "20+ aktywnych członków" claim.
 
-**Plans**: 7 plans
+**Plans**: 8 plans
 
 Plans:
 **Wave 1**
-- [ ] 04-01-PLAN.md — Tracer: /jak-dolaczyc/ from join.js with breadcrumbs + BreadcrumbList, 15-question FAQ + FAQPage from the same data, pages.css (wave 1)
+- [ ] 04-01-PLAN.md — Tracer: /jak-dolaczyc/ from join.js with breadcrumbs + BreadcrumbList, 15-question FAQ + FAQPage from the same data (wave 1)
 - [ ] 04-02-PLAN.md — CR-01: gates and clean.js may only move/delete _site or _test/** (wave 1)
 - [ ] 04-03-PLAN.md — Live Discord badge: build-time count with offline switch and backstop, data-js module, no layout shift (wave 1)
 
@@ -146,10 +146,13 @@ Plans:
 - [ ] 04-05-PLAN.md — Gate rules G11 (breadcrumbs/BreadcrumbList) and G12 (FAQPage = visible FAQ) with fixtures (wave 2)
 
 **Wave 3** *(blocked on Wave 2 completion)*
-- [ ] 04-06-PLAN.md — Legacy #recruitment redirect, nav to real pages with aria-current, home teaser and D-09 fact alignment (wave 3)
+- [ ] 04-06-PLAN.md — Subpage styles: one pages.css partial for breadcrumbs, join page and operations page within the CSS budget (wave 3)
 
 **Wave 4** *(blocked on Wave 3 completion)*
-- [ ] 04-07-PLAN.md — WR-01 content-hashed main.js and module URLs, Polish README for Phase 4, full phase gate (wave 4)
+- [ ] 04-07-PLAN.md — Legacy #recruitment redirect, nav to real pages with aria-current, home teaser and D-09 fact alignment (wave 4)
+
+**Wave 5** *(blocked on Wave 4 completion)*
+- [ ] 04-08-PLAN.md — WR-01 content-hashed main.js and module URLs, Polish README for Phase 4, full phase gate (wave 5)
 **UI hint**: yes
 
 ### Phase 5: Accessibility & Visual Refresh

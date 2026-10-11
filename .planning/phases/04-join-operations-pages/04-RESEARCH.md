@@ -684,12 +684,16 @@ OCAP explained in plain Polish ("nagranie przebiegu misji, które oglądamy po g
 | A5 | Chrome auto-opens a closed `<details>` when the URL fragment targets it (`#mody`); other browsers may only scroll to it | Code Examples (FAQ) | Recruiter deep links scroll but don't expand in some browsers; no JS planned for this |
 | A6 | The hero "Złóż podanie" button should point to `/jak-dolaczyc/` | Pitfall 2 | Copy/UX preference; `#rekrutacja` also works |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Is a UI-SPEC needed before planning?** `workflow.ui_phase` is `true` and the phase has a UI hint, but Phase 5 owns the visual refresh (UI-01). Recommendation: no full `/gsd-ui-phase`. The planner reuses existing HUD primitives (`.hud-border`, `.hud-btn`, `.section-header`, `.req-list`) and adds one small `pages.css` partial. If the orchestrator's flow insists on a UI-SPEC, keep it minimal (layout of 2 pages only).
+   **RESOLVED:** No UI-SPEC. Both subpages are styled by one new partial `src/css/partials/pages.css` that reuses the existing HUD primitives (`.hud-border`, `.hud-btn`, `.section-header`, `.req-list`), with colours only through `var(--…)` and no new effects. Plan 04-06 owns it (breadcrumbs, join page, FAQ, operations blocks, recap cards) within `BUDGET.cssGzipMaxBytes`.
 2. **Fix WR-01 (unversioned JS) in this phase?** Phase 4 changes the JS contract (new hooks, terminal lookup). Recommendation: yes, one small task (version `main.js` with a content hash like `cssHash` and append it to the literal import specifiers), because returning visitors would otherwise miss the badge and redirect until their cache expires. Planner/user decision.
+   **RESOLVED:** Fixed in this phase by plan 04-08 Task 1 (numbered 04-07 before the checker revision split the subpage styles into their own plan): `lib/js.js` content hash of `src/js`, `main.js?v=<hash>` in `base.njk`, and `+ version` on every literal module specifier; WR-01 is marked `fixed` in the Phase 3 review disposition.
 3. **Backstop value in `site.js`:** today's live count is 246 members. Recommendation: `membersBackstop: 240` (floors to "200+"). It's a number the user should glance at, not a TODO (it is derived from a live measurement).
+   **RESOLVED:** `site.discord.membersBackstop: 240` (renders "200+ osób"), set by plan 04-03 Task 1. The user confirms the value (or supplies another) in the 04-03 Task 3 human-check. It is not a FACTS row.
 4. **Exact FACTS row granularity:** recommendation: one row per independently confirmable unit (each drafted FAQ answer, each recap, the evening times, each page description, the `updated` date, page intro/flavour lines). Expect roughly FACTS-03…FACTS-20.
+   **RESOLVED:** FACTS-03..FACTS-13, one row per independently confirmable unit. 04-01: FACTS-03 (join page description, status line and intro), FACTS-04 (FAQ `doswiadczenie`), FACTS-05 (FAQ `obecnosc`). 04-04: FACTS-06 (operations page description, status line and intro), FACTS-07 (evening times), FACTS-08 (OCAP explanation), FACTS-09 (`lastUpdate` date), FACTS-10..FACTS-13 (one per recap). The other FAQ answers state confirmed D-02 facts and carry no marker (D-01).
 
 ## Environment Availability
 

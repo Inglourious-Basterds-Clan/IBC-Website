@@ -12,7 +12,7 @@
 | `approximate_presence_count` | INTEGRATE | Live "· N online" in the browser only; never baked, a baked online count goes stale within minutes (D-16) |
 | Non-2xx responses (404 `10006 Unknown Invite`, 429, 5xx) | INTEGRATE | Handled: build falls back to `site.discord.membersBackstop`, browser keeps the baked text silently (D-16) |
 | Network error / timeout (`AbortSignal.timeout(5000)`) | INTEGRATE | Handled the same way; the build never fails or hangs because of Discord (T-04-09) |
-| Malformed body (non-JSON, non-integer or negative counts) | INTEGRATE | Rejected by integer validation; nothing is written (T-04-07) |
+| Malformed body (non-JSON, non-integer or negative counts) | INTEGRATE | Rejected by integer validation; nothing is written (T-04-08) |
 | `DISCORD_FETCH=0` offline switch | INTEGRATE | Test builds and offline builds skip the network deterministically (Pitfall 5) |
 | `with_expiration` query parameter / `expires_at` field | OPT-OUT | The invite is permanent (`expires_at: null`, tested); expiry is never shown |
 | `guild_scheduled_event_id` query parameter / `guild_scheduled_event` field | OPT-OUT | No event content on the site (Event markup and hand-maintained calendars are out of scope; bot calendar is ENG-04, v2) |
