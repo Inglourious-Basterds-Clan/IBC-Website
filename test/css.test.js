@@ -86,6 +86,14 @@ test("picture sources never form a box (D-15)", () => {
   assert.ok(css.includes("picture>source{display:none}"), "picture > source is not display: none, so sources shift flex layouts");
 });
 
+// D-15 (03-11 parity): the Font Awesome glyph carried the button's letter-spacing inside its box,
+// so an SVG icon in a lettered button keeps that space as a margin.
+test("icons in lettered buttons keep the old glyph's trailing letter-spacing (D-15)", () => {
+  const css = cssBytes(out["css-root"]).toString("utf8");
+  assert.ok(css.includes(".hud-btn .icon{margin-right:2px}"), ".hud-btn .icon lost its 2px (the .hud-btn letter-spacing)");
+  assert.ok(css.includes(".header-cta .icon{margin-right:1.5px}"), ".header-cta .icon lost its 1.5px (the .header-cta letter-spacing)");
+});
+
 test("root and prefix builds produce the same bytes (PERF-06 concurrency edge)", () => {
   const root = cssBytes(out["css-root"]);
   const prefix = cssBytes(out["css-prefix"]);

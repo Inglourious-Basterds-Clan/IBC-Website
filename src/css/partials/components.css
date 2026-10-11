@@ -106,3 +106,9 @@
   overflow: visible;
   vertical-align: -0.125em;
 }
+
+/* The webfont glyph was text, so the button's letter-spacing sat after it inside the icon box;
+   the SVG gets the same space as a margin, keeping button widths and text positions (D-15) */
+.hud-btn .icon {
+  margin-right: 2px;
+}
