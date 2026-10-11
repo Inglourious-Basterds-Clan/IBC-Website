@@ -27,7 +27,8 @@
   {#- D-07, D-09: the self-hosted font replaces Google Fonts. crossorigin is required, or the font is fetched twice;
       HtmlBasePlugin prefixes the href. #}
   <link rel="preload" href="/fonts/montserrat-latin-ext.var.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="/css/style.css">
+  {#- D-12: the Lightning CSS bundle; ?v= is its content hash, HtmlBasePlugin prefixes the path and keeps the query. #}
+  <link rel="stylesheet" href="/css/style.css?v={{ cssHash }}">
   
   <!-- Open Graph & Twitter Cards -->
   <meta property="og:type" content="website">

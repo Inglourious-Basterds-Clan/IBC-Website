@@ -7,6 +7,7 @@ import { isIndexableUrl } from "./lib/seo.js";
 import { buildSchemaGraph, jsonLd } from "./lib/schema.js";
 import { processImages } from "./lib/images.js";
 import { renderIcon } from "./lib/icons.js";
+import { getCssBundle, resetCssBundle } from "./lib/css.js";
 
 export default function (eleventyConfig) {
   // Rewrites root-relative href/src/srcset with pathPrefix and provides the htmlBaseUrl filter.
@@ -36,8 +37,15 @@ export default function (eleventyConfig) {
     for (const file of files) cpSync(file, join(target, basename(file)));
   });
 
+  // One stylesheet (D-12): src/css/style.11ty.js writes css/style.css from the Lightning CSS bundle,
+  // so the CSS sources are not passthrough-copied. The head links it with ?v=<cssHash>, the first
+  // 10 hex characters of the bundle's sha256, so a deploy never serves a stale cached copy.
+  eleventyConfig.addGlobalData("cssHash", () => getCssBundle().hash);
+  // Every build (also each --serve rebuild) bundles afresh, so npm run dev picks up CSS edits.
+  eleventyConfig.on("eleventy.before", () => resetCssBundle());
+  eleventyConfig.addWatchTarget("src/css/");
+
   eleventyConfig.addPassthroughCopy({
-    "src/css": "css",
     "src/js": "js",
     "src/assets": "assets",
     // Self-hosted Montserrat (D-09): the woff2 and its OFL licence ship together, unchanged.

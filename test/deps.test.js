@@ -62,6 +62,15 @@ test("eleventy-img is pinned exactly", () => {
   assert.equal(lock.packages["node_modules/@11ty/eleventy-img"]?.version, "7.0.0");
 });
 
+test("lightningcss is pinned and CI has its linux binary (D-12, Pitfall 8)", () => {
+  assert.equal(pkg.devDependencies.lightningcss, "1.33.0");
+  assert.equal(lock.packages["node_modules/lightningcss"]?.version, "1.33.0");
+  assert.ok(
+    lock.packages["node_modules/lightningcss-linux-x64-gnu"],
+    "package-lock.json has no node_modules/lightningcss-linux-x64-gnu entry (npm ci on ubuntu would fail)",
+  );
+});
+
 test("installed sharp matches the lockfile", () => {
   const installed = readJson("node_modules/sharp/package.json");
   assert.equal(installed.version, lock.packages["node_modules/sharp"].version);

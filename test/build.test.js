@@ -24,6 +24,10 @@ const originalNames = [
 
 // A drive-letter path such as C:/ or c:\ (not the "s:/" inside "https://").
 const drivePathPattern = /(?<![A-Za-z])[A-Za-z]:[\\/](?![\\/])/;
+// The cache-busted stylesheet link (D-12): <prefix>css/style.css?v=<10 lowercase hex>.
+function stylesheetHref(prefix) {
+  return new RegExp(`href="${prefix.replace(/[/.]/g, "\\$&")}css/style\\.css\\?v=[0-9a-f]{10}"`);
+}
 const inviteDomainPattern = /https?:\/\/(?:www\.)?discord(?:\.gg|(?:app)?\.com\/invite)\/[A-Za-z0-9-]+/g;
 
 function ogImage(html) {
@@ -71,14 +75,14 @@ test("default build emits the site", () => {
   }
   assert.ok(listFiles(join(out, "img"), [".avif"]).length > 0, "no AVIF variant under img/");
   const html = read(out, "index.html");
-  assert.ok(html.includes('href="/css/style.css"'), "stylesheet is not root-relative");
+  assert.match(html, stylesheetHref("/"), "stylesheet is not root-relative");
   assert.ok(html.includes('src="/js/main.js"'), "script is not root-relative");
 });
 
 test("prefix build rewrites root-relative URLs", () => {
   const out = build("build-prefix", { PATH_PREFIX: "/IBC-Website/" });
   const html = read(out, "index.html");
-  assert.ok(html.includes('href="/IBC-Website/css/style.css"'), "stylesheet missing the prefix");
+  assert.match(html, stylesheetHref("/IBC-Website/"), "stylesheet missing the prefix");
   assert.ok(html.includes('src="/IBC-Website/js/main.js"'), "script missing the prefix");
   assert.ok(attrValues(html, "src").every((value) => value !== "."), 'empty src rewritten to "."');
 
@@ -145,7 +149,7 @@ test("SITE_URL and PATH_PREFIX are normalized", () => {
   const image = ogImage(html);
   assert.equal(image, "https://mutated.example/IBC-Website/assets/og/og-default-v1.jpg");
   assert.ok(!image.replace(/^https:\/\//, "").includes("//"), "double slash after the host");
-  assert.ok(html.includes('href="/IBC-Website/css/style.css"'), "slashless PATH_PREFIX not normalized");
+  assert.match(html, stylesheetHref("/IBC-Website/"), "slashless PATH_PREFIX not normalized");
   for (const page of allHtml(out)) {
     assert.ok(!page.includes("localhost:8080"), "default SITE_URL leaked into a mutated build");
   }
@@ -155,7 +159,7 @@ test("empty env falls back to defaults", () => {
   const out = build("build-empty", { SITE_URL: "", PATH_PREFIX: "" });
   const html = read(out, "index.html");
   assert.equal(ogImage(html), "http://localhost:8080/assets/og/og-default-v1.jpg");
-  assert.ok(html.includes('href="/css/style.css"'), "empty PATH_PREFIX did not fall back to /");
+  assert.match(html, stylesheetHref("/"), "empty PATH_PREFIX did not fall back to /");
 });
 
 test("invite comes from site.js", () => {
