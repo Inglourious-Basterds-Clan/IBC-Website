@@ -3,16 +3,16 @@ gsd_state_version: "1.0"
 current_phase: 03
 current_phase_name: performance-assets
 status: executing
-stopped_at: Completed 03-10-PLAN.md
-last_updated: "2026-10-11T10:05:13.078Z"
+stopped_at: Completed 03-11-PLAN.md
+last_updated: "2026-10-11T10:57:48.235Z"
 last_activity: 2026-10-11
 last_activity_desc: Phase 2 complete, transitioned to Phase 3
-state_head: cbc1db97c31cebc48840ef6950adddc47659dbcf
+state_head: 6f7f6cf6f48aac02a13899d6c5e7bab70e8cf3eb
 progress:
   total_phases: 5
   completed_phases: 2
   total_plans: 24
-  completed_plans: 23
+  completed_plans: 24
   percent: 40
 ---
 
@@ -80,6 +80,7 @@ Progress: [████░░░░░░] 40%
 | Phase 03 P08 | 15 min | 2 tasks | 12 files |
 | Phase 03 P09 | 11 min | 3 tasks | 15 files |
 | Phase 03 P10 | 22 min | 3 tasks | 12 files |
+| Phase 03 P11 | 49 min | 3 tasks | 44 files |
 
 ## Accumulated Context
 
@@ -145,6 +146,10 @@ Recent decisions affecting current work:
 - [Phase 03]: 03-09: runtime state is classes (.lightbox.is-open, .decryption-overlay.is-open, .tag-error, .terminal-line-alert) and textContent; only body.style.overflow scroll lock remains as a runtime style
 - [Phase 03]: 03-10: the every-class-used guard reads bundle rule preludes only and matches class names as whole words with (?<![\w-])name(?![\w-]), so hyphenated supersets do not count as use
 - [Phase 03]: 03-10: dead CSS (roster, calendar, status panel, countdown, form styles, green/danger badges, 480px timer rule, keyframes blink/fadeIn) deleted; computed-style parity proven by a CDP probe with frozen Date (0 of 1.61M values differ)
+- [Phase 03]: 03-11: npm run build = clean, eleventy, check-seo, check-perf (&&); final BUDGET css 5120 / js 6144 / font 45824 B = measured 3957 / 4857 / 36460 + 25 % rounded to 256
+- [Phase 03]: 03-11: picture > source { display: none } fixes the 24 px header logo shift that picture { display: contents } caused
+- [Phase 03]: 03-11: icons in lettered buttons get margin-right = button letter-spacing (2px, 1.5px header CTA) to keep pre-Phase-3 button widths
+- [Phase 03]: 03-11: residual logo softness (downscale path, not encoding) left to the 03-04 human check; PSI >= 90 needs the user's deploy and run
 
 ### Pending Todos
 
@@ -175,6 +180,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-10-11T10:05:12.984Z
-Stopped at: Completed 03-10-PLAN.md
+Last session: 2026-10-11T10:57:30.978Z
+Stopped at: Completed 03-11-PLAN.md
 Resume file: None

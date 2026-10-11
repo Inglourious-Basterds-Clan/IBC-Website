@@ -191,7 +191,7 @@ status: complete
 
 ## Task Commits
 
-1. **Task 1 (tracer): build ends with the perf gate, caps from measured sizes:** `528052a` (feat). Tracer feedback gate: `human_verify_mode` is end-of-phase and the verify is automated only, so the full verify was re-run after the commit. It passed (288/288 at the time was 286/286, plus both builds OK). The tracer was verified end to end, then work moved to Task 2.
+1. **Task 1 (tracer): build ends with the perf gate, caps from measured sizes:** `528052a` (feat). Tracer feedback gate: `human_verify_mode` is end-of-phase and the verify is automated only, so the full verify was re-run after the commit. It passed: `npm test` 286/286 at that point, and both builds printed `check-perf: OK`. The tracer was verified end to end, then work moved to Task 2.
 2. **Task 2: README pipeline section, docs test, pangram page:** `6a498d2` (docs)
 3. **Task 3: parity evidence and PSI record:** `7753ba6` (docs). Fixes made during the task:
    - `39e5c21` (fix) picture sources hidden

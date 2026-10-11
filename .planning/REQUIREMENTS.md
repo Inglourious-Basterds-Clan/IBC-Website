@@ -30,13 +30,13 @@ Requirements for this milestone. Each maps to a roadmap phase.
 
 ### Performance
 
-- [ ] **PERF-01**: Images are served as AVIF/WebP with responsive srcset and explicit dimensions; below-the-fold images lazy-load
-- [ ] **PERF-02**: Hero is an `<img fetchpriority="high">` of about 120 KB or less on mobile, and the duplicate `hero.jpg` is removed
-- [ ] **PERF-03**: Lightbox loads optimized images under 300 KB, and the logo is resized to its display size
-- [ ] **PERF-04**: Fonts are self-hosted woff2 that include Polish characters; no requests go to Google Fonts
-- [ ] **PERF-05**: Font Awesome CDN is replaced by inline SVG icons with accessible names
-- [ ] **PERF-06**: CSS is split into partials and bundled into one minified file; inline styles are removed
-- [ ] **PERF-07**: JS is split into ES modules loaded through `data-js` hooks, and each module does nothing on pages where its feature isn't present
+- [x] **PERF-01**: Images are served as AVIF/WebP with responsive srcset and explicit dimensions; below-the-fold images lazy-load
+- [x] **PERF-02**: Hero is an `<img fetchpriority="high">` of about 120 KB or less on mobile, and the duplicate `hero.jpg` is removed
+- [x] **PERF-03**: Lightbox loads optimized images under 300 KB, and the logo is resized to its display size
+- [x] **PERF-04**: Fonts are self-hosted woff2 that include Polish characters; no requests go to Google Fonts
+- [x] **PERF-05**: Font Awesome CDN is replaced by inline SVG icons with accessible names
+- [x] **PERF-06**: CSS is split into partials and bundled into one minified file; inline styles are removed
+- [x] **PERF-07**: JS is split into ES modules loaded through `data-js` hooks, and each module does nothing on pages where its feature isn't present
 - [ ] **PERF-08**: Every page scores ≥ 90 in all four Lighthouse categories on mobile
 
 ### Content
@@ -116,13 +116,13 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SEO-07 | Phase 2 | Complete |
 | SEO-08 | Phase 2 | Complete |
 | SEO-09 | Phase 2 | Complete |
-| PERF-01 | Phase 3 | Pending |
-| PERF-02 | Phase 3 | Pending |
-| PERF-03 | Phase 3 | Pending |
-| PERF-04 | Phase 3 | Pending |
-| PERF-05 | Phase 3 | Pending |
-| PERF-06 | Phase 3 | Pending |
-| PERF-07 | Phase 3 | Pending |
+| PERF-01 | Phase 3 | Complete |
+| PERF-02 | Phase 3 | Complete |
+| PERF-03 | Phase 3 | Complete |
+| PERF-04 | Phase 3 | Complete |
+| PERF-05 | Phase 3 | Complete |
+| PERF-06 | Phase 3 | Complete |
+| PERF-07 | Phase 3 | Complete |
 | PERF-08 | Phase 5 | Pending |
 | CONT-01 | Phase 4 | Pending |
 | CONT-02 | Phase 4 | Pending |

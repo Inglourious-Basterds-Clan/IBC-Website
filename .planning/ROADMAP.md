@@ -93,7 +93,7 @@ Plans:
   4. Each page loads a single minified CSS bundle, and the built HTML contains no inline `style=` attributes.
   5. JS features load as ES modules through `data-js` hooks. A page without the gallery, terminal or easter egg loads with no console errors and doesn't run that feature's code.
 
-**Plans**: 10/11 plans executed
+**Plans**: 11/11 plans executed
 
 Plans:
 **Wave 1**
@@ -119,7 +119,7 @@ Plans:
 - [x] 03-10-PLAN.md — Dead CSS removed; stylesheet split into 10 partials with a byte-identical bundle (wave 6)
 
 **Wave 7** *(blocked on Wave 6 completion)*
-- [ ] 03-11-PLAN.md — Perf gate chained into npm run build with measured caps, README, pangram dev page, D-15 parity screenshots and D-18 PSI record (wave 7)
+- [x] 03-11-PLAN.md — Perf gate chained into npm run build with measured caps, README, pangram dev page, D-15 parity screenshots and D-18 PSI record (wave 7)
 
 ### Phase 4: Join & Operations Pages
 
@@ -160,7 +160,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5. Phases 2 and 3 both 
 |-------|----------------|--------|-----------|
 | 1. Eleventy Foundation | 7/7 | Complete    | 2026-10-06 |
 | 2. Technical SEO | 6/6 | Complete    | 2026-10-08 |
-| 3. Performance & Assets | 10/11 | In Progress | - |
+| 3. Performance & Assets | 11/11 | In Progress | - |
 | 4. Join & Operations Pages | 0/TBD | Not started | - |
 | 5. Accessibility & Visual Refresh | 0/TBD | Not started | - |
 
