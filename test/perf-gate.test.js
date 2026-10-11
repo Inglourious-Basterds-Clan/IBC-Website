@@ -5,10 +5,10 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { existsSync, mkdirSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { gzipSync } from "node:zlib";
-import { cleanEnv, repoRoot } from "./helpers.js";
+import { build, cleanEnv, repoRoot } from "./helpers.js";
 import * as perf from "../lib/check-perf.js";
 
 const { BUDGET, checkPerf } = perf;
@@ -477,4 +477,68 @@ test("CLI exits 1 with its own message when --dir is a file", () => {
   const result = runGate("_test/perf-gate-fixtures/cli-dir-is-file/robots.txt");
   assert.equal(result.status, 1);
   assert.match(result.stderr, /check-perf: _test\/perf-gate-fixtures\/cli-dir-is-file\/robots\.txt is not a folder/);
+});
+
+// D-16/D-17 on the real site: the two production builds the project deploys (root and the
+// /IBC-Website/ GitHub Pages preview) pass the gate with the final BUDGET, and npm run build
+// ends with the gate. Built once per file; node --test runs files in parallel processes, so the
+// folder names carry the suite name.
+const realRoot = { dir: null, site: { url: "http://localhost:8080", pathPrefix: "/" } };
+const realPrefix = { dir: null, site: { url: "https://inglourious-basterds-clan.github.io", pathPrefix: "/IBC-Website/" } };
+function realBuild(variant) {
+  if (variant.dir) return variant.dir;
+  variant.dir =
+    variant === realRoot
+      ? build("perf-gate-real-root")
+      : build("perf-gate-real-prefix", { SITE_URL: variant.site.url, PATH_PREFIX: variant.site.pathPrefix });
+  return variant.dir;
+}
+
+test("real builds pass the perf gate (D-16)", () => {
+  for (const variant of [realRoot, realPrefix]) {
+    const problems = checkPerf(realBuild(variant), variant.site);
+    assert.deepEqual(problems, [], `${variant.site.pathPrefix} build fails the perf gate:\n${problems.join("\n")}`);
+  }
+});
+
+test("every measured size is within its cap (D-17)", () => {
+  for (const variant of [realRoot, realPrefix]) {
+    const sizes = perf.measurePerf(realBuild(variant), variant.site);
+    const label = `${variant.site.pathPrefix} build`;
+    assert.ok(sizes.cssGzipBytes > 0 && sizes.cssGzipBytes <= BUDGET.cssGzipMaxBytes, `${label}: css ${sizes.cssGzipBytes} B gz`);
+    assert.ok(
+      sizes.initialJsGzipBytes > 0 && sizes.initialJsGzipBytes <= BUDGET.initialJsGzipMaxBytes,
+      `${label}: initial js ${sizes.initialJsGzipBytes} B gz`,
+    );
+    assert.ok(sizes.fontBytes > 0 && sizes.fontBytes <= BUDGET.fontMaxBytes, `${label}: font ${sizes.fontBytes} B`);
+    assert.ok(sizes.fontFiles <= BUDGET.fontFilesMax, `${label}: ${sizes.fontFiles} font files`);
+    assert.ok(
+      sizes.heroMobileMaxBytes > 0 && sizes.heroMobileMaxBytes <= BUDGET.heroMobileMaxBytes,
+      `${label}: hero mobile max ${sizes.heroMobileMaxBytes} B`,
+    );
+    assert.ok(sizes.lightboxMaxBytes > 0 && sizes.lightboxMaxBytes < BUDGET.lightboxMaxBytes, `${label}: lightbox max ${sizes.lightboxMaxBytes} B`);
+  }
+});
+
+test("a regression in a real build is caught", () => {
+  const dir = join(fixturesDir, "real-regression");
+  rmSync(dir, { recursive: true, force: true });
+  cpSync(realBuild(realRoot), dir, { recursive: true });
+  const indexPath = join(dir, "index.html");
+  const html = readFileSync(indexPath, "utf8");
+  assert.match(html, /<main\b/, "the real index.html has no <main> element");
+  writeFileSync(indexPath, html.replace(/<main\b/, '<main style="color:red"'));
+  const problems = checkPerf(dir, realRoot.site);
+  assert.ok(
+    problems.some((problem) => /^index\.html(?::\d+)?: P4 /.test(problem)),
+    `no P4 line for the inline style in index.html:\n${problems.join("\n")}`,
+  );
+});
+
+test("npm run build ends with the perf gate", () => {
+  const pkg = JSON.parse(readFileSync(join(repoRoot, "package.json"), "utf8"));
+  assert.equal(
+    pkg.scripts.build,
+    "node scripts/clean.js && eleventy && node scripts/check-seo.js && node scripts/check-perf.js",
+  );
 });

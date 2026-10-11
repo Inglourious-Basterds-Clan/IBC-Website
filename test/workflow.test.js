@@ -130,3 +130,14 @@ test("(h) the workflow never sets the local opt-out", () => {
 test("(i) the workflow never opts into indexing (D-15, D-18)", () => {
   assert.ok(!workflow.includes("SITE_INDEXABLE"), "workflow mentions SITE_INDEXABLE; the Pages preview must stay noindex");
 });
+
+// D-19: page speed is measured by hand with PageSpeed Insights; CI runs no Lighthouse step.
+// Test (c) keeps the npm ci -> npm test -> npm run build order, and npm run build ends with the
+// perf gate (test/perf-gate.test.js), so CI enforces the budget without Lighthouse.
+test("(j) no Lighthouse CI (D-19)", () => {
+  assert.ok(!/lighthouse/i.test(workflow), "the workflow mentions Lighthouse; D-19 keeps PageSpeed checks manual");
+  const ci = indexOrFail(buildPart, "run: npm ci");
+  const unitTests = indexOrFail(buildPart, "run: npm test");
+  const siteBuild = indexOrFail(buildPart, "run: npm run build");
+  assert.ok(ci < unitTests && unitTests < siteBuild, "build job no longer runs npm ci, npm test and npm run build in order");
+});

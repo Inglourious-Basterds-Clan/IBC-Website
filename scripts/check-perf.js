@@ -1,5 +1,5 @@
 // Post-build performance gate (D-16, D-17; no Lighthouse CI, D-19). Runs after
-// scripts/check-seo.js in `npm run build` (wired in by 03-11), so a build that breaks the
+// scripts/check-seo.js in `npm run build` (joined with &&), so a build that breaks the
 // byte budget fails before anything is deployed.
 // Usage: node scripts/check-perf.js [--dir <folder relative to the repo root>] (default _site)
 // The path prefix comes only from src/_data/site.js (the same normalisation Eleventy used);
