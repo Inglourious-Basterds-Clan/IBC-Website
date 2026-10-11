@@ -20,53 +20,54 @@ export function init(el) {
   observer.observe(recSection);
 }
 
+// One terminal line: time, tag and message spans, all written with textContent. The tag
+// colour is inherited from .terminal-body; an error tag adds a class, never an inline style (D-12).
+export function writeToConsole(consoleEl, message, status = 'info') {
+  const line = document.createElement('div');
+  line.className = 'terminal-line';
+
+  const now = new Date();
+  const timeStr = String(now.getHours()).padStart(2, '0') + ':' +
+                  String(now.getMinutes()).padStart(2, '0') + ':' +
+                  String(now.getSeconds()).padStart(2, '0');
+
+  let tag = '[INFO]';
+  if (status === 'success') tag = '[ OK ]';
+  if (status === 'error') tag = '[ERR ]';
+  if (status === 'warn') tag = '[WARN]';
+
+  const timeSpan = document.createElement('span');
+  timeSpan.className = 'time';
+  timeSpan.textContent = timeStr;
+
+  const tagSpan = document.createElement('span');
+  tagSpan.className = status === 'error' ? 'tag tag-error' : 'tag';
+  tagSpan.textContent = tag;
+
+  const messageSpan = document.createElement('span');
+  messageSpan.className = 'message';
+  messageSpan.textContent = message;
+
+  line.append(timeSpan, tagSpan, messageSpan);
+
+  consoleEl.appendChild(line);
+  consoleEl.scrollTop = consoleEl.scrollHeight; // Autoscroll
+}
+
 function runBootSequence(consoleEl, discordUrl) {
-  function writeToConsole(message, status = 'info') {
-    const line = document.createElement('div');
-    line.className = 'terminal-line';
-
-    const now = new Date();
-    const timeStr = String(now.getHours()).padStart(2, '0') + ':' +
-                    String(now.getMinutes()).padStart(2, '0') + ':' +
-                    String(now.getSeconds()).padStart(2, '0');
-
-    let tag = '[INFO]';
-    if (status === 'success') tag = '[ OK ]';
-    if (status === 'error') tag = '[ERR ]';
-    if (status === 'warn') tag = '[WARN]';
-
-    const timeSpan = document.createElement('span');
-    timeSpan.className = 'time';
-    timeSpan.textContent = timeStr;
-
-    const tagSpan = document.createElement('span');
-    tagSpan.className = 'tag';
-    tagSpan.style.color = status === 'success' ? 'var(--accent-color)' : status === 'error' ? '#ef4444' : 'var(--accent-color)';
-    tagSpan.textContent = tag;
-
-    const messageSpan = document.createElement('span');
-    messageSpan.className = 'message';
-    messageSpan.textContent = message;
-
-    line.append(timeSpan, tagSpan, messageSpan);
-
-    consoleEl.appendChild(line);
-    consoleEl.scrollTop = consoleEl.scrollHeight; // Autoscroll
-  }
-
   // Simulated start sequence
-  writeToConsole('Uruchamianie terminala zaciągowego IBC...');
+  writeToConsole(consoleEl, 'Uruchamianie terminala zaciągowego IBC...');
 
   setTimeout(() => {
-    writeToConsole('Wyszukiwanie aktywnego połączenia z serwerem Discord...', 'warn');
+    writeToConsole(consoleEl, 'Wyszukiwanie aktywnego połączenia z serwerem Discord...', 'warn');
   }, 600);
 
   setTimeout(() => {
-    writeToConsole('Połączenie nawiązane: ' + discordUrl.replace(/^https?:\/\//, ''), 'success');
+    writeToConsole(consoleEl, 'Połączenie nawiązane: ' + discordUrl.replace(/^https?:\/\//, ''), 'success');
   }, 1400);
 
   setTimeout(() => {
-    writeToConsole('Status rekrutacji klanu: OTWARTA (OPEN)', 'success');
-    writeToConsole('Wskazówka: Użyj przycisku obok, aby dołączyć do serwera Discord klanu i złożyć podanie.', 'warn');
+    writeToConsole(consoleEl, 'Status rekrutacji klanu: OTWARTA (OPEN)', 'success');
+    writeToConsole(consoleEl, 'Wskazówka: Użyj przycisku obok, aby dołączyć do serwera Discord klanu i złożyć podanie.', 'warn');
   }, 2200);
 }

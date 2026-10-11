@@ -907,6 +907,11 @@ section {
   padding: 20px;
 }
 
+/* Open state, toggled by the lightbox module (D-12; was style.display) */
+.lightbox.is-open {
+  display: flex;
+}
+
 .lightbox-content {
   position: relative;
   max-width: 90%;
@@ -1153,6 +1158,17 @@ textarea.form-control {
   display: inline-flex;
   align-items: center;
   gap: 10px;
+}
+
+/* Terminal line colours, former inline styles (D-12): the error tag and the easter-egg alert line
+   use the same #ef4444 the scripts wrote inline; other tags inherit the .terminal-body accent */
+.terminal-line .tag-error {
+  color: var(--danger-color);
+}
+
+.terminal-line-alert .tag,
+.terminal-line-alert .message {
+  color: var(--danger-color);
 }
 
 /* --- FOOTER --- */
@@ -1429,6 +1445,11 @@ footer {
   justify-content: center;
   align-items: center;
   padding: 20px;
+}
+
+/* Open state, toggled by the easter-egg module (D-12; was style.display) */
+.decryption-overlay.is-open {
+  display: flex;
 }
 
 .decryption-box {

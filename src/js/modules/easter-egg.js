@@ -7,24 +7,36 @@ export function init(el) {
 
   if (!overlay || !closeBtn) return;
 
+  const closeEasterEgg = () => {
+    overlay.classList.remove('is-open');
+    document.body.style.overflow = 'auto'; // Unlock scrolling
+  };
+
   const openEasterEgg = () => {
-    overlay.style.display = 'flex';
+    overlay.classList.add('is-open');
     document.body.style.overflow = 'hidden'; // Lock scrolling
 
     // Log to recruitment terminal console if exists (looked up now, so module order never matters)
     const consoleEl = document.getElementById('terminal-console');
     if (consoleEl) {
       const line = document.createElement('div');
-      line.className = 'terminal-line';
+      // The alert colour comes from .terminal-line-alert in the stylesheet (D-12)
+      line.className = 'terminal-line terminal-line-alert';
       const now = new Date();
       const timeStr = String(now.getHours()).padStart(2, '0') + ':' +
                       String(now.getMinutes()).padStart(2, '0') + ':' +
                       String(now.getSeconds()).padStart(2, '0');
-      line.innerHTML = `
-        <span class="time">${timeStr}</span>
-        <span class="tag" style="color: #ef4444">[WARN]</span>
-        <span class="message" style="color: #ef4444">RAPORT DIABLO UJAWNIONY. PROTOKÓŁ ZŁAMANY.</span>
-      `;
+      const parts = [
+        { className: 'time', text: timeStr },
+        { className: 'tag', text: '[WARN]' },
+        { className: 'message', text: 'RAPORT DIABLO UJAWNIONY. PROTOKÓŁ ZŁAMANY.' }
+      ];
+      parts.forEach(part => {
+        const span = document.createElement('span');
+        span.className = part.className;
+        span.textContent = part.text;
+        line.appendChild(span);
+      });
       consoleEl.appendChild(line);
       consoleEl.scrollTop = consoleEl.scrollHeight;
     }
@@ -38,16 +50,10 @@ export function init(el) {
     }
   });
 
-  closeBtn.addEventListener('click', () => {
-    overlay.style.display = 'none';
-    document.body.style.overflow = 'auto'; // Unlock scrolling
-  });
+  closeBtn.addEventListener('click', closeEasterEgg);
 
   // Close on outer click
   overlay.addEventListener('click', (e) => {
-    if (e.target === overlay) {
-      overlay.style.display = 'none';
-      document.body.style.overflow = 'auto';
-    }
+    if (e.target === overlay) closeEasterEgg();
   });
 }

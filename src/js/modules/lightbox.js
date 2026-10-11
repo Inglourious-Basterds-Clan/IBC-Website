@@ -40,7 +40,7 @@ export function init(el) {
   function openLightbox(index) {
     currentIndex = index;
     updateLightboxContent();
-    lightbox.style.display = 'flex';
+    lightbox.classList.add('is-open');
     document.body.style.overflow = 'hidden'; // Lock background scroll
   }
 
@@ -55,7 +55,7 @@ export function init(el) {
   }
 
   function closeLightbox() {
-    lightbox.style.display = 'none';
+    lightbox.classList.remove('is-open');
     document.body.style.overflow = 'auto'; // Unlock background scroll
   }
 
@@ -94,7 +94,7 @@ export function init(el) {
 
   // Keyboard navigation
   document.addEventListener('keydown', (e) => {
-    if (lightbox.style.display === 'flex') {
+    if (lightbox.classList.contains('is-open')) {
       if (e.key === 'Escape') closeLightbox();
       if (e.key === 'ArrowRight') showNext();
       if (e.key === 'ArrowLeft') showPrev();
