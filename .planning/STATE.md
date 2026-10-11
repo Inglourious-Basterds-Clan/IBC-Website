@@ -1,43 +1,43 @@
 ---
 gsd_state_version: "1.0"
-current_phase: 03
-current_phase_name: performance-assets
-status: executing
-stopped_at: Completed 03-11-PLAN.md
-last_updated: "2026-10-11T10:57:48.235Z"
+current_phase: 4
+current_phase_name: Join & Operations Pages
+status: planning
+stopped_at: Phase 3 complete, ready to plan Phase 4
+last_updated: "2026-10-11T14:37:45.043Z"
 last_activity: 2026-10-11
-last_activity_desc: Phase 2 complete, transitioned to Phase 3
-state_head: 6f7f6cf6f48aac02a13899d6c5e7bab70e8cf3eb
+last_activity_desc: Phase 3 complete, transitioned to Phase 4
+state_head: 59d83f2d89e6033e1972f0daf0e527fbc59fed45
 progress:
   total_phases: 5
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 24
   completed_plans: 24
-  percent: 40
+  percent: 60
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-10-08)
+See: .planning/PROJECT.md (updated 2026-10-11)
 
 **Core value:** A Polish player searching for an Arma 3 milsim clan (or for "IBC" by name) finds this site, understands what IBC is and how to join, and clicks through to Discord.
-**Current focus:** Phase 03 — Performance & Assets
+**Current focus:** Phase 04 — Join & Operations Pages
 
 ## Current Position
 
-Phase: 03 (performance-assets) — EXECUTING
-Plan: 11 of 11
-Status: Executing (03-09 complete)
-Last activity: 2026-10-11 — Completed 03-09 (features load as ES modules through data-js hooks; runtime state is classes and textContent)
+Phase: 4 — Join & Operations Pages
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-10-11 — Phase 3 complete, transitioned to Phase 4
 
-Progress: [████░░░░░░] 40%
+Progress: [██████░░░░] 60%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 13
+- Total plans completed: 24
 - Average duration: -
 - Total execution time: 0.0 hours
 
@@ -47,6 +47,7 @@ Progress: [████░░░░░░] 40%
 |-------|-------|-------|----------|
 | 01 | 7 | - | - |
 | 2 | 6 | - | - |
+| 3 | 11 | - | - |
 
 **Recent Trend:**
 - Last 5 plans: -
@@ -150,10 +151,11 @@ Recent decisions affecting current work:
 - [Phase 03]: 03-11: picture > source { display: none } fixes the 24 px header logo shift that picture { display: contents } caused
 - [Phase 03]: 03-11: icons in lettered buttons get margin-right = button letter-spacing (2px, 1.5px header CTA) to keep pre-Phase-3 button widths
 - [Phase 03]: 03-11: residual logo softness (downscale path, not encoding) left to the 03-04 human check; PSI >= 90 needs the user's deploy and run
+- [Phase 03]: UAT 8/8 passed 2026-10-11; mobile PSI Performance 100 (target 90, baseline 67); verification re-run passed 7/7
 
 ### Pending Todos
 
-- [2026-10-08] [general] Fix mobile LCP and render-blocking CSS in Phase 3 — [todo file](.planning/todos/pending/2026-10-08-fix-mobile-lcp-and-render-blocking-css-in-phase-3.md) — Needs Feed into Phase 3 planning, in this order:.
+None. (2026-10-08 mobile LCP todo resolved by Phase 3: PSI mobile 100.)
 
 ### Blockers/Concerns
 
@@ -161,6 +163,8 @@ Recent decisions affecting current work:
 - [Phase 2 advisory]: scripts/check-seo.js:72 — a crash inside checkSite fails the build but leaves _site/ in place; scripts/clean.js does not remove a stale _site.rejected/.
 - [Phase 2 docs]: 02-SECURITY.md T-02-ADV-01 row still describes sharp 0.35.4 (bumped to 0.35.5 in quick 261008-vmd).
 - [Phase 3/5]: Share Tech Mono has no Polish glyphs. Phase 3 self-hosts fonts with Polish coverage (interim mono if needed); the Phase 5 UI-SPEC makes the final HUD font choice.
+- [Phase 3 review]: CR-01 (critical, open) — lib/reject-output.js can move/delete an in-repo folder if `--dir` points at src/.git; add an allow-list (_site, _test/**) before Phase 4. All 12 findings in 03-REVIEW-DISPOSITION.md still `open` (WR-01 module cache-busting, WR-03/04 perf-gate coverage, WR-05 dev image cache).
+- [Phase 3 docs]: parity/parity.md "Post-Phase 3, median of 3" PSI row is empty (UAT recorded Performance 100); header logo could use loading="eager".
 - [Phase 4]: Needs clan facts from the user (schedule, modpack, DLC, join steps, play style, honest member metric) to confirm in FACTS.md.
 - [Phase 5]: Run `/gsd-ui-phase` first (UI-SPEC: identity inventory, effect budget, HUD font).
 
@@ -180,6 +184,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-10-11T10:57:30.978Z
-Stopped at: Completed 03-11-PLAN.md
+Last session: 2026-10-11
+Stopped at: Phase 3 complete, ready to plan Phase 4
 Resume file: None

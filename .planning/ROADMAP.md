@@ -14,7 +14,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Eleventy Foundation** - Migrate the existing page to Eleventy at visual parity, with one config value for the site URL and Discord invite and a shared layout (completed 2026-10-06)
 - [x] **Phase 2: Technical SEO** - Every page gets complete metadata, structured data, a sitemap, a noindex guard for non-final hosts and a build gate for SEO errors (completed 2026-10-08)
-- [ ] **Phase 3: Performance & Assets** - Optimized images, self-hosted Polish fonts, inline SVG icons, and modular CSS/JS that set the mobile performance budget
+- [x] **Phase 3: Performance & Assets** - Optimized images, self-hosted Polish fonts, inline SVG icons, and modular CSS/JS that set the mobile performance budget (completed 2026-10-11)
 - [ ] **Phase 4: Join & Operations Pages** - Real `/jak-dolaczyc/` and `/operacje/` pages, multi-page navigation, breadcrumbs, user-confirmed facts and a live Discord badge
 - [ ] **Phase 5: Accessibility & Visual Refresh** - Keyboard, screen reader and reduced-motion support, a polished tactical-HUD refresh, and a Lighthouse score of at least 90 on every page
 
@@ -93,7 +93,7 @@ Plans:
   4. Each page loads a single minified CSS bundle, and the built HTML contains no inline `style=` attributes.
   5. JS features load as ES modules through `data-js` hooks. A page without the gallery, terminal or easter egg loads with no console errors and doesn't run that feature's code.
 
-**Plans**: 11/11 plans executed
+**Plans**: 11/11 plans complete
 
 Plans:
 **Wave 1**
@@ -160,7 +160,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5. Phases 2 and 3 both 
 |-------|----------------|--------|-----------|
 | 1. Eleventy Foundation | 7/7 | Complete    | 2026-10-06 |
 | 2. Technical SEO | 6/6 | Complete    | 2026-10-08 |
-| 3. Performance & Assets | 11/11 | In Progress | - |
+| 3. Performance & Assets | 11/11 | Complete    | 2026-10-11 |
 | 4. Join & Operations Pages | 0/TBD | Not started | - |
 | 5. Accessibility & Visual Refresh | 0/TBD | Not started | - |
 

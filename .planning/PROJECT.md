@@ -29,14 +29,16 @@ A Polish player searching for an Arma 3 milsim clan (or for "IBC" by name) finds
 - ✓ Technical SEO: unique titles/descriptions, absolute canonicals, sitemap.xml + robots.txt, full absolute OG/Twitter cards with a 1200×630 card, favicons/manifest/theme-color, Organization + WebSite JSON-LD, Polish 404 — Phase 2
 - ✓ Post-build SEO gate (`scripts/check-seo.js`, rules G0–G10) fails broken output and unconfirmed TODO(FACTS-NN) drafts; rejected builds are moved to `_site.rejected/` — Phase 2
 - ✓ Indexing is opt-in (`SITE_INDEXABLE=1` on an https final host); every other host is `noindex`; IIS cutover checklist in README — Phase 2
+- ✓ Images optimized: AVIF/WebP responsive `<picture>`, explicit dimensions, lazy-loading below the fold, `fetchpriority="high"` hero ≤ ~120 KB on mobile, lightbox images < 300 KB — Phase 3
+- ✓ Third-party weight removed: self-hosted Montserrat woff2 with Polish glyphs (no Google Fonts), Font Awesome replaced by inline SVG icons with accessible names — Phase 3
+- ✓ CSS split into partials and bundled into one minified, hash-versioned file; inline styles removed; JS split into `data-js` ES modules that no-op where their feature is absent — Phase 3
+- ✓ Post-build perf gate (`scripts/check-perf.js`, frozen BUDGET) fails oversize output; mobile PageSpeed Performance 100 (baseline 67) — Phase 3
 
 ### Active
 
 - [ ] Breadcrumbs: visible breadcrumbs + BreadcrumbList JSON-LD on subpages (SEO-06, Phase 4; rest of technical SEO validated in Phase 2)
 - [ ] Domain cutover: confirm FACTS-01/FACTS-02 drafts, build with `SITE_INDEXABLE=1`, deploy to IIS and run the 404/manifest `curl.exe` checks (backlog 999.1)
-- [ ] Lighthouse scores are high (target ≥ 90 in Performance, Accessibility, Best Practices, SEO on mobile)
-- [ ] Images optimized (WebP/AVIF, responsive sizes, explicit dimensions, lazy-loading)
-- [ ] Third-party weight reduced (Font Awesome full CDN → inline SVG icons; self-hosted/subset fonts)
+- [ ] Lighthouse scores are high (target ≥ 90 in Performance, Accessibility, Best Practices, SEO on mobile) — PERF-08, Phase 5 (mobile Performance already 100 after Phase 3)
 - [ ] Accessibility: semantic landmarks, skip link (added in Phase 1), ARIA for modals/menu, focus management, contrast, reduced-motion support
 - [ ] Visual refresh that keeps the tactical identity but feels more polished and trustworthy to first-time visitors
 - [ ] New indexable page: How to join / FAQ (requirements, mods, schedule, recruitment steps)
@@ -90,6 +92,9 @@ A Polish player searching for an Arma 3 milsim clan (or for "IBC" by name) finds
 | Post-build SEO gate in `npm run build`; no env switch skips it | Broken SEO or unconfirmed facts must never ship; IIS deploy is a manual copy of `_site/` | ✓ Good — Phase 2 (CR-01/CR-02 hardened) |
 | Drafted facts carry TODO(FACTS-NN) tracked in FACTS.md | Claude drafts copy, user confirms; G10 blocks indexable builds until confirmed | ✓ Good — Phase 2 |
 | SEO images generated once by isolated `tools/seo-images` (sharp pinned exactly, now 0.35.5) and committed | Keeps image libraries out of the site build and CI | ✓ Good — Phase 2 (sharp bump user-vetted 2026-10-08) |
+| Images processed in the build (eleventy-img, sharp pinned 0.35.5 via overrides); originals in unshipped `src/images/` | Responsive AVIF/WebP without committing variants; never ship originals | ✓ Good — Phase 3 (PSI mobile 100) |
+| Fonts self-hosted: one Montserrat variable woff2 with latin-ext, subset once outside the repo | Polish glyphs required; no Google Fonts requests | ✓ Good — Phase 3 |
+| Perf budget enforced by a post-build gate; caps only in the BUDGET object and only raised by reviewed edit | Keeps Phase 4/5 pages and the visual refresh within budget | ✓ Good — Phase 3 (CSS 3957 / JS 4910 / font 36460 B gz) |
 | Slugs /jak-dolaczyc/, /operacje/, /sklad/ | Match Polish search phrasing; fixed forever | — Pending |
 | Polish only | Target audience is Polish players | — Pending |
 
@@ -111,4 +116,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-10-08 after Phase 2*
+*Last updated: 2026-10-11 after Phase 3*
