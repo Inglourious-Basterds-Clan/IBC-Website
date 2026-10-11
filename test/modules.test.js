@@ -280,6 +280,80 @@ test("lightbox opens item 0 with avif/webp sources set before img.src, and Arrow
   assert.equal(env.picture.children.length, 3, "sources were inserted twice");
 });
 
+/* --- STATE CLASSES (D-12): is-open instead of style.display --- */
+test("lightbox open adds is-open; Escape and the close button remove it; arrows act only while open", async () => {
+  const { init } = await loadModule("lightbox");
+  const env = lightboxDom(galleryData);
+  init(env.grid);
+
+  env.items[0].fire("keydown", { key: "Enter" });
+  assert.ok(env.lightbox.classList.contains("is-open"), "Enter on an item did not add is-open");
+  assert.ok(env.lightbox.classList.contains("lightbox"), "the base lightbox class was lost");
+  env.doc.fire("keydown", { key: "Escape" });
+  assert.equal(env.lightbox.classList.contains("is-open"), false, "Escape did not remove is-open");
+
+  env.items[1].fire("click");
+  assert.ok(env.lightbox.classList.contains("is-open"));
+  env.closeBtn.fire("click");
+  assert.equal(env.lightbox.classList.contains("is-open"), false, "the close button did not remove is-open");
+
+  env.items[0].fire("click");
+  env.lightbox.fire("click", { target: env.lightbox });
+  assert.equal(env.lightbox.classList.contains("is-open"), false, "an outer click did not remove is-open");
+
+  const before = env.img.src;
+  env.doc.fire("keydown", { key: "ArrowRight" });
+  assert.equal(env.img.src, before, "ArrowRight acted while the lightbox was closed");
+  assert.equal(env.lightbox.style.display, undefined, "lightbox wrote style.display");
+});
+
+function easterEggDom({ withTerminal = false } = {}) {
+  const trigger = createStub("span");
+  const overlay = createStub("div");
+  overlay.className = "decryption-overlay";
+  const closeBtn = createStub("button");
+  const consoleEl = createStub("div");
+  const byId = { "decryption-overlay": overlay, "decryption-close": closeBtn };
+  if (withTerminal) byId["terminal-console"] = consoleEl;
+  const doc = installDocument({ byId });
+  return { trigger, overlay, closeBtn, consoleEl, doc };
+}
+
+test("easter egg open adds is-open to the overlay; close and an outer click remove it", async () => {
+  const { init } = await loadModule("easter-egg");
+  const env = easterEggDom();
+  init(env.trigger);
+
+  env.trigger.fire("click");
+  assert.ok(env.overlay.classList.contains("is-open"), "click did not add is-open");
+  env.closeBtn.fire("click");
+  assert.equal(env.overlay.classList.contains("is-open"), false, "the close button did not remove is-open");
+
+  env.trigger.fire("keydown", { key: " " });
+  assert.ok(env.overlay.classList.contains("is-open"), "Space did not add is-open");
+  env.overlay.fire("click", { target: env.overlay });
+  assert.equal(env.overlay.classList.contains("is-open"), false, "an outer click did not remove is-open");
+  assert.ok(env.overlay.classList.contains("decryption-overlay"), "the base overlay class was lost");
+  assert.equal(env.overlay.style.display, undefined, "easter egg wrote style.display");
+});
+
+test("easter egg appends a terminal-line-alert line built from textContent spans", async () => {
+  const { init } = await loadModule("easter-egg");
+  const env = easterEggDom({ withTerminal: true });
+  init(env.trigger);
+  env.trigger.fire("click");
+
+  assert.equal(env.consoleEl.children.length, 1, "no line appended to the terminal");
+  const [line] = env.consoleEl.children;
+  assert.deepEqual(line.className.split(" ").sort(), ["terminal-line", "terminal-line-alert"]);
+  assert.deepEqual(line.children.map((span) => span.className), ["time", "tag", "message"]);
+  const [time, tag, message] = line.children;
+  assert.match(time.textContent, /^\d{2}:\d{2}:\d{2}$/);
+  assert.equal(tag.textContent, "[WARN]");
+  assert.equal(message.textContent, "RAPORT DIABLO UJAWNIONY. PROTOKÓŁ ZŁAMANY.");
+  for (const span of line.children) assert.deepEqual(span.style, {}, `${span.className} span has an inline style`);
+});
+
 /* --- BUILD OUTPUT --- */
 let rootDir;
 let devDir;

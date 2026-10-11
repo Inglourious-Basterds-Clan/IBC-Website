@@ -7,7 +7,7 @@ import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
-import { init as initTerminal } from "../src/js/modules/terminal.js";
+import * as terminal from "../src/js/modules/terminal.js";
 import { init as initScrollSpy } from "../src/js/modules/scroll-spy.js";
 
 const jsDir = fileURLToPath(new URL("../src/js/", import.meta.url));
@@ -129,7 +129,7 @@ function bootTerminal(t, discordUrl) {
   t.mock.timers.enable({ apis: ["setTimeout"] });
   const env = installDom();
   const consoleEl = createConsoleEl(discordUrl);
-  initTerminal(consoleEl);
+  terminal.init(consoleEl);
   env.intersect(env.recruitment);
   t.mock.timers.runAll();
   return consoleEl.children;
@@ -184,6 +184,25 @@ test("terminal.js has no invite literal and writeToConsole uses textContent", ()
   const body = terminalSource.slice(start, end);
   assert.ok(body.includes("textContent"), "writeToConsole does not use textContent");
   assert.ok(!/innerHTML|outerHTML|insertAdjacentHTML/.test(body), "writeToConsole uses an HTML-string sink");
+});
+
+test("an error line's tag carries tag-error; other statuses only the tag class (D-12)", () => {
+  assert.equal(typeof terminal.writeToConsole, "function", "terminal.js does not export writeToConsole");
+  installDom();
+  const consoleEl = createConsoleEl();
+  for (const status of ["error", "info", "success", "warn"]) terminal.writeToConsole(consoleEl, "x", status);
+  const tags = consoleEl.children.map((line) => line.children[1]);
+  assert.deepEqual(tags.map((tag) => tag.className), ["tag tag-error", "tag", "tag", "tag"]);
+  assert.deepEqual(tags.map((tag) => tag.textContent), ["[ERR ]", "[INFO]", "[ OK ]", "[WARN]"]);
+  for (const tag of tags) assert.deepEqual(tag.style, {}, "the tag span has an inline style");
+});
+
+test("no file under src/js assigns an HTML string or sets style.display / style.color", () => {
+  for (const file of jsFiles()) {
+    const source = readFileSync(file, "utf8");
+    assert.ok(!/\.(?:innerHTML|outerHTML)\s*=|insertAdjacentHTML\s*\(|document\.write\s*\(/.test(source), `${file} assigns an HTML string`);
+    assert.ok(!/\.style\.(?:display|color)\b/.test(source), `${file} sets style.display or style.color`);
+  }
 });
 
 test("every file under src/js passes node --check", () => {
