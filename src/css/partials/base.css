@@ -1,0 +1,128 @@
+/* --- CUSTOM VARIABLES --- */
+:root {
+  --bg-primary: #080e11;
+  --bg-secondary: #12181b;
+  --bg-tertiary: #202629;
+  --bg-overlay: rgba(8, 14, 17, 0.85);
+  
+  --accent-color: #cbb18a; /* Figma Soft Sand/Gold */
+  --accent-rgb: 203, 177, 138;
+  --accent-glow: rgba(203, 177, 138, 0.25);
+  --accent-glow-strong: rgba(203, 177, 138, 0.6);
+  
+  --warn-color: #702b15; /* Figma Rust Orange */
+  --warn-rgb: 112, 43, 21;
+  --warn-glow: rgba(112, 43, 21, 0.25);
+  
+  --danger-color: #ef4444; /* Alert Red */
+  
+  --text-primary: #e8ded0; /* Figma Cream */
+  --text-secondary: #cbb18a; /* Figma Sand */
+  --text-muted: #8e9fa9; /* WCAG AA compliant contrast > 4.5:1 */
+  
+  --font-hud: 'Montserrat', 'Montserrat Fallback', monospace;
+  --font-body: 'Montserrat', 'Montserrat Fallback', sans-serif;
+  
+  --border-color: rgba(203, 177, 138, 0.2);
+  --border-hover: rgba(203, 177, 138, 0.6);
+  
+  --scanline-color: rgba(203, 177, 138, 0.012);
+  --grid-line-color: rgba(203, 177, 138, 0.025);
+  
+  --transition-speed: 0.25s;
+}
+
+
+/* --- BASE STYLES --- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  overflow-x: hidden;
+}
+
+body {
+  position: relative;
+  min-height: 100vh;
+}
+
+/* Wrapping an img in a picture never changes layout: the img keeps its own box */
+picture {
+  display: contents;
+}
+
+/* --- TACTICAL SCREEN OVERLAYS --- */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: 
+    linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
+    linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+  background-size: 100% 4px, 6px 100%;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0.4;
+}
+
+/* Tactical Grid Background */
+.grid-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    linear-gradient(var(--grid-line-color) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line-color) 1px, transparent 1px);
+  background-size: 40px 40px;
+  background-position: center;
+  z-index: -2;
+  pointer-events: none;
+}
+
+
+
+/* --- TYPOGRAPHY --- */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-hud);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+h1 span, .section-header h2, .logo span {
+  color: var(--text-primary); /* Fallback for browsers not supporting gradient clip */
+  background: linear-gradient(178.76deg, #F3EDE3 20.92%, #E8DED0 62.03%, #DACAB3 80.5%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-fill-color: transparent;
+  display: inline-block;
+}
+
+p {
+  line-height: 1.6;
+  color: var(--text-primary);
+  opacity: 0.85;
+}
+
+
+a {
+  color: var(--accent-color);
+  text-decoration: none;
+  transition: all var(--transition-speed) ease;
+}
+
+a:hover {
+  text-shadow: 0 0 8px var(--accent-glow-strong);
+}

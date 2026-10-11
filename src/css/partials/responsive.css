@@ -1,0 +1,104 @@
+/* --- RESPONSIVE MEDIA QUERIES --- */
+@media (max-width: 992px) {
+  .hero-text p {
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .hero-btn-group {
+    justify-content: center;
+  }
+  
+  .about-grid, .recruitment-grid {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+  
+  .lightbox-prev {
+    left: 10px;
+  }
+  
+  .lightbox-next {
+    right: 10px;
+  }
+}
+
+@media (max-width: 768px) {
+  header {
+    padding: 10px 0;
+  }
+  
+  .menu-toggle {
+    display: flex;
+  }
+
+  .menu-toggle {
+    order: 3;
+  }
+
+  .header-actions {
+    order: 2;
+    margin-left: auto;
+    gap: 12px;
+  }
+  
+  nav ul {
+    position: fixed;
+    top: 65px;
+    left: -100%;
+    width: 100%;
+    height: calc(100vh - 65px);
+    background: var(--bg-primary);
+    flex-direction: column;
+    align-items: center;
+    padding-top: 50px;
+    gap: 40px;
+    transition: left 0.3s ease;
+    border-top: 1px solid var(--border-color);
+  }
+  
+  nav ul.active {
+    left: 0;
+  }
+  
+  .hero-text h1 {
+    font-size: 2.5rem;
+  }
+  
+  .section-header h2 {
+    font-size: 1.8rem;
+  }
+  
+  .footer-links {
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-btn-group {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .hud-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .hud-btn.header-cta {
+    width: auto;
+    padding: 8px 10px;
+  }
+
+  .header-cta-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+}

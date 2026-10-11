@@ -1,0 +1,104 @@
+/* --- SECTION GENERAL STYLES --- */
+section {
+  padding: 100px 20px;
+  position: relative;
+}
+
+.section-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.section-header {
+  margin-bottom: 60px;
+  border-left: 3px solid var(--accent-color);
+  padding-left: 20px;
+}
+
+.section-header h2 {
+  font-size: 2.2rem;
+  color: var(--text-primary);
+}
+
+.section-header p {
+  font-size: 0.95rem;
+  color: var(--accent-color);
+  font-family: var(--font-hud);
+  margin-top: 5px;
+}
+
+/* --- ABOUT US (O NAS) --- */
+.about {
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.about-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: center;
+}
+
+.about-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.about-content p {
+  font-size: 1.05rem;
+}
+
+.highlight-box {
+  background: rgba(34, 197, 94, 0.02);
+  border-left: 2px solid var(--accent-color);
+  padding: 20px;
+  margin-top: 15px;
+}
+
+.highlight-box p {
+  font-style: italic;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+}
+
+.about-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.stat-card {
+  padding: 25px;
+  text-align: center;
+}
+
+.stat-card h3 {
+  font-size: 2.5rem;
+  color: var(--accent-color);
+  text-shadow: 0 0 10px var(--accent-glow);
+  margin-bottom: 5px;
+}
+
+.stat-card p {
+  font-family: var(--font-hud);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+/* Former inline styles (D-12): the same declarations; the ancestor class keeps each rule above h3 and .stat-card h3 (D-15) */
+.about-content .about-heading {
+  color: var(--accent-color);
+  font-size: 1.3rem;
+}
+
+.about-content .about-heading-spaced {
+  margin-top: 15px;
+}
+
+.stat-card .stat-text {
+  font-size: 1.8rem;
+}

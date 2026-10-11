@@ -1,0 +1,161 @@
+/* --- GALLERY SECTION (GALERIA) --- */
+.gallery {
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+  gap: 25px;
+}
+
+.gallery-item {
+  position: relative;
+  overflow: hidden;
+  border-radius: 4px;
+  cursor: pointer;
+  aspect-ratio: 16/9;
+}
+
+.gallery-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.gallery-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(transparent 30%, rgba(8, 9, 12, 0.9));
+  opacity: 0.8;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 20px;
+  transition: opacity var(--transition-speed) ease;
+}
+
+.gallery-overlay h3 {
+  font-size: 1.1rem;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+  transform: translateY(10px);
+  transition: transform var(--transition-speed) ease;
+}
+
+.gallery-overlay p {
+  font-family: var(--font-hud);
+  font-size: 0.8rem;
+  color: var(--accent-color);
+  transform: translateY(10px);
+  transition: transform var(--transition-speed) ease;
+}
+
+.gallery-item:hover img {
+  transform: scale(1.05);
+}
+
+.gallery-item:hover .gallery-overlay {
+  opacity: 1;
+}
+
+.gallery-item:hover .gallery-overlay h3,
+.gallery-item:hover .gallery-overlay p {
+  transform: translateY(0);
+}
+
+/* Lightbox Modal */
+.lightbox {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(4, 5, 7, 0.95);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  z-index: 110;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+/* Open state, toggled by the lightbox module (D-12; was style.display) */
+.lightbox.is-open {
+  display: flex;
+}
+
+.lightbox-content {
+  position: relative;
+  max-width: 90%;
+  max-height: 85%;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 0 30px rgba(34, 197, 94, 0.15);
+}
+
+.lightbox-content img {
+  /* width/height attributes only supply the aspect ratio here (Pitfall 6) */
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 80vh;
+  display: block;
+  object-fit: contain;
+}
+
+.lightbox-caption {
+  font-family: var(--font-hud);
+  padding: 15px;
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border-color);
+  color: var(--text-primary);
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.lightbox-close {
+  position: absolute;
+  top: -40px;
+  right: 0;
+  color: var(--accent-color);
+  font-family: var(--font-hud);
+  font-size: 1.5rem;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+
+.lightbox-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(14, 17, 23, 0.8);
+  border: 1px solid var(--border-color);
+  color: var(--accent-color);
+  font-family: var(--font-hud);
+  padding: 15px 10px;
+  cursor: pointer;
+  user-select: none;
+  font-weight: bold;
+  font-size: 1.2rem;
+  transition: all var(--transition-speed) ease;
+}
+
+.lightbox-prev {
+  left: -60px;
+}
+
+.lightbox-next {
+  right: -60px;
+}
+
+.lightbox-nav:hover {
+  background: var(--accent-color);
+  color: var(--bg-primary);
+}

@@ -1,0 +1,141 @@
+/* --- RECRUITMENT SECTION (REKRUTACJA) --- */
+.recruitment {
+  background: var(--bg-primary);
+}
+
+.recruitment-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+}
+
+.recruitment-info {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.recruitment-info h3 {
+  font-size: 1.5rem;
+  color: var(--accent-color);
+  margin-bottom: 10px;
+}
+
+.req-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.req-list li {
+  position: relative;
+  padding-left: 25px;
+  color: var(--text-secondary);
+}
+
+.req-list li::before {
+  content: "[+]";
+  position: absolute;
+  left: 0;
+  color: var(--accent-color);
+  font-family: var(--font-hud);
+}
+
+/* Terminal output status display in recruitment */
+.terminal-display {
+  padding: 20px;
+  border-radius: 4px;
+  height: 100%;
+}
+
+.terminal-header {
+  border-bottom: 1px solid rgba(34, 197, 94, 0.15);
+  padding-bottom: 10px;
+  margin-bottom: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-hud);
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.terminal-body {
+  font-family: var(--font-hud);
+  font-size: 0.9rem;
+  color: var(--accent-color);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  height: 180px;
+  overflow-y: auto;
+}
+
+.terminal-line {
+  display: flex;
+  gap: 10px;
+}
+
+.terminal-line .time {
+  color: var(--text-muted);
+}
+
+/* Recruitment Discord button icon: the 1.3rem the old inline style gave the webfont icon (D-15) */
+.recruitment-cta-icon {
+  font-size: 1.3rem;
+}
+
+/* Recruitment instructions card, former inline styles (D-12): the same declarations. Each descendant
+   rule (0,2,0) outranks h3, p, .hud-badge, .req-list, .hud-btn and the 480px .hud-btn rule (D-15) */
+.recruitment-instructions {
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.recruitment-instructions .recruitment-badge {
+  margin-bottom: 20px;
+  display: inline-block;
+}
+
+.recruitment-instructions .recruitment-heading {
+  color: var(--accent-color);
+  font-size: 1.3rem;
+  margin-bottom: 15px;
+  font-family: var(--font-hud);
+}
+
+.recruitment-instructions .recruitment-lead {
+  margin-bottom: 20px;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--text-primary);
+  opacity: 0.9;
+}
+
+.recruitment-instructions .recruitment-steps {
+  margin-bottom: 25px;
+}
+
+.recruitment-instructions .recruitment-cta {
+  width: 100%;
+  justify-content: center;
+  font-size: 1.1rem;
+  padding: 15px 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Terminal line colours, former inline styles (D-12): the error tag and the easter-egg alert line
+   use the same #ef4444 the scripts wrote inline; other tags inherit the .terminal-body accent */
+.terminal-line .tag-error {
+  color: var(--danger-color);
+}
+
+.terminal-line-alert .tag,
+.terminal-line-alert .message {
+  color: var(--danger-color);
+}

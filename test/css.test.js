@@ -2,11 +2,12 @@
 // every page links exactly one stylesheet, /css/style.css?v=<hash>, whose hash matches the
 // shipped bytes; the Lightning CSS bundle is minified and keeps the Safari prefixes (Pitfall 2);
 // root and prefix builds ship the same bytes (PERF-06 concurrency edge); only the bundle ships
-// from src/css; no page or template carries an inline style. 03-10 adds the partial and dead-CSS checks.
+// from src/css; no page or template carries an inline style; the entry only imports the partials in
+// cascade order; no dead or unused class selector ships (03-10, D-13).
 import { before, test } from "node:test";
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join, relative } from "node:path";
 import { build, listFiles, repoRoot } from "./helpers.js";
 
@@ -155,6 +156,30 @@ test("no dead roster, calendar, status, countdown or form CSS ships (D-13)", () 
 test("every class selector in the bundle is used by a template or script (D-13)", () => {
   const unused = unusedClasses(cssBytes(out["css-root"]).toString("utf8"), classSources());
   assert.deepEqual(unused, [], `css/style.css styles classes no .njk or .js file uses: ${unused.join(", ")}`);
+});
+
+// The cascade order of the partials (D-12): the order of the original stylesheet's sections.
+const partialOrder = ["fonts", "base", "components", "header", "hero", "sections", "gallery", "recruitment", "footer", "responsive"];
+
+test("the entry only imports partials (D-12)", () => {
+  const entry = readFileSync(join(repoRoot, "src", "css", "style.css"), "utf8");
+  const lines = entry
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((line) => line !== "");
+  const names = lines.map((line) => {
+    const match = /^@import "\.\/partials\/([a-z0-9-]+)\.css";$/.exec(line);
+    assert.ok(match, `src/css/style.css has a line that is not a partial @import: ${line}`);
+    return match[1];
+  });
+  const partialsDir = join(repoRoot, "src", "css", "partials");
+  for (const name of names) assert.ok(existsSync(join(partialsDir, `${name}.css`)), `src/css/style.css imports a missing partial: ${name}.css`);
+  assert.equal(new Set(names).size, names.length, `src/css/style.css imports a partial twice: ${names.join(", ")}`);
+  const files = readdirSync(partialsDir).filter((file) => file.endsWith(".css")).map((file) => file.slice(0, -4)).sort();
+  assert.deepEqual([...names].sort(), files, "every file in src/css/partials/ must be imported exactly once");
+  assert.equal(names.at(-1), "responsive", "responsive.css must be the last import");
+  assert.deepEqual(names, partialOrder, "the partials must be imported in the original cascade order");
 });
 
 test("the every-class-used check reports an invented class (negative control)", () => {

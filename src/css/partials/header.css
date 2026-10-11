@@ -1,0 +1,167 @@
+/* --- HEADER / NAVIGATION --- */
+header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 100;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--bg-overlay);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+
+.nav-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 15px 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+}
+
+.logo-img {
+  height: 48px;
+  width: auto;
+  display: block;
+}
+
+.logo-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.logo-text span {
+  font-family: var(--font-hud);
+  font-weight: 800;
+  font-size: 0.72rem;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text-primary);
+  display: block;
+}
+
+.logo-text span:nth-child(2) {
+  color: var(--accent-color);
+  font-weight: 900;
+  text-shadow: 0 0 8px var(--accent-glow);
+}
+
+
+nav ul {
+  display: flex;
+  list-style: none;
+  gap: 30px;
+}
+
+nav ul li a {
+  font-family: var(--font-hud);
+  font-size: 0.95rem;
+  letter-spacing: 1px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  padding: 5px 0;
+  position: relative;
+}
+
+nav ul li a::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background-color: var(--accent-color);
+  transition: width var(--transition-speed) ease;
+}
+
+nav ul li a:hover, nav ul li a.active-nav {
+  color: var(--accent-color);
+  text-shadow: 0 0 8px var(--accent-glow);
+}
+
+nav ul li a:hover::after, nav ul li a.active-nav::after {
+  width: 100%;
+}
+
+.menu-toggle {
+  display: none;
+  flex-direction: column;
+  gap: 6px;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 10px;
+  min-width: 44px;
+  min-height: 44px;
+  justify-content: center;
+  align-items: center;
+}
+
+.menu-toggle span {
+  display: block;
+  width: 25px;
+  height: 2px;
+  background-color: var(--accent-color);
+  transition: all var(--transition-speed) ease;
+}
+
+/* Menu toggle active X animation */
+.menu-toggle.open span:nth-child(1) {
+  transform: translateY(8px) rotate(45deg);
+}
+.menu-toggle.open span:nth-child(2) {
+  opacity: 0;
+}
+.menu-toggle.open span:nth-child(3) {
+  transform: translateY(-8px) rotate(-45deg);
+}
+
+/* --- SKIP LINK & HEADER CTA --- */
+/* Pre-existing content overflow on narrow phones must not widen the layout
+   viewport, or the fixed header (and its Discord button and menu toggle)
+   grows past the screen edge. clip hides the same overflow html already hides. */
+body {
+  overflow-x: clip;
+}
+
+.skip-link {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 150;
+  padding: 10px 16px;
+  background: var(--bg-primary);
+  color: var(--accent-color);
+  border: 1px solid var(--accent-color);
+  font-family: var(--font-hud);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transform: translateY(-120%);
+  transition: transform var(--transition-speed) ease;
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+}
+
+.header-cta {
+  padding: 6px 14px;
+  font-size: 0.8rem;
+  letter-spacing: 1.5px;
+}
