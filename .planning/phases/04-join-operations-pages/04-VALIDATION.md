@@ -40,7 +40,30 @@ Indexable check (expected to FAIL until FACTS are confirmed): `SITE_URL=https://
 
 ## Per-Task Verification Map
 
-Filled by the planner per task. Requirement → test map from research:
+Filled by the planner per task (each command is the task's own suite; every task then runs `npm test`, and build tasks run the root and/or `/IBC-Website/` production build):
+
+| Task | Wave | Requirement | Behavior | Test Type | Automated Command | File Exists | Status |
+|------|------|-------------|----------|-----------|-------------------|-------------|--------|
+| 04-01 T1 (tracer) | 1 | CONT-01, SEO-06 | /jak-dolaczyc/ requirements, 6 steps, CTA, breadcrumbs, BreadcrumbList, sitemap | build-output + unit | `node --test test/pages.test.js test/schema.test.js test/facts.test.js test/devpages.test.js test/seo.test.js test/fonts.test.js` | ❌ W0 (pages.test.js created here) | ⬜ pending |
+| 04-01 T2 | 1 | CONT-02, CONT-06 | 15 FAQ details, FAQPage = visible text, draft markers | build-output + unit | `node --test test/pages.test.js test/schema.test.js test/facts.test.js` | ✅ after T1 | ⬜ pending |
+| 04-01 T3 | 1 | CONT-01..02 | pages.css partial, every class used, CSS budget | unit + perf gate | `node --test test/css.test.js test/pages.test.js` | ✅ | ⬜ pending |
+| 04-02 T1 (tracer) | 1 | CONT-06 (gate safety) | CR-01 allow-list in removeRejectedOutput | unit + CLI | `node --test test/reject-output.test.js test/seo-gate.test.js test/perf-gate.test.js` | ❌ W0 (reject-output.test.js created here) | ⬜ pending |
+| 04-02 T2 | 1 | CONT-06 (gate safety) | clean.js on the same allow-list | CLI | `node --test test/reject-output.test.js test/devpages.test.js` | ✅ after T1 | ⬜ pending |
+| 04-03 T1 (tracer) | 1 | CONT-07 | baked fallback, hook, live update end to end (stub) | build-output + unit | `node --test test/discord.test.js test/modules.test.js test/links.test.js test/layout.test.js` | ❌ W0 (discord.test.js created here) | ⬜ pending |
+| 04-03 T2 | 1 | CONT-07 | failure modes, plurals, rounding, guards | unit (stub DOM) | `node --test test/discord.test.js` | ✅ after T1 | ⬜ pending |
+| 04-03 T3 | 1 | CONT-07 | single-line badge, 20+ kept, no baked online, budgets | build-output + perf gate | `node --test test/discord.test.js test/css.test.js` | ✅ | ⬜ pending |
+| 04-04 T1 (tracer) | 2 | CONT-03, SEO-06 | /operacje/ schedule, types, eras, 5-step evening, Najbliższe misje, breadcrumbs | build-output | `node --test test/pages.test.js test/schema.test.js test/facts.test.js test/seo.test.js test/fonts.test.js` | ✅ | ⬜ pending |
+| 04-04 T2 | 2 | CONT-04, CONT-06 | 3–5 recaps newest first, UTC dates, lazy pictures, markers | build-output + unit + perf gate | `node --test test/pages.test.js test/images.test.js test/facts.test.js test/links.test.js` | ✅ | ⬜ pending |
+| 04-04 T3 | 2 | CONT-03..04 | operations styles within the CSS budget | unit + perf gate | `node --test test/css.test.js test/pages.test.js` | ✅ | ⬜ pending |
+| 04-05 T1 (tracer) | 2 | SEO-06 | gate G11 + fixtures; real builds pass | gate fixtures | `node --test test/seo-gate.test.js test/seo-files.test.js test/pages.test.js` | ✅ extend | ⬜ pending |
+| 04-05 T2 | 2 | CONT-02 | gate G12 + fixtures (entity-safe) | gate fixtures | `node --test test/seo-gate.test.js test/pages.test.js` | ✅ extend | ⬜ pending |
+| 04-06 T1 (tracer) | 3 | CONT-05 | /#recruitment redirect, teaser id, terminal closest(section) | unit (stub DOM) + build-output | `node --test test/client.test.js test/modules.test.js test/layout.test.js test/icons.test.js` | ✅ update | ⬜ pending |
+| 04-06 T2 | 3 | CONT-05 | nav Start/O nas/Operacje/Dołącz, aria-current, scroll-spy mix | build-output + unit | `node --test test/layout.test.js test/devpages.test.js test/seo-files.test.js test/pages.test.js test/client.test.js test/links.test.js` | ✅ update | ⬜ pending |
+| 04-06 T3 | 3 | CONT-06 (D-09) | teaser facts, no contradictions across pages | build-output | `node --test test/layout.test.js test/pages.test.js test/css.test.js test/icons.test.js test/discord.test.js` | ✅ update | ⬜ pending |
+| 04-07 T1 (tracer) | 4 | CONT-05, CONT-07 (WR-01) | versioned main.js and module URLs | unit + build-output | `node --test test/js-version.test.js test/build.test.js test/devpages.test.js test/modules.test.js test/client.test.js test/links.test.js test/perf-gate.test.js` | ❌ W0 (js-version.test.js created here) | ⬜ pending |
+| 04-07 T2 | 4 | CONT-06 (phase gate) | README docs; indexable build fails only on open FACTS rows | docs test + builds | `node --test test/docs.test.js test/links.test.js` + indexable build check | ✅ extend | ⬜ pending |
+
+Requirement → test map from research (kept for reference):
 
 | Requirement | Behavior | Test Type | Automated Command | File Exists | Status |
 |-------------|----------|-----------|-------------------|-------------|--------|
@@ -59,11 +82,12 @@ Filled by the planner per task. Requirement → test map from research:
 
 ## Wave 0 Requirements
 
-- [ ] `lib/reject-output.js` CR-01 allow-list + tests for `--dir src` / `--dir .git`
-- [ ] `test/helpers.js` — `DISCORD_FETCH` in `buildEnvKeys`, default `"0"` in test builds
-- [ ] `test/pages.test.js` — new suite for both pages (CONT-01..04, SEO-06 visible part, nav marking)
-- [ ] `test/discord.test.js` — `lib/discord.js` units + badge module stub-DOM tests
-- [ ] `test/seo-gate.test.js` — G11/G12 fixtures
+- [ ] `lib/reject-output.js` CR-01 allow-list + tests for `--dir src` / `--dir .git` (04-02 T1, on fake repo roots and `.cache/` fixtures only)
+- [ ] `test/helpers.js` — `DISCORD_FETCH` in `buildEnvKeys`, default `"0"` in test builds (04-03 T1)
+- [ ] `test/pages.test.js` — new suite for both pages (04-01 T1 creates it; 04-04 and 04-06 extend it)
+- [ ] `test/discord.test.js` — `lib/discord.js` units + badge module stub-DOM tests (04-03 T1/T2)
+- [ ] `test/seo-gate.test.js` — G11/G12 fixtures (04-05)
+- [ ] `test/js-version.test.js` — WR-01 checks (04-07 T1)
 
 ---
 

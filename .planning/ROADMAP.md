@@ -133,7 +133,23 @@ Plans:
   4. Every fact Claude drafted is marked TODO and listed in `FACTS.md`. The production build stays blocked until the user confirms each one and the markers are removed.
   5. The home page shows a live Discord members/online badge. It falls back to a static number when the request fails or JS is off, and its label doesn't contradict the "20+ aktywnych członków" claim.
 
-**Plans**: TBD
+**Plans**: 7 plans
+
+Plans:
+**Wave 1**
+- [ ] 04-01-PLAN.md — Tracer: /jak-dolaczyc/ from join.js with breadcrumbs + BreadcrumbList, 15-question FAQ + FAQPage from the same data, pages.css (wave 1)
+- [ ] 04-02-PLAN.md — CR-01: gates and clean.js may only move/delete _site or _test/** (wave 1)
+- [ ] 04-03-PLAN.md — Live Discord badge: build-time count with offline switch and backstop, data-js module, no layout shift (wave 1)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [ ] 04-04-PLAN.md — /operacje/ from operations.js: schedule, mission types, eras, typowy wieczór, Najbliższe misje, 4 drafted recap cards with images (wave 2)
+- [ ] 04-05-PLAN.md — Gate rules G11 (breadcrumbs/BreadcrumbList) and G12 (FAQPage = visible FAQ) with fixtures (wave 2)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+- [ ] 04-06-PLAN.md — Legacy #recruitment redirect, nav to real pages with aria-current, home teaser and D-09 fact alignment (wave 3)
+
+**Wave 4** *(blocked on Wave 3 completion)*
+- [ ] 04-07-PLAN.md — WR-01 content-hashed main.js and module URLs, Polish README for Phase 4, full phase gate (wave 4)
 **UI hint**: yes
 
 ### Phase 5: Accessibility & Visual Refresh
@@ -161,7 +177,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5. Phases 2 and 3 both 
 | 1. Eleventy Foundation | 7/7 | Complete    | 2026-10-06 |
 | 2. Technical SEO | 6/6 | Complete    | 2026-10-08 |
 | 3. Performance & Assets | 11/11 | Complete    | 2026-10-11 |
-| 4. Join & Operations Pages | 0/TBD | Not started | - |
+| 4. Join & Operations Pages | 0/7 | Not started | - |
 | 5. Accessibility & Visual Refresh | 0/TBD | Not started | - |
 
 ## Backlog
