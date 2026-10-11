@@ -16,7 +16,7 @@
         <span></span>
       </button>
       <div class="header-actions">
-        <nav>
+        <nav data-js="scroll-spy">
           <ul id="mobile-nav">
             {% for item in navigation %}
             <li><a href="{{ item.href }}"{% if page.url == "/" and loop.first %} class="active-nav"{% endif %}>{{ item.label }}</a></li>

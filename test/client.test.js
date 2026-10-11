@@ -1,19 +1,37 @@
-// FOUND-02/04/06 client checks: src/js/main.js runs in a node:vm sandbox against a small
-// stub DOM, so the recruitment terminal and scroll-spy are tested without a browser.
-// Static checks guard the invite source and the writeToConsole sink.
-import { test } from "node:test";
+// FOUND-02/04/06 client checks: the recruitment terminal and scroll-spy ES modules
+// (src/js/modules/) run against a small stub DOM installed on globalThis, so they are
+// tested without a browser. Static checks guard the invite source and the writeToConsole sink.
+import { test, afterEach } from "node:test";
 import assert from "node:assert/strict";
-import vm from "node:vm";
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
+import { join } from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { init as initTerminal } from "../src/js/modules/terminal.js";
+import { init as initScrollSpy } from "../src/js/modules/scroll-spy.js";
 
-const mainPath = fileURLToPath(new URL("../src/js/main.js", import.meta.url));
-const mainSource = readFileSync(mainPath, "utf8");
+const jsDir = fileURLToPath(new URL("../src/js/", import.meta.url));
+const terminalPath = join(jsDir, "modules", "terminal.js");
+const terminalSource = readFileSync(terminalPath, "utf8");
 // Same invite pattern as build.test.js, with the scheme optional so a display-only copy counts too.
 const inviteDomainPattern = /(?:https?:\/\/)?(?:www\.)?discord(?:\.gg|(?:app)?\.com\/invite)\/[A-Za-z0-9-]+/g;
 
+// Every .js file under src/js, recursively.
+function jsFiles(dir = jsDir) {
+  return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+    const path = join(dir, entry.name);
+    if (entry.isDirectory()) return jsFiles(path);
+    return entry.name.endsWith(".js") ? [path] : [];
+  });
+}
+
 /* --- STUB DOM HARNESS --- */
+const globalKeys = ["document", "window", "IntersectionObserver"];
+
+afterEach(() => {
+  for (const key of globalKeys) delete globalThis[key];
+});
+
 function createElement(tagName) {
   return {
     tagName: String(tagName).toUpperCase(),
@@ -64,14 +82,13 @@ function createLink(href, pathname) {
   };
 }
 
-function loadMain({ discordUrl, withTerminal = true, pathname = "/", links = [], sections = [] } = {}) {
-  const consoleEl = withTerminal ? createConsoleEl(discordUrl) : null;
+// Installs document, window and IntersectionObserver stubs on globalThis.
+function installDom({ pathname = "/", sections = [] } = {}) {
   const recruitment = sections.find((section) => section.getAttribute("id") === "recruitment") ||
     createSection("SECTION", "recruitment");
   const observers = [];
-  let domReady = null;
 
-  class IntersectionObserver {
+  globalThis.IntersectionObserver = class IntersectionObserver {
     constructor(callback, options) {
       this.callback = callback;
       this.options = options;
@@ -82,36 +99,22 @@ function loadMain({ discordUrl, withTerminal = true, pathname = "/", links = [],
       this.targets.push(target);
     }
     disconnect() {}
-  }
+  };
 
-  const document = {
-    addEventListener(type, handler) {
-      if (type === "DOMContentLoaded") domReady = handler;
-    },
+  globalThis.document = {
     getElementById(id) {
-      if (id === "terminal-console") return consoleEl;
       if (id === "recruitment") return recruitment;
       return null;
     },
     querySelector: () => null,
     querySelectorAll(selector) {
-      if (selector === "nav ul li a") return links;
       if (selector === "section, header") return sections;
       return [];
     },
     createElement,
     body: { style: {} },
   };
-
-  const sandbox = {
-    document,
-    window: { location: { pathname } },
-    IntersectionObserver,
-    setTimeout: (callback) => callback(),
-  };
-  vm.runInNewContext(mainSource, sandbox, { filename: "src/js/main.js" });
-  assert.equal(typeof domReady, "function", "main.js did not register a DOMContentLoaded handler");
-  domReady();
+  globalThis.window = { location: { pathname } };
 
   function intersect(target) {
     const observer = observers.find((candidate) => candidate.targets.includes(target));
@@ -119,13 +122,17 @@ function loadMain({ discordUrl, withTerminal = true, pathname = "/", links = [],
     observer.callback([{ isIntersecting: true, target }]);
   }
 
-  return { consoleEl, recruitment, observers, intersect };
+  return { recruitment, observers, intersect };
 }
 
-function bootTerminal(discordUrl) {
-  const env = loadMain({ discordUrl });
+function bootTerminal(t, discordUrl) {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  const env = installDom();
+  const consoleEl = createConsoleEl(discordUrl);
+  initTerminal(consoleEl);
   env.intersect(env.recruitment);
-  return env.consoleEl.children;
+  t.mock.timers.runAll();
+  return consoleEl.children;
 }
 
 function messageOf(line) {
@@ -134,8 +141,8 @@ function messageOf(line) {
 }
 
 /* --- RECRUITMENT TERMINAL (FOUND-04) --- */
-test("terminal prints the invite from data-discord-url without its scheme", () => {
-  const lines = bootTerminal("https://invite.example/TEST123");
+test("terminal prints the invite from data-discord-url without its scheme", (t) => {
+  const lines = bootTerminal(t, "https://invite.example/TEST123");
   const messages = lines.map(messageOf);
   assert.ok(
     messages.includes("Połączenie nawiązane: invite.example/TEST123"),
@@ -143,8 +150,8 @@ test("terminal prints the invite from data-discord-url without its scheme", () =
   );
 });
 
-test("terminal lines are three spans (time, tag, message)", () => {
-  const lines = bootTerminal("https://invite.example/TEST123");
+test("terminal lines are three spans (time, tag, message)", (t) => {
+  const lines = bootTerminal(t, "https://invite.example/TEST123");
   assert.ok(lines.length >= 4, "boot sequence wrote fewer than 4 lines");
   for (const line of lines) {
     assert.equal(line.className, "terminal-line");
@@ -156,10 +163,10 @@ test("terminal lines are three spans (time, tag, message)", () => {
   assert.equal(messageOf(lines[0]), "Uruchamianie terminala zaciągowego IBC...");
 });
 
-test("terminal boots without data-discord-url", () => {
+test("terminal boots without data-discord-url", (t) => {
   let lines;
   assert.doesNotThrow(() => {
-    lines = bootTerminal(undefined);
+    lines = bootTerminal(t, undefined);
   });
   const messages = lines.map(messageOf);
   assert.ok(
@@ -168,20 +175,24 @@ test("terminal boots without data-discord-url", () => {
   );
 });
 
-test("main.js has no invite literal and writeToConsole uses textContent", () => {
-  assert.deepEqual(mainSource.match(inviteDomainPattern) || [], [], "main.js contains an invite literal");
-  assert.ok(mainSource.includes("getAttribute('data-discord-url')"), "main.js does not read data-discord-url");
-  const start = mainSource.indexOf("function writeToConsole");
-  const end = mainSource.indexOf("consoleEl.appendChild(line)", start);
+test("terminal.js has no invite literal and writeToConsole uses textContent", () => {
+  assert.deepEqual(terminalSource.match(inviteDomainPattern) || [], [], "terminal.js contains an invite literal");
+  assert.ok(terminalSource.includes("getAttribute('data-discord-url')"), "terminal.js does not read data-discord-url");
+  const start = terminalSource.indexOf("function writeToConsole");
+  const end = terminalSource.indexOf("consoleEl.appendChild(line)", start);
   assert.ok(start !== -1 && end !== -1, "writeToConsole body not found");
-  const body = mainSource.slice(start, end);
+  const body = terminalSource.slice(start, end);
   assert.ok(body.includes("textContent"), "writeToConsole does not use textContent");
-  assert.ok(!body.includes("innerHTML"), "writeToConsole still assigns innerHTML");
+  assert.ok(!/innerHTML|outerHTML|insertAdjacentHTML/.test(body), "writeToConsole uses an HTML-string sink");
 });
 
-test("main.js is a valid classic script (node --check)", () => {
-  const result = spawnSync(process.execPath, ["--check", mainPath], { encoding: "utf8" });
-  assert.equal(result.status, 0, result.stderr);
+test("every file under src/js passes node --check", () => {
+  const files = jsFiles();
+  assert.ok(files.length >= 3, `expected main.js and the modules, found ${files.length} files`);
+  for (const file of files) {
+    const result = spawnSync(process.execPath, ["--check", file], { encoding: "utf8" });
+    assert.equal(result.status, 0, `${file}: ${result.stderr}`);
+  }
 });
 
 /* --- SCROLL-SPY (FOUND-06) --- */
@@ -199,9 +210,19 @@ function activeHashes(links) {
   return links.filter((link) => link.classList.contains("active-nav")).map((link) => link.hash);
 }
 
+// The header <nav> hook element: its querySelectorAll returns the links.
+function createNav(links) {
+  return {
+    tagName: "NAV",
+    querySelectorAll: (selector) => (selector === "ul li a" ? links : []),
+  };
+}
+
 function loadScrollSpy({ pathname, links, sections = homeSections() }) {
   // No terminal, so every IntersectionObserver in the run belongs to scroll-spy.
-  return { ...loadMain({ withTerminal: false, pathname, links, sections }), links, sections };
+  const env = installDom({ pathname, sections });
+  initScrollSpy(createNav(links));
+  return { ...env, links, sections };
 }
 
 test("scroll-spy highlights the intersecting section's link under /IBC-Website/", () => {

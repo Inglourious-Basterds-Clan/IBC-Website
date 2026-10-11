@@ -1,19 +1,30 @@
-document.addEventListener('DOMContentLoaded', () => {
-  initMobileMenu();
-  initLightbox();
-  initRecruitmentTerminal();
-  initScrollSpy();
-  initEasterEgg();
+/* --- FEATURE LOADER (D-14) --- */
+// Module entry. Every page loads this file as <script type="module">, so it runs after the
+// DOM is parsed. Each [data-js] element names a feature; the name is only a key into the
+// frozen loader map below, and a module specifier is never built from attribute text.
+// Literal relative specifiers resolve against this file's own URL, so they work at the
+// site root and under a path prefix alike.
+const loaders = Object.freeze({
+  terminal: () => import('./modules/terminal.js'),
+  'scroll-spy': () => import('./modules/scroll-spy.js')
 });
 
-
+export function initFeatures(root, featureLoaders) {
+  const hooks = Array.from(root.querySelectorAll('[data-js]'));
+  return Promise.all(hooks.map(el => {
+    const name = el.getAttribute('data-js');
+    // Unknown names (and inherited keys such as "constructor") load nothing.
+    if (!Object.prototype.hasOwnProperty.call(featureLoaders, name)) return null;
+    return featureLoaders[name]().then(mod => mod.init(el));
+  }));
+}
 
 /* --- MOBILE MENU --- */
 function initMobileMenu() {
   const toggle = document.querySelector('.menu-toggle');
   const navList = document.querySelector('nav ul');
   const navLinks = document.querySelectorAll('nav ul li a');
-  
+
   if (toggle && navList) {
     toggle.addEventListener('click', () => {
       navList.classList.toggle('active');
@@ -35,10 +46,6 @@ function initMobileMenu() {
   }
 }
 
-
-
-
-
 /* --- TACTICAL GALLERY LIGHTBOX --- */
 function initLightbox() {
   const lightbox = document.getElementById('lightbox');
@@ -48,7 +55,7 @@ function initLightbox() {
   const prevBtn = document.querySelector('.lightbox-prev');
   const nextBtn = document.querySelector('.lightbox-next');
   const items = document.querySelectorAll('.gallery-item');
-  
+
   if (!lightbox || !imgEl || !captionEl || !closeBtn || !prevBtn || !nextBtn || items.length === 0) return;
 
   let currentIndex = 0;
@@ -141,123 +148,26 @@ function initLightbox() {
   });
 }
 
-/* --- TACTICAL RECRUITMENT TERMINAL --- */
-function initRecruitmentTerminal() {
-  const consoleEl = document.getElementById('terminal-console');
-  if (!consoleEl) return;
-  const discordUrl = consoleEl.getAttribute('data-discord-url') || '';
-
-  let booted = false;
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting && !booted) {
-        booted = true;
-        runBootSequence(consoleEl, discordUrl);
-      }
-    });
-  }, { threshold: 0.3 });
-
-  const recSection = document.getElementById('recruitment');
-  if (recSection) observer.observe(recSection);
-}
-
-function runBootSequence(consoleEl, discordUrl) {
-  function writeToConsole(message, status = 'info') {
-    const line = document.createElement('div');
-    line.className = 'terminal-line';
-    
-    const now = new Date();
-    const timeStr = String(now.getHours()).padStart(2, '0') + ':' + 
-                    String(now.getMinutes()).padStart(2, '0') + ':' + 
-                    String(now.getSeconds()).padStart(2, '0');
-                    
-    let tag = '[INFO]';
-    if (status === 'success') tag = '[ OK ]';
-    if (status === 'error') tag = '[ERR ]';
-    if (status === 'warn') tag = '[WARN]';
-    
-    const timeSpan = document.createElement('span');
-    timeSpan.className = 'time';
-    timeSpan.textContent = timeStr;
-
-    const tagSpan = document.createElement('span');
-    tagSpan.className = 'tag';
-    tagSpan.style.color = status === 'success' ? 'var(--accent-color)' : status === 'error' ? '#ef4444' : 'var(--accent-color)';
-    tagSpan.textContent = tag;
-
-    const messageSpan = document.createElement('span');
-    messageSpan.className = 'message';
-    messageSpan.textContent = message;
-
-    line.append(timeSpan, tagSpan, messageSpan);
-
-    consoleEl.appendChild(line);
-    consoleEl.scrollTop = consoleEl.scrollHeight; // Autoscroll
-  }
-
-  // Simulated start sequence
-  writeToConsole('Uruchamianie terminala zaciągowego IBC...');
-  
-  setTimeout(() => {
-    writeToConsole('Wyszukiwanie aktywnego połączenia z serwerem Discord...', 'warn');
-  }, 600);
-
-  setTimeout(() => {
-    writeToConsole('Połączenie nawiązane: ' + discordUrl.replace(/^https?:\/\//, ''), 'success');
-  }, 1400);
-
-  setTimeout(() => {
-    writeToConsole('Status rekrutacji klanu: OTWARTA (OPEN)', 'success');
-    writeToConsole('Wskazówka: Użyj przycisku obok, aby dołączyć do serwera Discord klanu i złożyć podanie.', 'warn');
-  }, 2200);
-}
-
-/* --- ACTIVE NAVIGATION HIGH-LIGHT ON SCROLL --- */
-function initScrollSpy() {
-  const sections = document.querySelectorAll('section, header');
-  // Only links that point at this same document (home); on other pages scroll-spy is a no-op.
-  const navLinks = Array.from(document.querySelectorAll('nav ul li a'))
-    .filter(link => link.hash && link.pathname === window.location.pathname);
-
-  if (navLinks.length === 0) return;
-
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        const id = entry.target.getAttribute('id') || (entry.target.tagName === 'HEADER' ? 'hero' : '');
-        if (id) {
-          navLinks.forEach(link => {
-            link.classList.remove('active-nav');
-            if (link.hash === '#' + id) link.classList.add('active-nav');
-          });
-        }
-      }
-    });
-  }, { rootMargin: '-30% 0px -60% 0px' });
-
-  sections.forEach(section => observer.observe(section));
-}
-
 /* --- EASTER EGG DECRYPTION CONSOLE --- */
 function initEasterEgg() {
   const trigger = document.getElementById('easteregg-trigger');
   const overlay = document.getElementById('decryption-overlay');
   const closeBtn = document.getElementById('decryption-close');
-  
+
   if (!trigger || !overlay || !closeBtn) return;
 
   const openEasterEgg = () => {
     overlay.style.display = 'flex';
     document.body.style.overflow = 'hidden'; // Lock scrolling
-    
+
     // Log to recruitment terminal console if exists
     const consoleEl = document.getElementById('terminal-console');
     if (consoleEl) {
       const line = document.createElement('div');
       line.className = 'terminal-line';
       const now = new Date();
-      const timeStr = String(now.getHours()).padStart(2, '0') + ':' + 
-                      String(now.getMinutes()).padStart(2, '0') + ':' + 
+      const timeStr = String(now.getHours()).padStart(2, '0') + ':' +
+                      String(now.getMinutes()).padStart(2, '0') + ':' +
                       String(now.getSeconds()).padStart(2, '0');
       line.innerHTML = `
         <span class="time">${timeStr}</span>
@@ -291,4 +201,8 @@ function initEasterEgg() {
   });
 }
 
-
+// Module scripts are deferred, so the DOM is ready here (no DOMContentLoaded needed).
+initMobileMenu();
+initLightbox();
+initEasterEgg();
+initFeatures(document, loaders);
