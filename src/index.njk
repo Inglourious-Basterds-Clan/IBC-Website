@@ -33,10 +33,10 @@ todo: "FACTS-01"
         
         <div class="about-grid">
           <div class="about-content">
-            <h3 style="color: var(--accent-color); font-size: 1.3rem;">Kim jesteśmy?</h3>
+            <h3 class="about-heading">Kim jesteśmy?</h3>
             <p>Grupa Inglourious Basterds Clan (IBC) operuje nieprzerwanie od 2018 roku na polskiej oraz zagranicznej scenie Arma 3. Jako grupa jesteśmy skupieni na przyjemności z rozgrywki oraz wzajemnym udoskonalaniu siebie nawzajem. Wielu z nas ma wiedzę o różnych okresach historycznych, także każdy u nas znajdzie coś dla siebie.</p>
             
-            <h3 style="color: var(--accent-color); font-size: 1.3rem; margin-top: 15px;">Nasz Styl Gry</h3>
+            <h3 class="about-heading about-heading-spaced">Nasz Styl Gry</h3>
             <p>Wyróżnia nas elastyczność w działaniu - staramy się być skuteczni niezależnie od tego, czym gramy, w jakiej roli gramy oraz w jakich warunkach klimatycznych operujemy. Potrafimy odnaleźć się w każdej sytuacji taktycznej, niezależnie od przeciwności losu.</p>
             <p>Gramy różne rodzaje rozgrywek, od scenariuszy PvE (wewnętrzno-klanowych), przez kampanie dynamiczne, po tzw. Joint Operations (JOPy) z innymi zaprzyjaźnionymi grupami społeczności.</p>
             
@@ -51,7 +51,7 @@ todo: "FACTS-01"
               <p>Aktywnych członków</p>
             </div>
             <div class="stat-card hud-border">
-              <h3 style="font-size: 1.8rem;">Paczka modyfikacji</h3>
+              <h3 class="stat-text">Paczka modyfikacji</h3>
               <p>skrojona pod misję</p>
             </div>
             <div class="stat-card hud-border">
@@ -59,7 +59,7 @@ todo: "FACTS-01"
               <p>Start misji (Pt/Sob/Ndz)</p>
             </div>
             <div class="stat-card hud-border">
-              <h3 style="font-size: 1.8rem;">Dedykowany</h3>
+              <h3 class="stat-text">Dedykowany</h3>
               <p>Serwer gry 24/7</p>
             </div>
           </div>
@@ -124,20 +124,20 @@ todo: "FACTS-01"
           </div>
 
           <!-- Instructions Column -->
-          <div class="recruitment-instructions hud-border" style="padding: 30px; display: flex; flex-direction: column; justify-content: space-between;">
+          <div class="recruitment-instructions hud-border">
             <div>
-              <div class="hud-badge amber" style="margin-bottom: 20px; display: inline-block;">Karta Mobilizacyjna</div>
-              <h3 style="color: var(--accent-color); font-size: 1.3rem; margin-bottom: 15px; font-family: var(--font-hud);">Instrukcja Zaciągu</h3>
-              <p style="margin-bottom: 20px; font-size: 0.95rem; line-height: 1.6; color: var(--text-primary); opacity: 0.9;">Cały proces rekrutacyjny w klanie IBC odbywa się za pośrednictwem naszego serwera Discord. Aby do nas dołączyć, wykonaj poniższe kroki:</p>
+              <div class="hud-badge amber recruitment-badge">Karta Mobilizacyjna</div>
+              <h3 class="recruitment-heading">Instrukcja Zaciągu</h3>
+              <p class="recruitment-lead">Cały proces rekrutacyjny w klanie IBC odbywa się za pośrednictwem naszego serwera Discord. Aby do nas dołączyć, wykonaj poniższe kroki:</p>
               
-              <ul class="req-list" style="margin-bottom: 25px;">
+              <ul class="req-list recruitment-steps">
                 <li>Dołącz do serwera Discord za pomocą przycisku poniżej.</li>
                 <li>Wybierz odpowiednią rolę podczas dołączania do serwera - Kadet.</li>
                 <li>Przejdź na kanał kadetów i zapoznaj się z wiadomością powitalną.</li>
               </ul>
             </div>
             
-            <a href="{{ site.discord.invite }}" target="_blank" rel="noopener noreferrer" class="hud-btn active" style="width: 100%; justify-content: center; font-size: 1.1rem; padding: 15px 0; display: inline-flex; align-items: center; gap: 10px;">
+            <a href="{{ site.discord.invite }}" target="_blank" rel="noopener noreferrer" class="hud-btn active recruitment-cta">
               {% icon "discord", "recruitment-cta-icon" %} Wejdź na Discord
             </a>
           </div>

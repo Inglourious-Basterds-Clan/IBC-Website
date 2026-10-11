@@ -2,13 +2,13 @@
 // every page links exactly one stylesheet, /css/style.css?v=<hash>, whose hash matches the
 // shipped bytes; the Lightning CSS bundle is minified and keeps the Safari prefixes (Pitfall 2);
 // root and prefix builds ship the same bytes (PERF-06 concurrency edge); only the bundle ships
-// from src/css. 03-10 adds the partial and dead-CSS checks.
+// from src/css; no page or template carries an inline style. 03-10 adds the partial and dead-CSS checks.
 import { before, test } from "node:test";
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { readdirSync, readFileSync } from "node:fs";
 import { join, relative } from "node:path";
-import { build, listFiles } from "./helpers.js";
+import { build, listFiles, repoRoot } from "./helpers.js";
 
 const variants = [
   { name: "css-root", prefix: "/", env: {} },
@@ -88,5 +88,29 @@ test("only the bundle ships from src/css", () => {
   for (const variant of variants) {
     const names = readdirSync(join(out[variant.name], "css")).sort();
     assert.deepEqual(names, ["style.css"], `${variant.name}: the output css/ folder holds ${names.join(", ")}`);
+  }
+});
+
+// Every start tag that carries a style attribute (D-12): inline styles became classes.
+function styledTags(markup) {
+  return Array.from(markup.matchAll(/<[A-Za-z][^>]*>/g), (match) => match[0]).filter((tag) =>
+    /\sstyle\s*=/i.test(tag),
+  );
+}
+
+test("no inline styles anywhere (D-12)", () => {
+  for (const variant of variants) {
+    for (const { file, html } of pages(out[variant.name])) {
+      const styled = styledTags(html);
+      assert.equal(styled.length, 0, `${variant.name}: ${file} has inline styles: ${styled.join(" ")}`);
+      assert.ok(!/<style[\s>]/i.test(html), `${variant.name}: ${file} has a <style> element`);
+    }
+  }
+  const templates = listFiles(join(repoRoot, "src"), [".njk"]);
+  assert.ok(templates.length > 0, "no .njk templates under src/");
+  for (const path of templates) {
+    const styled = styledTags(readFileSync(path, "utf8"));
+    const file = relative(repoRoot, path).replace(/\\/g, "/");
+    assert.equal(styled.length, 0, `${file} has inline styles: ${styled.join(" ")}`);
   }
 });

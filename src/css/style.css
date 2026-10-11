@@ -708,6 +708,20 @@ section {
   color: var(--text-secondary);
 }
 
+/* Former inline styles (D-12): the same declarations; the ancestor class keeps each rule above h3 and .stat-card h3 (D-15) */
+.about-content .about-heading {
+  color: var(--accent-color);
+  font-size: 1.3rem;
+}
+
+.about-content .about-heading-spaced {
+  margin-top: 15px;
+}
+
+.stat-card .stat-text {
+  font-size: 1.8rem;
+}
+
 /* --- ROSTER SECTION (SKŁAD) --- */
 .roster {
   background: var(--bg-primary);
@@ -1098,6 +1112,49 @@ textarea.form-control {
   font-size: 1.3rem;
 }
 
+/* Recruitment instructions card, former inline styles (D-12): the same declarations. Each descendant
+   rule (0,2,0) outranks h3, p, .hud-badge, .req-list, .hud-btn and the 480px .hud-btn rule (D-15) */
+.recruitment-instructions {
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.recruitment-instructions .recruitment-badge {
+  margin-bottom: 20px;
+  display: inline-block;
+}
+
+.recruitment-instructions .recruitment-heading {
+  color: var(--accent-color);
+  font-size: 1.3rem;
+  margin-bottom: 15px;
+  font-family: var(--font-hud);
+}
+
+.recruitment-instructions .recruitment-lead {
+  margin-bottom: 20px;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--text-primary);
+  opacity: 0.9;
+}
+
+.recruitment-instructions .recruitment-steps {
+  margin-bottom: 25px;
+}
+
+.recruitment-instructions .recruitment-cta {
+  width: 100%;
+  justify-content: center;
+  font-size: 1.1rem;
+  padding: 15px 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
 /* --- FOOTER --- */
 footer {
   border-top: 1px solid var(--border-color);
@@ -1165,6 +1222,13 @@ footer {
   font-size: 0.75rem;
   color: var(--text-muted);
   text-align: center;
+}
+
+/* The dim "v2.4.1" easter-egg trigger, former inline style (D-12): the same declarations (D-15) */
+.copyright .easteregg-trigger {
+  cursor: pointer;
+  opacity: 0.3;
+  margin-left: 10px;
 }
 
 /* --- CALENDAR SECTION (KALENDARZ) --- */
