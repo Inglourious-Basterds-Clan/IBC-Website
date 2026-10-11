@@ -12,7 +12,7 @@ Publiczna strona Inglourious Basterds Clan (IBC), polskiej społeczności milsim
 ```bash
 npm ci          # instalacja zależności dokładnie według package-lock.json
 npm run dev     # serwer deweloperski z automatycznym odświeżaniem: http://localhost:8080/
-npm run build   # czysty build produkcyjny do _site/ + kontrola SEO (scripts/check-seo.js); wymaga SITE_URL, patrz „Wdrożenie”
+npm run build   # czysty build produkcyjny do _site/ + kontrola SEO (scripts/check-seo.js) i wydajności (scripts/check-perf.js); wymaga SITE_URL, patrz „Wdrożenie”
 npm test        # testy automatyczne (budują warianty testowe do folderu _test/)
 ```
 
@@ -210,7 +210,7 @@ Te pliki są zapisane w repozytorium i build ich nie generuje:
 - `src/favicon.ico`,
 - `src/assets/brand/ibc-logo-512.png`: logo w danych JSON-LD.
 
-Tworzy je jednorazowo skrypt `tools/seo-images/make-seo-images.js` z własną, osobną instalacją biblioteki sharp (`tools/seo-images/package.json`), więc `npm ci`, `npm run build` i `npm test` jej nie potrzebują. Uruchom go tylko wtedy, gdy zmienia się grafika źródłowa (`src/assets/logo.png` albo `src/assets/hero-bg.jpg`):
+Tworzy je jednorazowo skrypt `tools/seo-images/make-seo-images.js` z własną, osobną instalacją biblioteki sharp (`tools/seo-images/package.json`), więc `npm ci`, `npm run build` i `npm test` jej nie potrzebują. Uruchom go tylko wtedy, gdy zmienia się grafika źródłowa (`src/images/logo.png` albo `src/images/hero-bg.jpg`; to te same oryginały, z których korzysta potok obrazów, patrz „Wydajność i zasoby”):
 
 ```bash
 npm --prefix tools/seo-images ci
@@ -220,6 +220,31 @@ node tools/seo-images/make-seo-images.js
 Napis na karcie OG wymaga czcionki Montserrat (pogrubionej) zainstalowanej w systemie. Bez niej skrypt kończy się błędem, zamiast po cichu użyć innej czcionki. Skrypt podmienia pliki dopiero wtedy, gdy wszystkie sześć jest gotowych, więc błąd w trakcie nie zostawia mieszanki starych i nowych obrazków.
 
 **Zasada wersji karty OG:** Discord i Facebook zapamiętują obrazek po adresie. Jeśli karta zmienia się po wdrożeniu, zapisz ją pod nową nazwą (`og-default-v2.jpg`, potem `-v3` itd.) i popraw `ogImage` w `src/_data/site.js`. Wtedy podglądy pobiorą nowy obrazek.
+
+## Wydajność i zasoby
+
+Strona ma być szybka na telefonie, więc wszystkie zasoby są przygotowywane podczas buildu i hostowane razem ze stroną: bez Google Fonts, bez CDN Font Awesome i bez stylów w atrybutach `style`.
+
+**Obrazy.** Oryginały zdjęć i logo leżą w `src/images/` i nigdy nie trafiają do `_site/` pod własną nazwą. `lib/images.js` opisuje presety (szerokości i formaty AVIF, WebP, JPEG dla tła strony głównej, miniatur galerii, podglądu w lightboksie i logo), a szablony wstawiają gotowe warianty shortcodem `{% picture %}`. Warianty są zapisywane w pamięci podręcznej `.cache/img/`:
+
+- pierwszy build po świeżym `npm ci` koduje je przez około 20 s, kolejne biorą je z pamięci podręcznej,
+- `npm test` najpierw uruchamia `scripts/warm-images.js` (skrypt `pretest`), żeby testy działające równolegle nie kodowały tych samych obrazów naraz,
+- po dodaniu nowego obrazu zrestartuj `npm run dev`,
+- nowe zdjęcie w galerii to plik w `src/images/` i wpis w `src/_data/gallery.js` (plik, tytuł, opis, tekst alternatywny; kolejność tablicy to kolejność na stronie).
+
+**Czcionka.** Jedyna czcionka to zmienny Montserrat z polskimi literami w `src/fonts/` (jeden plik woff2, obok licencja OFL `src/fonts/OFL.txt`). Przepis na podzbiór i pochodzenie pliku opisuje `tools/fonts/README.md`.
+
+**Ikony.** Ikony Discorda, YouTube i Facebooka są wstawiane jako SVG w HTML shortcodem `{% icon "discord" %}`. Ścieżki ikon są w `lib/icons.js`, skopiowane z Font Awesome Free 6.0.0 (ikony na licencji CC BY 4.0, atrybucja jest w komentarzu pliku).
+
+**CSS.** Style są podzielone na części w `src/css/partials/`, jedną na sekcję strony. `src/css/style.css` tylko importuje je przez `@import` w kolejności kaskady; nowa część potrzebuje swojej linii `@import` we właściwym miejscu. `src/css/style.11ty.js` składa je przez Lightning CSS w jeden zminifikowany plik `css/style.css`, a strona dołącza go z `?v=<hash treści>`, więc przeglądarka pobiera nową wersję po każdej zmianie. Nie używaj atrybutów `style` ani elementów `<style>`: nowe style idą do części arkusza.
+
+**JS.** Każda funkcja strony (menu, lightbox, terminal, scroll-spy, easter egg) ma w HTML hak `data-js="<nazwa>"`. `src/js/main.js` to loader: w swojej mapie przypisuje każdej nazwie moduł i ładuje tylko moduły tych haków, które są na stronie. Każdy moduł to `src/js/modules/<hook>.js` z funkcją `init(el)`, która nic nie robi, gdy brakuje jej elementów. Nowa funkcja to nowy moduł plus wpis w mapie w `src/js/main.js`.
+
+**Kontrola wydajności w buildzie.** `npm run build` po kontroli SEO uruchamia `scripts/check-perf.js` (oba kroki są połączone `&&`, więc odrzucona kontrola SEO zatrzymuje build przed kontrolą wydajności). Skrypt czyta gotowy `_site/` i sprawdza reguły P1-P11: obraz główny i rozmiar jego wariantów na telefon, obrazy lightboksa, brak hostów czcionek i ikon z zewnątrz, brak stylów inline, jeden arkusz stylów, wymiary i leniwe ładowanie obrazów, brak oryginałów w wyniku, rozmiar CSS i JS po gzip oraz jeden plik czcionki. Jeśli coś jest nie tak, wypisuje po jednej linii `check-perf: ...` na problem i, tak jak kontrola SEO, przenosi odrzucony wynik do `_site.rejected/`. Po udanym buildzie wypisuje `check-perf: OK` i linię z rozmiarami i limitami.
+
+**Limity (BUDGET).** Wszystkie limity są w jednym obiekcie `BUDGET` w `lib/check-perf.js`. Limity CSS, JS i czcionki to rozmiary zmierzone po fazie 3 plus 25 %, a obok każdego jest zapisany zmierzony rozmiar i data. Podniesienie limitu to świadoma zmiana obiektu `BUDGET`, sprawdzana w przeglądzie kodu (diff), z nowym pomiarem i datą wpisanymi obok; nigdy nie zmieniaj limitu wewnątrz reguły ani po to, żeby przepchnąć build.
+
+**PageSpeed Insights** uruchamiasz ręcznie na podglądzie GitHub Pages (wersja mobilna). W CI nie ma Lighthouse: GitHub Actions uruchamia `npm ci`, `npm test` i `npm run build`, więc limity pilnuje kontrola wydajności.
 
 ## Struktura projektu
 
@@ -235,13 +260,22 @@ src/_includes/partials/          wspólne elementy: nagłówek strony (head i SE
 src/_data/site.js                adres strony, prefiks ścieżki, link do Discorda i inne wspólne ustawienia (jedno źródło)
 src/_data/navigation.js          pozycje menu nawigacji
 src/_dev/                        strony testowe dla deweloperów, nigdy w buildzie produkcyjnym
-src/css/                         style
-src/js/                          skrypty przeglądarki
-src/assets/                      logo, zdjęcia, karta OG i ikony
-lib/                             funkcje SEO używane podczas buildu (indeksowanie, JSON-LD, reguły kontroli SEO w lib/check-seo.js)
+src/_data/gallery.js             lista zdjęć galerii (plik w src/images/, opis, kolejność)
+src/css/style.css                wejście arkusza stylów: tylko @import części w kolejności kaskady
+src/css/partials/                części arkusza stylów, jedna na sekcję strony
+src/css/style.11ty.js            składa arkusz w jeden plik css/style.css (Lightning CSS)
+src/js/main.js                   loader: dla każdego atrybutu data-js ładuje jego moduł
+src/js/modules/                  moduły funkcji strony, jeden na hak data-js (src/js/modules/<hook>.js)
+src/fonts/                       czcionka Montserrat (woff2) i jej licencja OFL.txt
+src/images/                      oryginały zdjęć i logo: wejście potoku obrazów (lib/images.js), nie trafiają do _site/
+src/assets/                      karta OG, ikony i logo JSON-LD (pliki SEO kopiowane bez zmian)
+lib/                             funkcje używane podczas buildu: SEO (lib/seo.js, lib/check-seo.js), obrazy (lib/images.js), CSS (lib/css.js), ikony (lib/icons.js), odczyt czcionki (lib/woff2.js) i kontrola wydajności (lib/check-perf.js)
 scripts/clean.js                 czyści _site/ przed każdym buildem
 scripts/check-seo.js             kontrola SEO uruchamiana po każdym buildzie
+scripts/check-perf.js            kontrola wydajności uruchamiana po kontroli SEO
+scripts/warm-images.js           przygotowuje warianty obrazów w .cache/img/ przed npm test
 tools/seo-images/                jednorazowy generator karty OG i ikon (osobna instalacja sharp)
+tools/fonts/                     przepis na podzbiór czcionki i jej pochodzenie (tools/fonts/README.md)
 FACTS.md                         rejestr tekstów roboczych do potwierdzenia
 test/                            testy automatyczne (npm test)
 eleventy.config.js               konfiguracja Eleventy

@@ -1,4 +1,5 @@
-// D-20 / SEO-09: README documents the indexing switch and the cutover.
+// D-20 / SEO-09: README documents the indexing switch and the cutover; 03-11 adds the asset
+// pipeline, the perf gate and its BUDGET contract.
 // The README is Polish prose, so this checks the load-bearing headings, commands and names
 // only, plus that every repo path it points the user at exists.
 import { test } from "node:test";
@@ -32,6 +33,11 @@ test("(b) README covers every D-20 cutover item", () => {
     "FACTS.md",
     "tools/seo-images",
     "scripts/check-seo.js",
+    "scripts/check-perf.js",
+    "BUDGET",
+    "src/images/",
+    "data-js",
+    "tools/fonts/README.md",
   ]) {
     assert.ok(readme.includes(needle), `README.md does not mention ${needle}`);
   }
@@ -47,7 +53,17 @@ test("(d) README holds no Discord invite", () => {
 });
 
 test("(e) the paths the README points at exist", () => {
-  for (const path of ["scripts/check-seo.js", "lib/seo.js", "tools/seo-images/make-seo-images.js", "FACTS.md"]) {
+  for (const path of [
+    "scripts/check-seo.js",
+    "lib/seo.js",
+    "tools/seo-images/make-seo-images.js",
+    "FACTS.md",
+    "scripts/check-perf.js",
+    "lib/check-perf.js",
+    "lib/images.js",
+    "lib/icons.js",
+    "tools/fonts/README.md",
+  ]) {
     assert.ok(existsSync(join(repoRoot, path)), `${path} is missing from the repo`);
   }
 });
