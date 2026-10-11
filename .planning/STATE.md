@@ -3,16 +3,16 @@ gsd_state_version: "1.0"
 current_phase: 03
 current_phase_name: performance-assets
 status: executing
-stopped_at: Completed 03-09-PLAN.md
-last_updated: "2026-10-11T09:40:04.508Z"
-last_activity: 2026-10-10
+stopped_at: Completed 03-10-PLAN.md
+last_updated: "2026-10-11T10:05:13.078Z"
+last_activity: 2026-10-11
 last_activity_desc: Phase 2 complete, transitioned to Phase 3
-state_head: ff8476e6146ae3b334a05466fe852f3e82dfd0c8
+state_head: cbc1db97c31cebc48840ef6950adddc47659dbcf
 progress:
   total_phases: 5
   completed_phases: 2
   total_plans: 24
-  completed_plans: 22
+  completed_plans: 23
   percent: 40
 ---
 
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-10-08)
 ## Current Position
 
 Phase: 03 (performance-assets) — EXECUTING
-Plan: 10 of 11
+Plan: 11 of 11
 Status: Executing (03-09 complete)
 Last activity: 2026-10-11 — Completed 03-09 (features load as ES modules through data-js hooks; runtime state is classes and textContent)
 
@@ -79,6 +79,7 @@ Progress: [████░░░░░░] 40%
 | Phase 03 P07 | 5 min | 2 tasks | 10 files |
 | Phase 03 P08 | 15 min | 2 tasks | 12 files |
 | Phase 03 P09 | 11 min | 3 tasks | 15 files |
+| Phase 03 P10 | 22 min | 3 tasks | 12 files |
 
 ## Accumulated Context
 
@@ -142,6 +143,8 @@ Recent decisions affecting current work:
 - [Phase 03]: 03-08: former inline styles are (0,2,0) ancestor-class + class rules at the end of their section, outranking every competing rule incl. the 480px .hud-btn; parity proven by headless-Chrome computed-style diff (0 of 501 props)
 - [Phase 03]: 03-09: main.js is a module entry: frozen literal loader map (own-property check) imports js/modules/<data-js>.js and calls init(el); modules read the DOM only inside init and no-op when elements are missing
 - [Phase 03]: 03-09: runtime state is classes (.lightbox.is-open, .decryption-overlay.is-open, .tag-error, .terminal-line-alert) and textContent; only body.style.overflow scroll lock remains as a runtime style
+- [Phase 03]: 03-10: the every-class-used guard reads bundle rule preludes only and matches class names as whole words with (?<![\w-])name(?![\w-]), so hyphenated supersets do not count as use
+- [Phase 03]: 03-10: dead CSS (roster, calendar, status panel, countdown, form styles, green/danger badges, 480px timer rule, keyframes blink/fadeIn) deleted; computed-style parity proven by a CDP probe with frozen Date (0 of 1.61M values differ)
 
 ### Pending Todos
 
@@ -172,6 +175,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-10-11T09:40:04.412Z
-Stopped at: Completed 03-09-PLAN.md
+Last session: 2026-10-11T10:05:12.984Z
+Stopped at: Completed 03-10-PLAN.md
 Resume file: None
