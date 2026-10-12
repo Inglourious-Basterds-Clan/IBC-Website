@@ -115,3 +115,44 @@ test("CLI gates fail on a non-output folder but leave it in place", () => {
     rmSync(`${fixture}.rejected`, { recursive: true, force: true });
   }
 });
+
+// scripts/clean.js shares the allow-list. Never pass src, .git or lib to the real clean.js:
+// a refusal is proven on a gitignored .cache/ folder instead.
+function runClean(target) {
+  return spawnSync(process.execPath, ["scripts/clean.js", target], { cwd: repoRoot, encoding: "utf8" });
+}
+
+test("clean.js refuses a folder that is not build output and leaves it in place", () => {
+  const fixture = join(repoRoot, ".cache", "reject-output-fixture");
+  try {
+    writeFile(join(fixture, "keep.txt"), "not build output");
+    const result = runClean(".cache/reject-output-fixture");
+    assert.equal(result.status, 1, `clean.js removed a non-output folder:\n${result.stderr}`);
+    assert.match(result.stderr, /refusing/);
+    assert.match(result.stderr, /only _site or a folder under _test\//);
+    assert.ok(existsSync(join(fixture, "keep.txt")), "clean.js deleted the .cache fixture");
+  } finally {
+    rmSync(fixture, { recursive: true, force: true });
+  }
+});
+
+test("clean.js removes a folder under _test/", () => {
+  const staleDir = join(repoRoot, "_test", "reject-output-stale");
+  try {
+    writeFile(join(staleDir, "index.html"), "<p>stale</p>");
+    const result = runClean("_test/reject-output-stale");
+    assert.equal(result.status, 0, `clean.js failed:\n${result.stderr}`);
+    assert.ok(!existsSync(staleDir), "_test/reject-output-stale still exists");
+  } finally {
+    rmSync(staleDir, { recursive: true, force: true });
+  }
+});
+
+test("clean.js still refuses the repo root and its parent", () => {
+  for (const target of [".", ".."]) {
+    const result = runClean(target);
+    assert.equal(result.status, 1, `clean.js ${target} should exit 1`);
+    assert.match(result.stderr, /refusing/);
+  }
+  assert.ok(existsSync(join(repoRoot, "package.json")), "package.json was deleted");
+});
