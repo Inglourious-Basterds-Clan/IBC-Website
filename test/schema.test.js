@@ -1,13 +1,15 @@
-// SEO-05 JSON-LD checks: lib/schema.js builds the home-page Organization + WebSite graph from
-// src/_data/site.js (D-10..D-14), jsonLd() cannot close the <script> element, the real builds
-// carry exactly one graph on the home page and none anywhere else, and the graph holds no
+// SEO-05/SEO-06 JSON-LD checks: lib/schema.js builds the home-page Organization + WebSite graph
+// from src/_data/site.js (D-10..D-14) and the subpage BreadcrumbList graph (D-17), jsonLd() cannot
+// close the <script> element, the real builds carry exactly one graph on the home page and one on
+// each indexable subpage with a breadcrumb (none on 404 and dev pages), and no graph holds
 // unconfirmed claims or personal data (plan prohibitions).
 import { before, test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { join, relative } from "node:path";
 import { attrValues, block, build, listFiles, read, repoRoot } from "./helpers.js";
-import { buildSchemaGraph, jsonLd } from "../lib/schema.js";
+import { buildBreadcrumbList, buildSchemaGraph, jsonLd } from "../lib/schema.js";
+import { isIndexableUrl, outputPathToUrl } from "../lib/seo.js";
 import { readImageSize } from "../lib/image-size.js";
 import site from "../src/_data/site.js";
 
@@ -60,11 +62,13 @@ function walk(value, types = [], keys = []) {
   return { types, keys };
 }
 
-// Prohibitions (test tier): only the D-10..D-12 keys on the Organization, no claims, no people.
+// Prohibitions (test tier): only the D-10..D-12 keys on an Organization (the home graph has one,
+// a subpage graph none), no claims, no people.
 function assertNoForbiddenContent(graph) {
-  const organization = nodeOfType(graph, "Organization");
-  for (const key of Object.keys(organization)) {
-    assert.ok(organizationKeys.includes(key), `Organization carries an unexpected key: ${key}`);
+  for (const organization of graph["@graph"].filter((node) => node["@type"] === "Organization")) {
+    for (const key of Object.keys(organization)) {
+      assert.ok(organizationKeys.includes(key), `Organization carries an unexpected key: ${key}`);
+    }
   }
   const { types, keys } = walk(graph);
   for (const type of forbiddenTypes) assert.ok(!types.includes(type), `graph contains @type ${type}`);
@@ -112,6 +116,32 @@ test("(unit) jsonLd escapes < so a value cannot close the script element", () =>
   assert.ok(text.includes("\\u003c/script>"), text);
   assert.deepEqual(JSON.parse(text), value);
 });
+
+const unitTrail = [
+  { name: "Start", url: "/" },
+  { name: "Jak dołączyć", url: "/jak-dolaczyc/" },
+];
+
+for (const [label, pathPrefix] of [["at the root", "/"], ["under a path prefix", "/IBC-Website/"]]) {
+  test(`(unit) buildBreadcrumbList ${label}`, () => {
+    const base = "https://ex.example" + pathPrefix;
+    const list = buildBreadcrumbList({ ...unitSite, pathPrefix }, unitTrail);
+    assert.equal(list["@type"], "BreadcrumbList");
+    assert.deepEqual(list.itemListElement, [
+      { "@type": "ListItem", position: 1, name: "Start", item: base },
+      { "@type": "ListItem", position: 2, name: "Jak dołączyć", item: base + "jak-dolaczyc/" },
+    ]);
+  });
+}
+
+test("(unit) buildBreadcrumbList throws on an empty name or a relative url", () => {
+  assert.throws(() => buildBreadcrumbList(unitSite, [{ name: "", url: "/" }]), /has no name/);
+  assert.throws(() => buildBreadcrumbList(unitSite, [{ name: "Start", url: "/" }, { url: "/x/" }]), /has no name/);
+  assert.throws(() => buildBreadcrumbList(unitSite, [{ name: "Start", url: "jak-dolaczyc/" }]), /root-relative/);
+});
+
+// Node types a subpage graph may hold (SEO-06, D-05, D-17).
+const subpageTypes = ["BreadcrumbList", "FAQPage"];
 
 const variants = {
   root: { name: "schema-root", env: { INCLUDE_DEV_PAGES: "1" } },
@@ -161,14 +191,27 @@ for (const key of Object.keys(variants)) {
     assert.ok(logo.hasAlpha, "logo has no alpha channel");
   });
 
-  test(`(${key} build) no other page carries JSON-LD`, () => {
+  test(`(${key} build) only home and indexable subpages carry JSON-LD`, () => {
     const outDir = outDirs[key];
     const pages = listFiles(outDir, [".html"]).map((full) => relative(outDir, full).replace(/\\/g, "/"));
     const others = pages.filter((relPath) => relPath !== "index.html");
     // The root build includes the dev pages, so it always has pages besides the home page.
     if (key === "root") assert.ok(others.some((relPath) => relPath.startsWith("_dev/")), "dev pages missing from the root build");
+    assert.ok(others.includes("jak-dolaczyc/index.html"), "jak-dolaczyc/index.html missing from the build");
     for (const relPath of others) {
-      assert.ok(!read(outDir, relPath).includes("application/ld+json"), `${relPath} carries JSON-LD`);
+      const html = read(outDir, relPath);
+      if (!html.includes("application/ld+json")) {
+        assert.notEqual(relPath, "jak-dolaczyc/index.html", "the join page carries no JSON-LD");
+        continue;
+      }
+      assert.ok(relPath !== "404.html" && !relPath.startsWith("_dev/"), `${relPath} carries JSON-LD`);
+      assert.ok(isIndexableUrl(outputPathToUrl(relPath)), `${relPath} is not indexable but carries JSON-LD`);
+      const blocks = jsonLdBlocks(html);
+      assert.equal(blocks.length, 1, `${relPath}: expected exactly one ld+json script`);
+      const types = blocks[0]["@graph"].map((node) => node["@type"]);
+      for (const type of types) assert.ok(subpageTypes.includes(type), `${relPath} graph holds @type ${type}`);
+      assert.ok(types.includes("BreadcrumbList"), `${relPath} graph has no BreadcrumbList`);
+      assertNoForbiddenContent(blocks[0]);
     }
   });
 }

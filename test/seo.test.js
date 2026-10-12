@@ -152,8 +152,11 @@ function sitemapLocs(outDir) {
 
 test("(f) sitemap lists exactly the indexable pages, sorted", () => {
   const rootLocs = sitemapLocs(rootBuild());
-  assert.deepEqual(rootLocs, ["http://localhost:8080/"]);
-  assert.deepEqual(sitemapLocs(prefixBuild()), ["https://guard.example/IBC-Website/"]);
+  assert.deepEqual(rootLocs, ["http://localhost:8080/", "http://localhost:8080/jak-dolaczyc/"]);
+  assert.deepEqual(sitemapLocs(prefixBuild()), [
+    "https://guard.example/IBC-Website/",
+    "https://guard.example/IBC-Website/jak-dolaczyc/",
+  ]);
   for (const locs of [rootLocs, sitemapLocs(indexableBuild())]) {
     assert.deepEqual(locs, [...locs].sort(), "sitemap <loc> entries are not sorted");
     for (const loc of locs) {

@@ -28,5 +28,6 @@ Ten plik to rejestr tekstów roboczych napisanych przez Claude'a, które klan mu
 |----|-------|---------------|--------|
 | FACTS-01 | `src/index.njk` (front matter `description`) | Polski klan Arma 3 milsim działający od 2018 roku. Regularne operacje co-op, realizm i praca zespołowa. Prowadzimy rekrutację – dołącz do nas na Discordzie! | do potwierdzenia |
 | FACTS-02 | `src/404.njk` (nagłówek h1, linia statusu, akapit i etykiety przycisków) | 404 // UTRACONO SYGNAŁ / Status // Brak sygnału z tego sektora / Ta strona nie istnieje. Sprawdź adres albo wróć do bazy. / Wróć na stronę główną / Dołącz na Discordzie | do potwierdzenia |
+| FACTS-03 | `src/jak-dolaczyc.njk` (front matter `description`, linia statusu, akapit wstępu) | Jak dołączyć do IBC, polskiego klanu Arma 3 milsim: wymagania, rekrutacja krok po kroku i odpowiedzi na najczęstsze pytania. Rekrutacja przez Discord. / Status // Rekrutacja otwarta / Gramy zespołowo i na luzie, ale z dyscypliną na misji. Poniżej znajdziesz wymagania, rekrutację krok po kroku i odpowiedzi na najczęstsze pytania. Całą rekrutację prowadzimy na Discordzie. | do potwierdzenia |
 
 Faza 4 (CONT-06) dopisuje tutaj kolejne teksty robocze w tym samym formacie.

@@ -1,0 +1,39 @@
+---
+layout: layouts/base.njk
+title: "Jak dołączyć do klanu Arma 3 – rekrutacja"
+description: "Jak dołączyć do IBC, polskiego klanu Arma 3 milsim: wymagania, rekrutacja krok po kroku i odpowiedzi na najczęstsze pytania. Rekrutacja przez Discord."
+permalink: /jak-dolaczyc/
+breadcrumb: "Jak dołączyć"
+todo: "FACTS-03"
+---
+<section class="subpage">
+  <div class="section-container">
+    <div class="section-header">
+      <h1>Jak dołączyć do IBC</h1>
+      <p>Status // Rekrutacja otwarta</p>
+    </div>
+    <p class="page-lead">Gramy zespołowo i na luzie, ale z dyscypliną na misji. Poniżej znajdziesz wymagania, rekrutację krok po kroku i odpowiedzi na najczęstsze pytania. Całą rekrutację prowadzimy na Discordzie.</p>
+
+    <div class="page-block" id="wymagania">
+      <h2>Wymagania</h2>
+      <ul class="req-list">
+        {%- for requirement in join.requirements %}
+        <li>{{ requirement }}</li>
+        {%- endfor %}
+      </ul>
+    </div>
+
+    <div class="page-block" id="kroki">
+      <h2>Krok po kroku</h2>
+      <ol class="join-steps">
+        {%- for step in join.steps %}
+        <li><h3>{{ step.title }}</h3><p>{{ step.text }}</p></li>
+        {%- endfor %}
+      </ol>
+    </div>
+
+    <div class="page-cta">
+      <a href="{{ site.discord.invite }}" target="_blank" rel="noopener noreferrer" class="hud-btn active">{% icon "discord" %} Wejdź na Discord</a>
+    </div>
+  </div>
+</section>
