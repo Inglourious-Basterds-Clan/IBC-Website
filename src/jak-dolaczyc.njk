@@ -4,6 +4,7 @@ title: "Jak dołączyć do klanu Arma 3 – rekrutacja"
 description: "Jak dołączyć do IBC, polskiego klanu Arma 3 milsim: wymagania, rekrutacja krok po kroku i odpowiedzi na najczęstsze pytania. Rekrutacja przez Discord."
 permalink: /jak-dolaczyc/
 breadcrumb: "Jak dołączyć"
+faqSchema: true
 todo: "FACTS-03"
 ---
 <section class="subpage">
@@ -30,6 +31,18 @@ todo: "FACTS-03"
         <li><h3>{{ step.title }}</h3><p>{{ step.text }}</p></li>
         {%- endfor %}
       </ol>
+    </div>
+
+    <div class="page-block" id="faq">
+      <h2>Najczęstsze pytania</h2>
+      <div class="faq-list">
+        {%- for item in join.faq %}
+        <details class="faq-item hud-border" id="{{ item.id }}">{% if item.draft %}<!-- {{ item.draft }} -->{% endif %}
+          <summary>{{ item.question }}</summary>
+          <p>{{ item.answer }}</p>
+        </details>
+        {%- endfor %}
+      </div>
     </div>
 
     <div class="page-cta">

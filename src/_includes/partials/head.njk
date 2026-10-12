@@ -59,6 +59,7 @@
 
   <!-- Structured Data JSON-LD -->
   {# D-14: Organization + WebSite on the home page only. D-17: a page with front matter breadcrumb gets its
-     BreadcrumbList graph. jsonLd escapes "<", so these two lines are the head's only safe uses. #}
+     BreadcrumbList graph, plus a FAQPage from join.faq when it sets faqSchema (D-05: the accordion's data).
+     jsonLd escapes "<", so these two lines are the head's only safe uses. #}
   {% if isHome %}<script type="application/ld+json">{{ site | schemaGraph | jsonLd | safe }}</script>{% endif %}
-  {% if breadcrumb %}<script type="application/ld+json">{{ site | pageGraph({ url: page.url, breadcrumb: breadcrumb }) | jsonLd | safe }}</script>{% endif %}
+  {% if breadcrumb %}<script type="application/ld+json">{{ site | pageGraph({ url: page.url, breadcrumb: breadcrumb, faq: (join.faq if faqSchema else none) }) | jsonLd | safe }}</script>{% endif %}
