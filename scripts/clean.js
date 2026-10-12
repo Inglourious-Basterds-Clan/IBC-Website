@@ -1,18 +1,18 @@
 // Deletes the build output folder (default _site/) before `npm run build`, so pages
 // from an earlier dev or INCLUDE_DEV_PAGES build never reach a deploy (FOUND-01).
 // Usage: node scripts/clean.js [dir relative to the repo root]
-// Refuses the repo root itself and anything outside it. Node built-ins only.
+// CR-01: the same allow-list as the gates (lib/reject-output.js): only _site or a folder
+// under _test/ is ever removed; anything else is refused. Node built-ins only.
 import { rmSync } from "node:fs";
-import { isAbsolute, relative, resolve, sep } from "node:path";
+import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { isDisposableOutput } from "../lib/reject-output.js";
 
 const repoRoot = resolve(fileURLToPath(new URL("..", import.meta.url)));
 const target = resolve(repoRoot, process.argv[2] || "_site");
-const rel = relative(repoRoot, target);
 
-// "" is the root itself, ".." escapes it, and an absolute result means another drive on Windows.
-if (rel === "" || rel === ".." || rel.startsWith(".." + sep) || isAbsolute(rel)) {
-  process.stderr.write(`clean.js: refusing to remove ${target}\n`);
+if (!isDisposableOutput(target, repoRoot)) {
+  process.stderr.write(`clean.js: refusing to remove ${target} (only _site or a folder under _test/)\n`);
   process.exit(1);
 }
 

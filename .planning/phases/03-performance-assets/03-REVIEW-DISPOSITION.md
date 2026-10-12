@@ -5,7 +5,7 @@ titles: json
 findings:
   - id: CR-01
     severity: critical
-    disposition: open
+    disposition: fixed
     title: "A mistyped `--dir` moves or recursively deletes source folders (`src/`, `.git/`, `node_modules/`)"
   - id: WR-01
     severity: warning
@@ -51,7 +51,7 @@ findings:
     severity: info
     disposition: open
     title: "The P3 host list covers only the replaced CDNs"
-open: 12
+open: 11
 total: 12
 recorded: 2026-10-11T11:15:17.278Z
 ---
@@ -60,7 +60,7 @@ recorded: 2026-10-11T11:15:17.278Z
 
 | Finding | Severity | Disposition | Source |
 |---------|----------|-------------|--------|
-| CR-01 | critical | open | - |
+| CR-01 | critical | fixed | 04-02 |
 | WR-01 | warning | open | - |
 | WR-02 | warning | open | - |
 | WR-03 | warning | open | - |
