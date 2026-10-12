@@ -6,6 +6,7 @@
 import { before, test } from "node:test";
 import assert from "node:assert/strict";
 import { attrValues, block, build, read } from "./helpers.js";
+import * as htmlLib from "../lib/html.js";
 import join from "../src/_data/join.js";
 import site from "../src/_data/site.js";
 
@@ -48,8 +49,94 @@ function canonicalOf(html) {
   return match[1];
 }
 
+// IN-02 / Pitfall 6: visible text as the tests and the SEO gate compare it with JSON-LD strings.
+test("(unit) visibleText decodes the autoescape entities, drops comments and tags", () => {
+  assert.equal(typeof htmlLib.visibleText, "function", "lib/html.js does not export visibleText");
+  const { visibleText } = htmlLib;
+  assert.equal(
+    visibleText("<p>Tak &amp; nie &quot;x&quot; &#39;y&#39; &lt;z&gt; &#92; &#261; „q”</p>"),
+    "Tak & nie \"x\" 'y' <z> \\ ą „q”",
+  );
+  assert.equal(visibleText("<!-- TODO(FACTS-99) --><summary>\n  Pytanie?\n</summary>"), "Pytanie?");
+  assert.equal(visibleText("a&#x105;b&#X105;"), "aąbą");
+  assert.equal(visibleText("  jeden \n\t dwa  "), "jeden dwa");
+});
+
+// Every <details class="faq-item ..."> as { id, summaries: [inner], answer: inner of <p>, raw }.
+function faqItems(html) {
+  return Array.from(html.matchAll(/<details\s[^>]*class="[^"]*\bfaq-item\b[^"]*"[^>]*>([\s\S]*?)<\/details>/g), (match) => {
+    const id = /\sid="([^"]*)"/.exec(match[0]);
+    const answer = /<\/summary>\s*<p>([\s\S]*?)<\/p>/.exec(match[1]);
+    return {
+      id: id ? id[1] : null,
+      summaries: Array.from(match[1].matchAll(/<summary>([\s\S]*?)<\/summary>/g), (summary) => summary[1]),
+      answer: answer ? answer[1] : null,
+      raw: match[1],
+    };
+  });
+}
+
+test("(data) join.faq: 12–16 entries, unique kebab-case ids, plain text without markers (D-04, CONT-06)", () => {
+  assert.ok(Array.isArray(join.faq), "join.faq is not an array");
+  assert.ok(join.faq.length >= 12 && join.faq.length <= 16, `join.faq has ${join.faq.length} entries, expected 12–16`);
+  const ids = join.faq.map((entry) => entry.id);
+  assert.equal(new Set(ids).size, ids.length, `duplicate FAQ ids: ${ids.join(", ")}`);
+  for (const entry of join.faq) {
+    assert.match(entry.id, /^[a-z0-9-]+$/, `FAQ id "${entry.id}" is not ASCII kebab-case`);
+    assert.ok(!["wymagania", "kroki", "faq"].includes(entry.id), `FAQ id "${entry.id}" collides with a page block id`);
+    for (const field of ["question", "answer"]) {
+      assert.equal(typeof entry[field], "string", `${entry.id}.${field} is not a string`);
+      assert.ok(entry[field].trim() !== "", `${entry.id}.${field} is empty`);
+      assert.doesNotMatch(entry[field], /TODO|FACTS-\d+/, `${entry.id}.${field} holds a marker (markers belong in draft)`);
+      assert.doesNotMatch(entry[field], /[<>]/, `${entry.id}.${field} holds HTML (answers are plain text)`);
+    }
+    if ("draft" in entry) assert.match(entry.draft, /^TODO\(FACTS-\d+\)$/, `${entry.id}.draft is not a TODO(FACTS-NN) marker`);
+  }
+});
+
 for (const [key, variant] of Object.entries(variants)) {
   const page = () => read(outDirs[key], joinPage);
+
+  test(`(${key} build) join page: native FAQ accordion equals the FAQPage JSON-LD (CONT-02, D-04, D-05)`, () => {
+    const html = page();
+    const { visibleText } = htmlLib;
+    assert.equal(typeof visibleText, "function", "lib/html.js does not export visibleText");
+    assert.ok(html.includes('<div class="page-block" id="faq">'), "no .page-block #faq");
+    const items = faqItems(html);
+    assert.ok(items.length >= 12 && items.length <= 16, `${items.length} FAQ items, expected 12–16`);
+    for (const item of items) {
+      assert.equal(item.summaries.length, 1, `FAQ ${item.id} needs exactly one <summary>`);
+      assert.ok(item.answer !== null, `FAQ ${item.id} has no answer paragraph`);
+    }
+    const ids = items.map((item) => item.id);
+    assert.equal(new Set(ids).size, ids.length, "duplicate FAQ ids on the page");
+    for (const id of ids) assert.match(id || "", /^[a-z0-9-]+$/);
+
+    const questions = items.map((item) => visibleText(item.summaries[0]));
+    const answers = items.map((item) => visibleText(item.answer));
+    assert.deepEqual(questions, join.faq.map((entry) => entry.question), "visible questions differ from join.faq");
+    assert.deepEqual(answers, join.faq.map((entry) => entry.answer), "visible answers differ from join.faq");
+
+    const blocks = jsonLdBlocks(html);
+    assert.equal(blocks.length, 1, "expected exactly one ld+json script");
+    const faqPages = blocks[0]["@graph"].filter((node) => node["@type"] === "FAQPage");
+    assert.equal(faqPages.length, 1, "expected exactly one FAQPage node");
+    const entities = faqPages[0].mainEntity;
+    assert.ok(entities.every((entity) => entity["@type"] === "Question" && entity.acceptedAnswer["@type"] === "Answer"));
+    assert.deepEqual(entities.map((entity) => entity.name), questions, "JSON-LD Question names differ from the visible questions");
+    assert.deepEqual(entities.map((entity) => entity.acceptedAnswer.text), answers, "JSON-LD answers differ from the visible answers");
+    for (const text of [...questions, ...answers]) assert.doesNotMatch(text, /TODO|FACTS-\d+/);
+  });
+
+  test(`(${key} build) join page: every drafted FAQ entry carries its marker comment (CONT-06)`, () => {
+    const items = new Map(faqItems(page()).map((item) => [item.id, item]));
+    const drafted = (join.faq || []).filter((entry) => entry.draft);
+    assert.ok(drafted.length > 0, "no drafted FAQ entry: the non-D-02 answers must be marked");
+    for (const entry of drafted) {
+      assert.ok(items.has(entry.id), `FAQ ${entry.id} missing from the page`);
+      assert.ok(items.get(entry.id).raw.includes(`<!-- ${entry.draft} -->`), `FAQ ${entry.id} lacks <!-- ${entry.draft} -->`);
+    }
+  });
 
   test(`(${key} build) join page: one h1, title and description`, () => {
     const html = page();

@@ -9,6 +9,7 @@ import { readFileSync } from "node:fs";
 import { join, relative } from "node:path";
 import { attrValues, block, build, listFiles, read, repoRoot } from "./helpers.js";
 import { buildBreadcrumbList, buildSchemaGraph, jsonLd } from "../lib/schema.js";
+import * as schema from "../lib/schema.js";
 import { isIndexableUrl, outputPathToUrl } from "../lib/seo.js";
 import { readImageSize } from "../lib/image-size.js";
 import site from "../src/_data/site.js";
@@ -138,6 +139,32 @@ test("(unit) buildBreadcrumbList throws on an empty name or a relative url", () 
   assert.throws(() => buildBreadcrumbList(unitSite, [{ name: "", url: "/" }]), /has no name/);
   assert.throws(() => buildBreadcrumbList(unitSite, [{ name: "Start", url: "/" }, { url: "/x/" }]), /has no name/);
   assert.throws(() => buildBreadcrumbList(unitSite, [{ name: "Start", url: "jak-dolaczyc/" }]), /root-relative/);
+});
+
+// D-05: Question/Answer from question/answer only; the id and draft fields never reach the graph.
+test("(unit) buildFaqPage maps question/answer and ignores id and draft", () => {
+  assert.equal(typeof schema.buildFaqPage, "function", "lib/schema.js does not export buildFaqPage");
+  const faq = schema.buildFaqPage([{ id: "a", draft: "x", question: "A?", answer: "B." }]);
+  assert.deepEqual(faq, {
+    "@type": "FAQPage",
+    mainEntity: [{ "@type": "Question", name: "A?", acceptedAnswer: { "@type": "Answer", text: "B." } }],
+  });
+});
+
+test("(unit) buildFaqPage throws on an empty question or answer", () => {
+  assert.equal(typeof schema.buildFaqPage, "function", "lib/schema.js does not export buildFaqPage");
+  assert.throws(() => schema.buildFaqPage([{ id: "pusta", question: "", answer: "B." }]), /pusta/);
+  assert.throws(() => schema.buildFaqPage([{ id: "brak", question: "A?" }]), /brak/);
+});
+
+test("(unit) buildPageGraph adds the FAQPage only for a non-empty faq", () => {
+  const types = (graph) => graph["@graph"].map((node) => node["@type"]);
+  const page = { url: "/jak-dolaczyc/", breadcrumb: "Jak dołączyć" };
+  const faq = [{ id: "a", question: "A?", answer: "B." }];
+  assert.deepEqual(types(schema.buildPageGraph(unitSite, { ...page, faq })), ["BreadcrumbList", "FAQPage"]);
+  assert.deepEqual(types(schema.buildPageGraph(unitSite, { ...page, faq: null })), ["BreadcrumbList"]);
+  assert.deepEqual(types(schema.buildPageGraph(unitSite, page)), ["BreadcrumbList"]);
+  assert.deepEqual(types(schema.buildPageGraph(unitSite, { ...page, faq: [] })), ["BreadcrumbList"]);
 });
 
 // Node types a subpage graph may hold (SEO-06, D-05, D-17).
