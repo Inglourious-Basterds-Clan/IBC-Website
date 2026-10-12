@@ -137,9 +137,12 @@ todo: "FACTS-01"
               </ul>
             </div>
             
-            <a href="{{ site.discord.invite }}" target="_blank" rel="noopener noreferrer" class="hud-btn active recruitment-cta">
-              {% icon "discord", "recruitment-cta-icon" %} Wejdź na Discord
-            </a>
+            <div class="recruitment-cta-group">
+              <a href="{{ site.discord.invite }}" target="_blank" rel="noopener noreferrer" class="hud-btn active recruitment-cta">
+                {% icon "discord", "recruitment-cta-icon" %} Wejdź na Discord
+              </a>
+              <p class="discord-badge" data-js="discord-badge" data-api-url="{{ discordBadge.apiUrl }}">Discord: <span class="discord-badge-members">{{ discordBadge.fallbackText }}</span><span class="discord-badge-online"></span></p>
+            </div>
           </div>
         </div>
       </div>

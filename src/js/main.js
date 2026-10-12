@@ -9,7 +9,8 @@ const loaders = Object.freeze({
   lightbox: () => import('./modules/lightbox.js'),
   terminal: () => import('./modules/terminal.js'),
   'scroll-spy': () => import('./modules/scroll-spy.js'),
-  'easter-egg': () => import('./modules/easter-egg.js')
+  'easter-egg': () => import('./modules/easter-egg.js'),
+  'discord-badge': () => import('./modules/discord-badge.js')
 });
 
 export function initFeatures(root, featureLoaders) {
