@@ -689,6 +689,123 @@ test("G11 exempts 404.html and /_dev/ pages without a trail", () => {
   assert.deepEqual(problems, []);
 });
 
+// G12 fixtures (D-05, Pitfall 6): the FAQPage JSON-LD must equal the visible FAQ.
+// A FAQPage node; an entry is a [name, text] pair or an already built mainEntity value.
+function faqPageNode(entries) {
+  const mainEntity = entries.map((entry) =>
+    Array.isArray(entry) ? { "@type": "Question", name: entry[0], acceptedAnswer: { "@type": "Answer", text: entry[1] } } : entry,
+  );
+  return { "@type": "FAQPage", mainEntity };
+}
+
+// An /about/ page with the 04-01 FAQ markup: items are [question, answer, draft?] in HTML source
+// form (draft prints the 04-01 marker comment inside the details). jsonLdItems are the FAQPage
+// entries (default: items; null leaves the FAQPage out); extraNodes are appended to the graph.
+function faqFixture(items, { jsonLdItems = items, extraNodes = [] } = {}) {
+  const details = items.map(([question, answer, draft], index) => {
+    const marker = draft ? `<!-- ${draft} -->` : "";
+    return `<details class="faq-item hud-border" id="q${index + 1}">${marker}
+  <summary>${question}</summary>
+  <p>${answer}</p>
+</details>`;
+  });
+  const faqNodes = jsonLdItems === null ? [] : [faqPageNode(jsonLdItems)];
+  return validPage(fixtureBase, "/about/", {
+    jsonLd: breadcrumbGraph(fixtureBase, "/about/", "Fixture", [...faqNodes, ...extraNodes]),
+    body: `<h1>Fixture</h1>\n<div class="faq-list">\n${details.join("\n")}\n</div>`,
+  });
+}
+
+const twoQuestions = [
+  ["Czy potrzebuję mikrofonu?", "Tak, mikrofon jest wymagany."],
+  ["Jakie mody?", "Pobierasz je przez Arma 3 Launcher."],
+];
+
+function g12Problems(problems) {
+  return problems.filter((problem) => problem.includes(": G12 "));
+}
+
+function g12About(name, items, options) {
+  return check(name, { "about/index.html": faqFixture(items, options) });
+}
+
+test("G12 FAQPage equal to the visible FAQ passes", () => {
+  assert.deepEqual(g12About("g12-valid", twoQuestions), []);
+});
+
+test("G12 entities, Polish quotes, a non-breaking space and a draft comment never cause a mismatch (Pitfall 6)", () => {
+  const visible = [
+    ["Czy &quot;mody&quot; &amp; DLC?", "To &#39;ok&#39; – 90&#160;GB „tak”", "TODO(FACTS-04)"],
+    ["Druga &lt;sprawa&gt;?", "Odpowiedź &#x41;"],
+  ];
+  const jsonLdItems = [
+    ["Czy \"mody\" & DLC?", "To 'ok' – 90 GB „tak”"],
+    ["Druga <sprawa>?", "Odpowiedź A"],
+  ];
+  assert.deepEqual(g12About("g12-entities", visible, { jsonLdItems }), []);
+});
+
+test("G12 questions in a different order", () => {
+  const problems = g12About("g12-order", twoQuestions, { jsonLdItems: [twoQuestions[1], twoQuestions[0]] });
+  assertProblem(problems, `about/index.html: G12 question 1 "${twoQuestions[1][0]}" differs from the visible summary "${twoQuestions[0][0]}"`);
+});
+
+test("G12 different answer text", () => {
+  const jsonLdItems = [twoQuestions[0], [twoQuestions[1][0], "Inna odpowiedź."]];
+  const problems = g12About("g12-answer", twoQuestions, { jsonLdItems });
+  assertProblem(problems, `about/index.html: G12 answer 2 "Inna odpowiedź." differs from the visible answer "${twoQuestions[1][1]}"`);
+});
+
+test("G12 more FAQPage questions than visible items", () => {
+  const jsonLdItems = [...twoQuestions, ["Trzecie?", "Tak."]];
+  const problems = g12About("g12-count", twoQuestions, { jsonLdItems });
+  assertProblem(problems, "about/index.html: G12 2 visible FAQ items but 3 FAQPage questions");
+});
+
+test("G12 visible FAQ without a FAQPage", () => {
+  const problems = g12About("g12-no-faqpage", twoQuestions, { jsonLdItems: null });
+  assertProblem(problems, "about/index.html: G12 visible FAQ (2 details.faq-item) without FAQPage JSON-LD (D-05)");
+});
+
+test("G12 FAQPage without a visible FAQ", () => {
+  const problems = g12About("g12-no-visible", [], { jsonLdItems: twoQuestions });
+  assertProblem(problems, "about/index.html: G12 FAQPage JSON-LD without a visible FAQ (details.faq-item) (D-05)");
+});
+
+test("G12 two FAQPage nodes", () => {
+  const problems = g12About("g12-two", twoQuestions, { extraNodes: [faqPageNode(twoQuestions)] });
+  assertProblem(problems, "about/index.html: G12 2 FAQPage nodes, expected at most one");
+});
+
+test("G12 FAQPage with an empty mainEntity", () => {
+  const problems = g12About("g12-empty-main", twoQuestions, { jsonLdItems: [] });
+  assertProblem(problems, "about/index.html: G12 FAQPage mainEntity must be a non-empty array of Questions");
+});
+
+test("G12 Question with an empty name", () => {
+  const blank = { "@type": "Question", name: " ", acceptedAnswer: { "@type": "Answer", text: twoQuestions[1][1] } };
+  const problems = g12About("g12-empty-name", twoQuestions, { jsonLdItems: [twoQuestions[0], blank] });
+  assertProblem(problems, "about/index.html: G12 FAQPage question 2 has an empty name");
+});
+
+test("G12 Question without acceptedAnswer.text", () => {
+  const noAnswer = { "@type": "Question", name: twoQuestions[0][0], acceptedAnswer: { "@type": "Answer" } };
+  const problems = g12About("g12-no-answer", twoQuestions, { jsonLdItems: [noAnswer, twoQuestions[1]] });
+  assertProblem(problems, "about/index.html: G12 FAQPage question 1 has an empty acceptedAnswer.text");
+});
+
+test("G12 Question with a wrong @type", () => {
+  const wrong = { "@type": "Answer", name: twoQuestions[0][0], acceptedAnswer: { "@type": "Answer", text: twoQuestions[0][1] } };
+  const problems = g12About("g12-wrong-type", twoQuestions, { jsonLdItems: [wrong, twoQuestions[1]] });
+  assertProblem(problems, 'about/index.html: G12 FAQPage question 1 @type is "Answer", expected "Question"');
+});
+
+test("G12 a page with neither a FAQPage nor a visible FAQ", () => {
+  const problems = g12About("g12-none", [], { jsonLdItems: null });
+  assert.deepEqual(g12Problems(problems), []);
+  assert.deepEqual(problems, []);
+});
+
 test("G6 meta keywords", () => {
   const href = fixtureBase + "about/";
   const page = validPage(fixtureBase, "/about/", {
