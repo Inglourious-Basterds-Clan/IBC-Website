@@ -25,7 +25,12 @@ const polishCopy = [
   "Aktywnych członków",
   "20+",
   "19:00",
-  "Ukończone 16 lat.",
+  "Zalecane 16+",
+  "TeamSpeak",
+  "ACRE2",
+  "ok. 90 GB",
+  "Start misji w weekendy",
+  "Pełna instrukcja",
   "// RAPORT DEKRYPTOWANIA: PROJEKT DIABLO",
   "WSZELKIE PRAWA ZASTRZEŻONE",
 ];

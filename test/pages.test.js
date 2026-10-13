@@ -6,7 +6,9 @@
 import { before, test } from "node:test";
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { attrValues, block, build, read, repoRoot } from "./helpers.js";
+import { readFileSync } from "node:fs";
+import { relative } from "node:path";
+import { attrValues, block, build, listFiles, read, repoRoot } from "./helpers.js";
 import { formatPlDate } from "../lib/dates.js";
 import * as htmlLib from "../lib/html.js";
 import join from "../src/_data/join.js";
@@ -469,3 +471,43 @@ for (const [key, variant] of Object.entries(variants)) {
     assert.ok(!notFound.includes("aria-current"), "404 carries aria-current");
   });
 }
+
+/* --- HOME AGREES WITH THE SUBPAGES (D-06, D-09, CONT-06) --- */
+const oldAgeLine = "Ukończone 16 lat";
+const oldDaysLabel = "Pt/Sob/Ndz";
+
+for (const [key] of Object.entries(variants)) {
+  test(`(${key} build) the home teaser states the confirmed facts and keeps terminal, CTA and badge (D-06, D-09)`, () => {
+    const home = read(outDirs[key], "index.html");
+    for (const text of ["Zalecane 16+", "TeamSpeak", "ACRE2", "ok. 90 GB", "Start misji w weekendy", "19:00", "20+", "Aktywnych członków", "Pełna instrukcja", "Wejdź na Discord", "Instrukcja Zaciągu", "Wymagania wstępne"]) {
+      assert.ok(home.includes(text), `home lacks "${text}"`);
+    }
+    const start = home.indexOf('<section id="rekrutacja"');
+    assert.ok(start !== -1, "no section#rekrutacja");
+    const teaser = home.slice(start, home.indexOf("</section>", start));
+    assert.ok(!teaser.includes("recruitment-steps"), "the teaser still has the step list");
+    assert.ok(teaser.includes('data-js="terminal"'), "the teaser lost the terminal");
+    assert.ok(teaser.includes("Wejdź na Discord"), "the teaser lost the Discord CTA");
+    assert.equal(teaser.split('class="discord-badge"').length - 1, 1, "the teaser needs exactly one Discord badge");
+    assert.ok(teaser.indexOf("Pełna instrukcja") < teaser.indexOf("recruitment-cta-group"), "Pełna instrukcja must come before the CTA group");
+  });
+
+  test(`(${key} build) home and subpages state the same age, schedule and modpack size (D-09)`, () => {
+    const pagesHtml = Object.fromEntries(["index.html", joinPage, operationsPage].map((rel) => [rel, read(outDirs[key], rel)]));
+    for (const [text, rels] of [["Zalecane 16+", ["index.html", joinPage]], ["19:00", ["index.html", operationsPage]], ["ok. 90 GB", ["index.html", joinPage]]]) {
+      for (const rel of rels) assert.ok(pagesHtml[rel].includes(text), `${rel} lacks "${text}"`);
+    }
+  });
+}
+
+test("no built page (dev pages included) carries the old age line or the Friday/Saturday/Sunday label (D-09)", () => {
+  const outDir = build("pages-dev", { INCLUDE_DEV_PAGES: "1" });
+  const files = listFiles(outDir, [".html"]);
+  assert.ok(files.length >= 6, `expected the pages and the dev pages, found ${files.length}`);
+  for (const file of files) {
+    const html = readFileSync(file, "utf8");
+    const rel = relative(outDir, file);
+    assert.ok(!html.includes(oldAgeLine), `${rel} carries "${oldAgeLine}"`);
+    assert.ok(!html.includes(oldDaysLabel), `${rel} carries "${oldDaysLabel}"`);
+  }
+});
