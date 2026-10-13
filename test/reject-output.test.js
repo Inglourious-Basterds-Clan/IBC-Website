@@ -5,7 +5,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { cleanEnv, repoRoot } from "./helpers.js";
@@ -148,11 +148,25 @@ test("clean.js removes a folder under _test/", () => {
   }
 });
 
+// WR-04: never aim the real clean.js at the real repo root. clean.js takes its repo root from
+// its own location, so a copy of it (and its one import) in a throwaway root is refused there
+// instead. The copy sits one level down, so ".." is still inside the throwaway folder and a
+// regression in isDisposableOutput can only delete temp files, never the working copy or tmpdir.
 test("clean.js still refuses the repo root and its parent", () => {
-  for (const target of [".", ".."]) {
-    const result = runClean(target);
-    assert.equal(result.status, 1, `clean.js ${target} should exit 1`);
-    assert.match(result.stderr, /refusing/);
+  const fakeParent = makeFakeRoot();
+  const fakeRoot = join(fakeParent, "repo");
+  try {
+    for (const rel of ["scripts/clean.js", "lib/reject-output.js"]) {
+      writeFile(join(fakeRoot, rel), readFileSync(join(repoRoot, rel)));
+    }
+    writeFile(join(fakeRoot, "package.json"), '{"type":"module"}\n');
+    for (const target of [".", ".."]) {
+      const result = spawnSync(process.execPath, ["scripts/clean.js", target], { cwd: fakeRoot, encoding: "utf8" });
+      assert.equal(result.status, 1, `clean.js ${target} should exit 1:\n${result.stderr}`);
+      assert.match(result.stderr, /refusing/);
+    }
+    assert.ok(existsSync(join(fakeRoot, "package.json")), "clean.js deleted the fake repo root");
+  } finally {
+    rmSync(fakeParent, { recursive: true, force: true });
   }
-  assert.ok(existsSync(join(repoRoot, "package.json")), "package.json was deleted");
 });
