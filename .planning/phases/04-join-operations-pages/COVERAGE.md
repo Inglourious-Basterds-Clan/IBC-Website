@@ -2,22 +2,23 @@
 
 **Endpoint in scope:** `GET https://discord.com/api/v10/invites/{code}?with_counts=true` (public, no auth, CORS-enabled; live-tested in 04-RESEARCH.md).
 **Consumers:** build time `lib/discord.js` via `src/_data/discordBadge.js` (baked fallback, plan 04-03); browser `src/js/modules/discord-badge.js` (live update, plan 04-03).
+**Status (2026-10-13):** The whole integration was removed in quick task 261013-vh0 (WR-01, GDPR: visitor IPs sent to Discord). Former INTEGRATE rows are now OPT-OUT; nothing on the site or in the build calls this endpoint.
 **Rule:** INTEGRATE by default; every OPT-OUT carries a one-line reason.
 
 | capability | decision | reason |
 |------------|----------|--------|
-| `GET /invites/{code}` request built from `site.discord.invite` (code parsed by `inviteCode()`) | INTEGRATE | Single source of the invite (FOUND-04); the code is validated `^[A-Za-z0-9-]+$` before it reaches a URL (04-03) |
-| `with_counts=true` query parameter | INTEGRATE | Required for the two count fields D-14 shows |
-| `approximate_member_count` | INTEGRATE | Baked fallback (floored, e.g. "200+ osób") at build time and live number in the browser (D-14, D-16) |
-| `approximate_presence_count` | INTEGRATE | Live "· N online" in the browser only; never baked, a baked online count goes stale within minutes (D-16) |
-| Non-2xx responses (404 `10006 Unknown Invite`, 429, 5xx) | INTEGRATE | Handled: build falls back to `site.discord.membersBackstop`, browser keeps the baked text silently (D-16) |
-| Network error / timeout (`AbortSignal.timeout(5000)`) | INTEGRATE | Handled the same way; the build never fails or hangs because of Discord (T-04-09) |
-| Malformed body (non-JSON, non-integer or negative counts) | INTEGRATE | Rejected by integer validation; nothing is written (T-04-08) |
-| `DISCORD_FETCH=0` offline switch | INTEGRATE | Test builds and offline builds skip the network deterministically (Pitfall 5) |
+| `GET /invites/{code}` request built from `site.discord.invite` | OPT-OUT | Removed 2026-10-13 (quick 261013-vh0, review WR-01): the site no longer calls Discord |
+| `with_counts=true` query parameter | OPT-OUT | Removed 2026-10-13 (quick 261013-vh0, review WR-01): the site no longer calls Discord |
+| `approximate_member_count` | OPT-OUT | Removed 2026-10-13 (quick 261013-vh0, review WR-01): the site no longer calls Discord |
+| `approximate_presence_count` | OPT-OUT | Removed 2026-10-13 (quick 261013-vh0, review WR-01): the site no longer calls Discord |
+| Non-2xx responses (404 `10006 Unknown Invite`, 429, 5xx) | OPT-OUT | Removed 2026-10-13 (quick 261013-vh0, review WR-01): the site no longer calls Discord |
+| Network error / timeout (`AbortSignal.timeout(5000)`) | OPT-OUT | Removed 2026-10-13 (quick 261013-vh0, review WR-01): the site no longer calls Discord |
+| Malformed body (non-JSON, non-integer or negative counts) | OPT-OUT | Removed 2026-10-13 (quick 261013-vh0, review WR-01): the site no longer calls Discord |
+| `DISCORD_FETCH=0` offline switch | OPT-OUT | Removed 2026-10-13 (quick 261013-vh0, review WR-01): the site no longer calls Discord |
 | `with_expiration` query parameter / `expires_at` field | OPT-OUT | The invite is permanent (`expires_at: null`, tested); expiry is never shown |
 | `guild_scheduled_event_id` query parameter / `guild_scheduled_event` field | OPT-OUT | No event content on the site (Event markup and hand-maintained calendars are out of scope; bot calendar is ENG-04, v2) |
 | `inviter` object (user id, username, avatar) | OPT-OUT | Privacy: personal user data is never read or rendered (ROST-03 spirit, T-04-11) |
-| `guild` object (name, icon, banner, splash, description, features, vanity code, nsfw level) | OPT-OUT | Not rendered; clan name and branding come from `site.js`; avoids publishing server internals |
+| `guild` object (name, icon, banner, description, features) | OPT-OUT | Not rendered; clan name and branding come from `site.js`; avoids publishing server internals |
 | `channel` object (id, name, type) | OPT-OUT | Internal channel names are not public site content |
 | `profile` / guild profile fields | OPT-OUT | Not needed for the badge; not rendered |
 | `code` and `type` fields of the response | OPT-OUT | The request already uses the configured code; the response echo is ignored |
