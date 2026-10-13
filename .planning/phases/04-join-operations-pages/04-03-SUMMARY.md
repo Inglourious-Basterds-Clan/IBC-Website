@@ -198,6 +198,10 @@ None. `DISCORD_FETCH=0` is optional, for offline builds. Plan 04-08 documents it
 - Plan 04-07 must keep `.recruitment-cta-group` (button + badge) together when it trims the recruitment section.
 - Assumptions A2 (no rate limit on single anonymous GETs) and A3 (a 429 without CORS may log a console error) stay open for Phase 5.
 
+## Self-Check: PASSED
+
+All four created files exist. Commits 4af32ee, 8287acb, 60a9791, 72b019f and 4ffda61 are on HEAD. `npm test` passes 320/320. `SITE_URL=https://guard.example npm run build` ends with check-seo OK and check-perf OK.
+
 ---
 *Phase: 04-join-operations-pages*
 *Completed: 2026-10-13*
