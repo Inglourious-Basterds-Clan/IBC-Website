@@ -81,17 +81,55 @@ function homeGraph(base, { extraNodes = [], drop } = {}) {
   return JSON.stringify({ "@context": "https://schema.org", "@graph": nodes });
 }
 
+// The 04-01 BreadcrumbList node for a subpage: Start (the home URL) > name (the page), items
+// absolute under base.
+function breadcrumbNode(base, url, name) {
+  return {
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Start", item: base },
+      { "@type": "ListItem", position: 2, name, item: base + url.slice(1) },
+    ],
+  };
+}
+
+// One JSON-LD @graph holding nodes.
+function graphOf(nodes) {
+  return JSON.stringify({ "@context": "https://schema.org", "@graph": nodes });
+}
+
+// The 04-01 subpage graph: the BreadcrumbList, then extraNodes (a FAQPage on /jak-dolaczyc/).
+function breadcrumbGraph(base, url, name, extraNodes = []) {
+  return graphOf([breadcrumbNode(base, url, name), ...extraNodes]);
+}
+
+// The 04-01 visible trail with root-relative hrefs (valid for the root fixture base).
+function breadcrumbNav(url, name) {
+  return `<nav class="breadcrumbs" aria-label="Ścieżka nawigacji">
+  <ol>
+    <li><a href="/">Start</a></li>
+    <li><a href="${url}" aria-current="page">${name}</a></li>
+  </ol>
+</nav>`;
+}
+
 // A minimal page that passes every gate rule implemented so far. url is the page.url ("/", "/o-nas/").
 // head replaces the default head lines; noindex defaults to true (a preview page).
 // title defaults to a title unique per url; description defaults to a non-empty one on
 // indexable urls and none elsewhere (D-04). null leaves the tag out. og overrides the
-// share tags (shareLines). jsonLd is the text of one ld+json script, added after the head
-// lines; it defaults to homeGraph on the home page and none elsewhere (G5); null leaves it out.
-function validPage(base, url, { canonical, noindex = true, head, title, description, og, jsonLd } = {}) {
+// share tags (shareLines). breadcrumb is the page's trail name (G11); it defaults to "Fixture"
+// on indexable non-home urls and null elsewhere, and when set the body starts with
+// breadcrumbNav. jsonLd is the text of one ld+json script, added after the head lines; it
+// defaults to homeGraph on the home page, breadcrumbGraph when a breadcrumb is set and none
+// elsewhere (G5, G11); null leaves it out. body is the markup after the trail (default an h1).
+function validPage(base, url, { canonical, noindex = true, head, title, description, og, jsonLd, breadcrumb, body } = {}) {
   const href = canonical === undefined ? base + url.slice(1) : canonical;
   const pageTitle = title === undefined ? `Fixture ${url}` : title;
   const pageDescription = description === undefined ? (isIndexableUrl(url) ? `Opis strony ${url}` : null) : description;
-  const pageJsonLd = jsonLd === undefined ? (url === "/" ? homeGraph(base) : null) : jsonLd;
+  const pageBreadcrumb = breadcrumb === undefined ? (isIndexableUrl(url) && url !== "/" ? "Fixture" : null) : breadcrumb;
+  const defaultJsonLd = url === "/" ? homeGraph(base) : pageBreadcrumb !== null ? breadcrumbGraph(base, url, pageBreadcrumb) : null;
+  const pageJsonLd = jsonLd === undefined ? defaultJsonLd : jsonLd;
+  const pageBody = (pageBreadcrumb === null ? "" : breadcrumbNav(url, pageBreadcrumb)) + (body ?? "<h1>Fixture</h1>");
   const lines = [
     ...(head ?? [
       ...(pageTitle === null ? [] : [`<title>${pageTitle}</title>`]),
@@ -107,7 +145,7 @@ function validPage(base, url, { canonical, noindex = true, head, title, descript
 <head>
   ${lines.join("\n  ")}
 </head>
-<body><h1>Fixture</h1></body>
+<body>${pageBody}</body>
 </html>
 `;
 }
@@ -523,6 +561,132 @@ test("G5 home page graph without the WebSite node", () => {
   const page = validPage(fixtureBase, "/", { jsonLd: homeGraph(fixtureBase, { drop: "WebSite" }) });
   const problems = check("g5-no-website", { "index.html": page });
   assert.deepEqual(g5Problems(problems), ["index.html: G5 home page lacks Organization + WebSite JSON-LD"]);
+});
+
+// G11 fixtures (SEO-06, D-17): each breaks the trail or the BreadcrumbList of one page.
+const aboutUrl = fixtureBase + "about/";
+
+// checkSite on a fixture whose /about/ page uses these validPage options.
+function g11About(name, options) {
+  return check(name, { "about/index.html": validPage(fixtureBase, "/about/", options) });
+}
+
+// An /about/ BreadcrumbList node with change(node) applied, as a one-node graph.
+function aboutBreadcrumbs(change) {
+  const node = breadcrumbNode(fixtureBase, "/about/", "Fixture");
+  change(node);
+  return graphOf([node]);
+}
+
+test("G11 indexable subpage without a BreadcrumbList", () => {
+  const problems = g11About("g11-missing", { jsonLd: null });
+  assertProblem(problems, "about/index.html: G11 missing BreadcrumbList JSON-LD on an indexable subpage (SEO-06)");
+});
+
+test("G11 two BreadcrumbList nodes", () => {
+  const node = breadcrumbNode(fixtureBase, "/about/", "Fixture");
+  const problems = g11About("g11-two", { jsonLd: graphOf([node, node]) });
+  assertProblem(problems, "about/index.html: G11 2 BreadcrumbList nodes, expected exactly one");
+});
+
+test("G11 one-item trail", () => {
+  const jsonLd = aboutBreadcrumbs((node) => node.itemListElement.splice(1));
+  assertProblem(g11About("g11-one-item", { jsonLd }), "about/index.html: G11 itemListElement must list at least 2 ListItems, found 1");
+});
+
+test("G11 positions out of order", () => {
+  const jsonLd = aboutBreadcrumbs((node) => {
+    node.itemListElement[0].position = 2;
+    node.itemListElement[1].position = 1;
+  });
+  const problems = g11About("g11-positions", { jsonLd });
+  assertProblem(problems, "about/index.html: G11 breadcrumb item 1 has position 2, expected 1");
+  assertProblem(problems, "about/index.html: G11 breadcrumb item 2 has position 1, expected 2");
+});
+
+test("G11 empty breadcrumb name", () => {
+  const jsonLd = aboutBreadcrumbs((node) => {
+    node.itemListElement[1].name = " ";
+  });
+  assertProblem(g11About("g11-empty-name", { jsonLd }), "about/index.html: G11 breadcrumb item 2 has an empty name");
+});
+
+test("G11 relative breadcrumb item", () => {
+  const jsonLd = aboutBreadcrumbs((node) => {
+    node.itemListElement[1].item = "/about/";
+  });
+  const problems = g11About("g11-relative", { jsonLd });
+  assertProblem(problems, `about/index.html: G11 breadcrumb item 2 item "/about/" is not an absolute URL under ${fixtureBase}`);
+});
+
+test("G11 breadcrumb item on a foreign host", () => {
+  const jsonLd = aboutBreadcrumbs((node) => {
+    node.itemListElement[1].item = "https://evil.example/about/";
+  });
+  const problems = g11About("g11-foreign", { jsonLd });
+  assertProblem(problems, `about/index.html: G11 breadcrumb item 2 item "https://evil.example/about/" is not an absolute URL under ${fixtureBase}`);
+});
+
+test("G11 first breadcrumb item is not the home URL", () => {
+  const jsonLd = aboutBreadcrumbs((node) => {
+    node.itemListElement[0].item = aboutUrl;
+  });
+  const problems = g11About("g11-first", { jsonLd });
+  assertProblem(problems, `about/index.html: G11 first breadcrumb item is "${aboutUrl}", expected the home URL "${fixtureBase}"`);
+});
+
+test("G11 last breadcrumb item is not the canonical", () => {
+  const jsonLd = aboutBreadcrumbs((node) => {
+    node.itemListElement[1].item = fixtureBase + "other/";
+  });
+  const problems = g11About("g11-last", { jsonLd });
+  assertProblem(problems, `about/index.html: G11 last breadcrumb item is "${fixtureBase}other/", expected the canonical "${aboutUrl}"`);
+});
+
+test("G11 BreadcrumbList without a visible trail", () => {
+  const problems = g11About("g11-no-nav", { breadcrumb: null, jsonLd: breadcrumbGraph(fixtureBase, "/about/", "Fixture") });
+  assertProblem(problems, 'about/index.html: G11 missing visible <nav class="breadcrumbs"> (SEO-06)');
+});
+
+test("G11 visible link text differs from the BreadcrumbList name", () => {
+  const page = validPage(fixtureBase, "/about/").replace(">Start</a>", ">Home</a>");
+  const problems = check("g11-text", { "about/index.html": page });
+  assertProblem(problems, 'about/index.html: G11 visible breadcrumb 1 text "Home" differs from the BreadcrumbList name "Start"');
+});
+
+test("G11 visible href differs from the BreadcrumbList item", () => {
+  const page = validPage(fixtureBase, "/about/").replace('href="/about/"', 'href="/inne/"');
+  const problems = check("g11-href", { "about/index.html": page });
+  assertProblem(
+    problems,
+    `about/index.html: G11 visible breadcrumb 2 href "/inne/" resolves to "${fixtureBase}inne/", expected the BreadcrumbList item "${aboutUrl}"`,
+  );
+});
+
+test("G11 visible trail with fewer links than the BreadcrumbList", () => {
+  const page = validPage(fixtureBase, "/about/").replace('<li><a href="/">Start</a></li>', "");
+  const problems = check("g11-link-count", { "about/index.html": page });
+  assertProblem(problems, "about/index.html: G11 visible breadcrumbs show 1 links, the BreadcrumbList has 2 items");
+});
+
+test("G11 home page with a BreadcrumbList (D-17)", () => {
+  const jsonLd = homeGraph(fixtureBase, { extraNodes: [breadcrumbNode(fixtureBase, "/about/", "Fixture")] });
+  const problems = check("g11-home-list", { "index.html": validPage(fixtureBase, "/", { jsonLd }) });
+  assertProblem(problems, "index.html: G11 home page must not carry a BreadcrumbList (D-17)");
+});
+
+test("G11 home page with a visible trail (D-17)", () => {
+  const problems = check("g11-home-nav", { "index.html": validPage(fixtureBase, "/", { breadcrumb: "Start" }) });
+  assert.deepEqual(problems, ["index.html: G11 home page must not show breadcrumbs (D-17)"]);
+});
+
+test("G11 exempts 404.html and /_dev/ pages without a trail", () => {
+  const problems = check("g11-exempt", {
+    "404.html": validPage(fixtureBase, "/404.html"),
+    "_dev/x/index.html": validPage(fixtureBase, "/_dev/x/"),
+  });
+  assert.ok(!problems.some((problem) => problem.includes(": G11 ")), problems.join("\n"));
+  assert.deepEqual(problems, []);
 });
 
 test("G6 meta keywords", () => {
