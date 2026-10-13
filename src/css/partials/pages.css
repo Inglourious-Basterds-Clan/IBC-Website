@@ -135,6 +135,144 @@
   margin-bottom: 8px;
 }
 
+/* Operations page (CONT-03, CONT-04, D-10, D-12) */
+/* Schedule and mission types share one item structure: li > h3 + p */
+.schedule-list,
+.type-list {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+  gap: 24px;
+}
+
+.schedule-list li,
+.type-list li {
+  border-left: 2px solid var(--border-color);
+  padding-left: 16px;
+}
+
+.schedule-list h3,
+.type-list h3 {
+  font-size: 1rem;
+  line-height: 1.2;
+  color: var(--accent-color);
+  margin-bottom: 4px;
+}
+
+/* Eras as small HUD tags; the text may wrap, so a long tag never overflows at 320 px */
+.era-list {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.era-list li {
+  font-family: var(--font-hud);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+  padding: 4px 8px;
+}
+
+.era-list + p {
+  margin-top: 16px;
+}
+
+/* Evening timeline: the accent line and the time stamps carry the structure, no node markers */
+.evening-timeline {
+  list-style: none;
+  border-left: 2px solid var(--accent-color);
+  padding-left: 24px;
+}
+
+.evening-timeline li {
+  padding-bottom: 24px;
+}
+
+.evening-timeline li:last-child {
+  padding-bottom: 0;
+}
+
+.evening-time {
+  display: block;
+  font-family: var(--font-hud);
+  font-size: 0.85rem;
+  font-weight: 700;
+  line-height: 1.5;
+  color: var(--accent-color);
+  margin-bottom: 4px;
+}
+
+.evening-timeline h3 {
+  font-size: 1rem;
+  line-height: 1.2;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+/* "Najbliższe misje": deliberately listless (D-10), the Discord button below the text */
+.upcoming {
+  background: var(--bg-secondary);
+  border-left: 3px solid var(--accent-color);
+  padding: 24px;
+}
+
+.upcoming p {
+  margin-bottom: 24px;
+}
+
+.recaps-updated {
+  font-family: var(--font-hud);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+  margin-bottom: 24px;
+}
+
+/* Recap cards: 3 columns in the 1200 px container (the 380 px sizes slot), 2 from about 664 px, 1 below */
+.recap-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+  gap: 24px;
+}
+
+/* Not interactive: no pointer, no zoom, no link; the only hover is the existing .hud-border one */
+.recap-card {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.recap-card img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+}
+
+.recap-body {
+  padding: 24px;
+}
+
+.recap-meta {
+  font-family: var(--font-hud);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.recap-body h3 {
+  font-size: 1rem;
+  line-height: 1.2;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
 /* The one mobile block of this partial: the 99 px mobile header needs a larger clearance (PD-1) */
 @media (max-width: 768px) {
   .breadcrumbs {
@@ -145,7 +283,9 @@
     column-gap: 8px;
   }
 
-  .faq-item {
+  .faq-item,
+  .upcoming,
+  .recap-body {
     padding: 16px;
   }
 }
