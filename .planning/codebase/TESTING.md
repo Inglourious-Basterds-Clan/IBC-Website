@@ -1,306 +1,176 @@
 ---
-last_mapped_commit: 63f2ad5fb842c140afe59fe486169f7da112193b
-last_mapped_at: 2026-10-02
+last_mapped_commit: 498f19eefca8ec513547073c1d87eb4bb2a09b7d
+last_mapped_at: 2026-10-13
 ---
 # Testing Patterns
 
-**Analysis Date:** 2026-10-02
+**Analysis Date:** 2026-10-13
 
 ## Test Framework
 
-**Status:** Not implemented
+**Runner:**
+- Node built-in test runner `node:test` (Node >= 22.19, `.nvmrc`)
+- Config: none; script in `package.json`: `node --test "test/*.test.js"`
+- `pretest` runs `scripts/warm-images.js` to pre-encode images into `.cache/img/`
 
-**Current State:**
-- No test framework configured (no Jest, Vitest, Mocha, or similar)
-- No test runner installed or available
-- No test files present in codebase
-- No package.json to manage test dependencies
+**Assertion Library:**
+- `node:assert/strict`
 
-**Suggested Approach for Future Implementation:**
-- For vanilla JavaScript frontend: Vitest or Jest with jsdom
-- For accessibility testing: Testing Library or Playwright
-- For E2E testing: Cypress or Playwright would test the full experience
+**Run Commands:**
+
+```bash
+npm test                                   # All tests (~430 across 24 files)
+node --test test/seo-gate.test.js          # Single file
+SITE_URL=https://example.org npm run build # Build + post-build gates (check-seo, check-perf)
+```
+
+In Git Bash set `MSYS_NO_PATHCONV=1` when passing `PATH_PREFIX=/IBC-Website/` on the command line. Test builds spawn Eleventy without a shell, so tests are unaffected.
 
 ## Test File Organization
 
-**Current Location:** N/A - no test files exist
+**Location:**
+- Separate `test/` directory, flat. Binary fixtures in `test/fixtures/` (`montserrat-ascii.var.woff2`).
 
-**Recommended Pattern (if testing is added):**
-- Locate tests co-located with source: `js/main.test.js` next to `js/main.js`
-- Naming convention: `*.test.js` or `*.spec.js` (recommend `.test.js` for consistency)
-- Structure tests in single file organized by feature section
+**Naming:**
+- `test/<area>.test.js`; helpers without the `.test` suffix (`test/helpers.js`)
 
-**Example structure (if implemented):**
+**Structure:**
 
 ```
-js/
-├── main.js                    # Source code
-└── main.test.js              # Tests for main.js
-css/
-├── style.css                 # Styles
-└── style.test.js            # Future CSS-in-JS or computed style tests (not typical)
+test/
+├── helpers.js           # build(), runBuild(), cleanEnv(), read(), attrValues(), repoRoot
+├── build.test.js        # SITE_URL guard, env handling
+├── pages.test.js        # rendered page content
+├── seo*.test.js         # SEO output + gate (seo-gate.test.js is largest, ~930 lines)
+├── perf-gate.test.js    # lib/check-perf.js rules
+├── client.test.js       # browser modules vs stub DOM
+├── modules.test.js      # loader map / module contract
+├── discord.test.js      # lib/discord.js + badge module
+├── workflow.test.js     # .github/workflows/pages.yml read as text
+├── deps.test.js, docs.test.js, facts.test.js  # repo hygiene contracts
+└── fixtures/
 ```
 
 ## Test Structure
 
-**Current:** No tests present
-
-**Recommended Structure (if testing is added):**
-
-For a Vitest setup, tests would follow this pattern based on the code organization:
+**Suite Organization:**
+Flat top-level `test()` calls (no `describe`). File header comment names the requirement IDs covered. Long files are split by `/* --- SECTION --- */` comments.
 
 ```javascript
-describe('Mobile Menu', () => {
-  beforeEach(() => {
-    // Setup DOM elements
-  });
+// CONT-07 checks (D-14..D-16): ...
+import { test, before, afterEach } from "node:test";
+import assert from "node:assert/strict";
+import { build, read, attrValues } from "./helpers.js";
 
-  it('should toggle menu on button click', () => {
-    // Test initMobileMenu() behavior
-  });
-
-  it('should close menu when link is clicked', () => {
-    // Test link click handler
-  });
-
-  it('should update aria-expanded attribute', () => {
-    // Test accessibility
-  });
+const out = {};
+before(() => {
+  out.root = build("discord-root");
+  out.prefix = build("discord-prefix", { SITE_URL: "https://guard.example", PATH_PREFIX: "/IBC-Website/" });
 });
 
-describe('Lightbox', () => {
-  beforeEach(() => {
-    // Setup gallery items and lightbox DOM
-  });
-
-  it('should open lightbox on item click', () => {
-    // Test openLightbox() behavior
-  });
-
-  it('should navigate between images', () => {
-    // Test showNext/showPrev
-  });
-
-  it('should close on ESC key', () => {
-    // Test keyboard handler
-  });
-});
+test("terminal prints the invite from data-discord-url without its scheme", (t) => { ... });
 ```
 
-**Patterns Observed in Code (to test):**
-- Event listeners and their handlers
-- DOM manipulation (classList, style properties, visibility)
-- State management via closures (e.g., `currentIndex` in lightbox)
-- Keyboard event handling (ArrowRight, ArrowLeft, Escape, Enter, Space)
-- Intersection Observer triggers (recruitment terminal on scroll)
-- Timed animations (setTimeout sequences in boot sequence)
+**Patterns:**
+- Setup: real Eleventy builds in `before()` via `build(name, env)` into `_test/<name>/`. Prefix `name` with the suite name; test files run in parallel processes.
+- Test both a root build and a path-prefix build (`PATH_PREFIX: "/IBC-Website/"`) when output URLs matter.
+- Teardown: `afterEach` deletes stub globals (`document`, `window`, `IntersectionObserver`) and restores `globalThis.fetch`.
+- Assertions: `assert.equal`, `assert.ok(cond, "message")`, `assert.match`, `assert.throws`; always give a failure message that names what is missing.
+- Test names are plain-English statements, often ending with the decision ID: `"scroll-spy on home manages only the hash links, never the page links (D-07, Pitfall 3)"`.
 
 ## Mocking
 
-**Current Strategy:** N/A - no test framework
+**Framework:** Hand-written stubs plus `node:test` built-in `t.mock.timers`.
 
-**What Would Need Mocking (if testing is added):**
-
-**DOM Elements:**
-- Would use jsdom or test library's test container
-- Example: `document.getElementById('lightbox')` needs to be mocked DOM element
-- Buttons, inputs, and interactive elements need synthetic events
-
-**Browser APIs:**
-- `IntersectionObserver` - would be mocked for unit tests, real in E2E tests
-- `setTimeout` - would use fake timers (vitest.useFakeTimers())
-- `localStorage` - could be mocked if using session storage in future
-- `window.matchMedia` - for responsive design testing
-
-**Events:**
-- Click events: synthetic `click()` method or `fireEvent.click()`
-- Keyboard events: synthetic with KeyboardEvent
-- Scroll events: manually trigger visibility detection
-
-**What NOT to Mock:**
-- CSS/styling (hard to test in unit tests; use E2E for visual verification)
-- DOM structure (use actual markup structure)
-- Event propagation (test with real or realistic synthetic events)
-
-## Fixtures and Factories
-
-**Current:** Not used
-
-**Would Be Needed For:**
-- Repeatable DOM setups for each test suite
-- Gallery item fixtures (image sources, titles, descriptions)
-- Sample event objects (click events, keyboard events)
-
-**Recommended Location:** Separate file or helper function
-
-**Example (if implemented):**
+**Patterns:**
 
 ```javascript
-// utils/test-fixtures.js
-export function createMockGalleryItems() {
-  return [
-    { src: 'img1.jpg', title: 'Operation 1', desc: 'Description' },
-    { src: 'img2.jpg', title: 'Operation 2', desc: 'Description' },
-  ];
-}
-
-export function createMockDOMElement(selector) {
-  return document.querySelector(selector) || document.createElement('div');
+// Stub DOM on globalThis (test/client.test.js)
+function bootTerminal(t, discordUrl) {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  const env = installDom();
+  const consoleEl = createConsoleEl(discordUrl, env.recruitment);
+  terminal.init(consoleEl);
+  env.intersect(env.recruitment);   // fire the fake IntersectionObserver
+  t.mock.timers.runAll();
+  return consoleEl.children;
 }
 ```
 
+- Replace `globalThis.fetch` for network code and restore it in `afterEach` (`test/discord.test.js`)
+- Builds always run with `DISCORD_FETCH=0` (`runBuild` default) so no test hits Discord
+
+**What to Mock:**
+- Browser globals (DOM, `IntersectionObserver`, `window`), timers, `fetch`
+
+**What NOT to Mock:**
+- Eleventy itself: run real builds through `test/helpers.js`
+- Filesystem: write real fixture folders under `_test/`
+- Build env: use `cleanEnv(env)`, which strips `SITE_URL`, `PATH_PREFIX`, `INCLUDE_DEV_PAGES`, `ELEVENTY_RUN_MODE`, `ALLOW_LOCAL_SITE_URL`, `SITE_INDEXABLE`, `DISCORD_FETCH` from the inherited env. Add any new output-affecting env var to `buildEnvKeys`.
+
+## Fixtures and Factories
+
+**Test Data:**
+
+```javascript
+// test/seo-gate.test.js: one folder per problem, a valid site with one thing broken
+const fixtureSite = { url: "https://fixture.example", pathPrefix: "/", indexable: false };
+function writeFixture(name, files) {
+  const dir = join(repoRoot, "_test", "seo-gate-fixtures", name);
+  rmSync(dir, { recursive: true, force: true });
+  ...
+  return dir;
+}
+```
+
+- Byte-level factories for binary inputs (`pngHeader(width, height)` in `test/seo-gate.test.js`)
+- Use `.example` domains for fake URLs
+
+**Location:**
+- Generated: `_test/` (gitignored, rebuilt each run). Committed: `test/fixtures/`.
+
 ## Coverage
 
-**Requirements:** None enforced
+**Requirements:** None enforced; no coverage tool. Coverage is by requirement ID: each requirement/decision gets a named test.
 
-**Current Coverage:** 0% - no tests written
-
-**Recommended Coverage Targets (if implemented):**
-- Statements: 70%+ (covers main interactive features)
-- Branches: 60%+ (keyboard shortcuts, conditional rendering)
-- Functions: 75%+ (all event handlers)
-- Lines: 70%+ (key paths through code)
-
-**High Priority Features to Test:**
-1. Mobile menu toggle and close behavior
-2. Lightbox navigation and close actions
-3. Scroll spy navigation highlighting
-4. Keyboard navigation (arrows, ESC)
-5. Intersection Observer trigger for terminal boot
-
-**View Coverage (if implemented):**
+**View Coverage:**
 
 ```bash
-vitest --coverage
-
-# or
-
-jest --coverage
+node --test --experimental-test-coverage "test/*.test.js"
 ```
 
 ## Test Types
 
-**Unit Tests (if implemented):**
-- Scope: Individual function behavior in isolation
-- Approach: Mock DOM elements, test function logic directly
-- Example: Test `showNext()` correctly increments index with modulo wrapping
-- Location: `js/main.test.js` with describe blocks per feature
-- Focus: Business logic, edge cases, error conditions
+**Unit Tests:**
+- Pure `lib/` functions (`lib/dates.js`, `lib/discord.js`, `lib/woff2.js`, `lib/schema.js`), including `assert.throws` on bad input
 
-**Integration Tests (if implemented):**
-- Scope: Multiple components working together (menu + navigation, gallery + lightbox)
-- Approach: Set up real DOM structure, trigger real events
-- Example: Click gallery item → lightbox opens → keyboard nav works
-- Would require: jsdom + event simulation
+**Integration Tests:**
+- Full Eleventy builds inspected as HTML text (regex helpers `attrValues`, `block` from `lib/html.js`)
+- Gate tests: run `checkSite` on fixtures and spawn `scripts/check-seo.js` / `scripts/check-perf.js` to check exit codes and `.rejected` handling
+- Contract tests on repo files: workflow YAML, dependencies, docs, `FACTS.md`
 
-**E2E Tests (if implemented - recommended):**
-- Framework: Cypress or Playwright (better for this use case)
-- Scope: Full user workflows from click to visual result
-- Example: User clicks hamburger menu → menu opens visually → user clicks nav link → page scrolls
-- Verification: Visual, accessibility, page state
-- Would be most valuable for this project's interactive features
+**E2E Tests:**
+- Not used (no browser). Visual/UX checks are human UAT items in `.planning/`.
 
-**Current Testing Approach:**
-- Manual testing via browser
-- No automated verification
+## Common Patterns
 
-## Common Patterns to Test
-
-**Async Testing (if needed):**
-Would use for setTimeout sequences (e.g., recruitment terminal boot sequence that writes messages with delays):
+**Async Testing:**
 
 ```javascript
-// Would test the timing and sequence of writeToConsole calls
-it('should write boot sequence messages in order', async () => {
-  vi.useFakeTimers();
-  // Trigger runBootSequence
-  // Verify message 1 written
-  vi.advanceTimersByTime(600);
-  // Verify message 2 written
-  // etc.
-  vi.runAllTimers();
+test("...", async () => {
+  await initFeatures(stubRoot, loaders);
+  assert.equal(...);
 });
 ```
 
-**Event Testing (most common in this codebase):**
+**Error Testing:**
 
 ```javascript
-// Would test click handlers
-it('should open lightbox when gallery item is clicked', () => {
-  const item = document.querySelector('.gallery-item');
-  fireEvent.click(item);
-  expect(document.getElementById('lightbox')).toBeVisible();
-});
-
-// Would test keyboard events
-it('should navigate with arrow keys', () => {
-  // Open lightbox first
-  fireEvent.keyDown(document, { key: 'ArrowRight' });
-  // Verify next image shown
-});
+assert.throws(() => formatPlDate("2026-02-30"), /not a real calendar date/);
+const { result } = runBuild("build-no-url", {});   // inspect a failing build without asserting
+assert.notEqual(result.status, 0);
 ```
-
-**Error Testing (guard clauses):**
-
-```javascript
-// Would test early returns and guard clauses
-it('should not crash if lightbox element missing', () => {
-  document.getElementById('lightbox').remove();
-  // Trigger lightbox init
-  expect(() => initLightbox()).not.toThrow();
-});
-```
-
-## Missing Test Infrastructure
-
-**What Would Need to Be Set Up:**
-
-1. **Package Manager:** Add `package.json` with scripts:
-   ```json
-   {
-     "scripts": {
-       "test": "vitest",
-       "test:watch": "vitest --watch",
-       "test:coverage": "vitest --coverage"
-     }
-   }
-   ```
-
-2. **Test Configuration:** Create `vitest.config.js`:
-   ```javascript
-   export default {
-     environment: 'jsdom',
-     globals: true,
-   };
-   ```
-
-3. **Test Utilities:** Setup file for DOM cleanup and common helpers
-
-4. **CI/CD Integration:** GitHub Actions workflow to run tests on push (if added to repo)
-
-## Current Risk - No Test Coverage
-
-**Untested Behaviors:**
-- Mobile menu opening/closing
-- Lightbox image navigation
-- Keyboard shortcuts (arrows, ESC, Enter, Space)
-- Accessibility attribute updates
-- Scroll spy highlighting
-- Terminal boot sequence timing
-- Easter egg overlay
-
-**Potential Issues Without Tests:**
-- Regressions when modifying event handlers
-- Accessibility breaking silently
-- Browser compatibility issues
-- Mobile interaction bugs
-- Timing issues in animations/sequences
-
-**Recommendations:**
-- Add E2E tests with Cypress first (easier setup for vanilla JS, better for this use case)
-- Then add unit tests for complex logic like index wrapping in lightbox
-- Focus on interactive features and keyboard navigation as highest priority
 
 ---
 
-*Testing analysis: 2026-10-02*
+*Testing analysis: 2026-10-13*

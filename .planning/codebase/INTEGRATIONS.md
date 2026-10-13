@@ -1,117 +1,83 @@
 ---
-last_mapped_commit: 63f2ad5fb842c140afe59fe486169f7da112193b
-last_mapped_at: 2026-10-02
+last_mapped_commit: 498f19eefca8ec513547073c1d87eb4bb2a09b7d
+last_mapped_at: 2026-10-13
 ---
 # External Integrations
 
-**Analysis Date:** 2026-10-02
+**Analysis Date:** 2026-10-13
 
 ## APIs & External Services
 
-**Chat & Community:**
-- Discord - Community platform and recruitment hub
-  - Invite link: `https://discord.gg/DhJwkeehJK`
-  - Reference: `index.html:174, 230, 265`
-  - Purpose: Main recruitment channel, community discussion, voice comms coordination
-  - No API integration (link-based only)
+**Discord (community funnel + member badge):**
+- Invite link `https://discord.gg/DhJwkeehJK` - the only literal copy lives in `site.discord.invite` (`src/_data/site.js`)
+- Discord Invite API `https://discord.com/api/v10/invites/<code>?with_counts=true` (no auth)
+  - Build time: `fetchInviteCounts()` in `lib/discord.js` (global `fetch`, 5 s `AbortSignal.timeout`), called once per process from `src/_data/discordBadge.js`. Any failure falls back to `site.discord.membersBackstop` (240) so the build never breaks. `DISCORD_FETCH=0` disables it (tests).
+  - Client side: `src/js/modules/discord-badge.js` fetches the same URL live (`credentials: 'omit'`, `referrerPolicy: 'no-referrer'`) to show member/online counts; baked fallback text stays if it fails.
+  - Only `approximate_member_count` / `approximate_presence_count` are read.
+
+**Social profiles (links only):**
+- YouTube `https://www.youtube.com/@IBC_A3`, Facebook `https://www.facebook.com/IBCA3` - `site.social` in `src/_data/site.js`, rendered in `src/_includes/partials/footer.njk`
+
+**Schema.org:**
+- JSON-LD vocabulary only (`lib/schema.js`), no network calls
+
+**CDNs:** None. Fonts (`src/fonts/`) and icons (`lib/icons.js` inline SVG) are self-hosted.
 
 ## Data Storage
 
 **Databases:**
-- Not detected - No backend database used
+- None. Content is in JS data files under `src/_data/`.
 
 **File Storage:**
-- Local filesystem only
-- Image assets in `assets/` directory
-- Formats: PNG, JPG
-- Key images:
-  - Logo: `assets/logo.png`
-  - Hero backgrounds: `assets/hero.jpg`, `assets/hero-bg.jpg`
-  - Gallery: `assets/op_patrol.jpg`, `assets/jo_1967.png`, `assets/cos.png`, `assets/funny.png`
-  - Additional: `assets/patrol.jpg`, `assets/sniper.jpg`
+- Local filesystem only: source images `src/images/`, static assets `src/assets/` (incl. `assets/og/og-default-v1.jpg`), processed image cache `.cache/img/`
 
 **Caching:**
-- Browser caching via HTTP headers (not configured in this codebase)
-- No application-level caching layer
-
-## Content Delivery
-
-**CDN & Hosted Resources:**
-
-- **Google Fonts** - Font delivery
-  - Endpoint: `https://fonts.googleapis.com`
-  - Secondary: `https://fonts.gstatic.com` (preconnect)
-  - Fonts loaded: Inter, Montserrat, Share Tech Mono
-  - Reference: `index.html:14-15`
-
-- **Font Awesome CDN** - Icon library
-  - Endpoint: `https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css`
-  - Version: 6.0.0
-  - Reference: `index.html:16`
-  - Icons: Discord, YouTube, Facebook
+- Build-side `.cache/img/` content-addressed image cache (`lib/images.js`)
+- Browser cache busting via `?v=` hashes (`cssHash` from `lib/css.js`, `jsHash` from `lib/js.js`)
 
 ## Authentication & Identity
 
 **Auth Provider:**
-- None detected - Site is public with no user authentication
-- Discord OAuth not yet implemented (no backend to handle it)
-- Future potential: Discord OAuth for recruitment workflow
+- None. No user accounts or login.
 
 ## Monitoring & Observability
 
 **Error Tracking:**
-- None detected
-- No Sentry, Rollbar, or similar
+- None
 
 **Logs:**
-- Browser console only (no external logging)
-- Terminal output simulated in recruitment section (`js/main.js:141-181`)
+- Build-time console output only; quality gates `scripts/check-seo.js` and `scripts/check-perf.js` fail the build on violations
 
-**Analytics:**
-- Not detected - No Google Analytics, Plausible, or similar tracking
+## CI/CD & Deployment
 
-## Social Media Integration
+**Hosting:**
+- Preview: GitHub Pages (`https://inglourious-basterds-clan.github.io/IBC-Website/`), always noindex
+- Final: IIS host (config via generated `/web.config` from `src/web.config.njk`), built locally with `SITE_URL`/`SITE_INDEXABLE=1`
 
-**Social Links (no direct API integration):**
-- Discord: `https://discord.gg/DhJwkeehJK`
-- YouTube: `https://www.youtube.com/@IBC_A3`
-- Facebook: `https://www.facebook.com/IBCA3`
-- Reference: `index.html:265-267`
-- Purpose: Social proof, community engagement links
+**CI Pipeline:**
+- GitHub Actions `.github/workflows/pages.yml`: on PR/push/dispatch runs `npm ci`, `npm test`, `npm run build`; push to `main` uploads `_site/` and deploys with `actions/deploy-pages`. Actions pinned to commit SHAs; `.github/dependabot.yml` bumps them.
 
-## SEO & Metadata
+## Environment Configuration
 
-**Structured Data:**
-- JSON-LD schema (SportsTeam type)
-- Location: `index.html:26-35`
-- Fields: Organization name, sport, founding date, description
-- Purpose: Search engine optimization, rich snippets
+**Required env vars:**
+- `SITE_URL` (production builds), `PATH_PREFIX` (subfolder hosting)
+- Optional: `SITE_INDEXABLE`, `ALLOW_LOCAL_SITE_URL`, `INCLUDE_DEV_PAGES`, `DISCORD_FETCH`
 
-**Open Graph & Meta Tags:**
-- og:title, og:description, og:image, og:type
-- Location: `index.html:19-23`
-- Purpose: Social media sharing preview
+**Secrets location:**
+- None required. No API keys; Discord invite API is public. CI uses only GitHub's built-in OIDC (`id-token: write`) for Pages deploy.
 
 ## Webhooks & Callbacks
 
 **Incoming:**
-- None detected
+- None
 
 **Outgoing:**
-- None detected
-- Discord invite is link-only (no webhook events)
+- None (only read-only GET to the Discord invite API)
 
-## Email Integration
+## Planned
 
-**Email Services:**
-- Not detected
-- No contact form or email submission
-
-## Payment & Commerce
-
-**Payment Processing:**
-- Not applicable - Site is informational only
+- Roster integration depending on an external Discord bot's data format (per project constraints) - not implemented
 
 ---
 
-*Integration audit: 2026-10-02*
+*Integration audit: 2026-10-13*

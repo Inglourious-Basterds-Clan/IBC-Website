@@ -1,213 +1,198 @@
 ---
-last_mapped_commit: 63f2ad5fb842c140afe59fe486169f7da112193b
-last_mapped_at: 2026-10-02
+last_mapped_commit: 498f19eefca8ec513547073c1d87eb4bb2a09b7d
+last_mapped_at: 2026-10-13
 ---
-<!-- refreshed: 2026-10-02 -->
+<!-- refreshed: 2026-10-13 -->
 
 # Architecture
 
-**Analysis Date:** 2026-10-02
+**Analysis Date:** 2026-10-13
 
 ## System Overview
 
 ```text
-┌─────────────────────────────────────────────────────────────┐
-│                   HTML Structure Layer                       │
-│              `index.html` - Single Page Document             │
-│  Header | Hero | About | Gallery | Recruitment | Footer     │
-└──────────────────────┬──────────────────────────────────────┘
-                       │
-         ┌─────────────┼─────────────┐
-         │             │             │
-         ▼             ▼             ▼
-┌──────────────┐ ┌──────────────┐ ┌──────────────┐
-│   CSS Layer  │ │ JavaScript   │ │   Assets     │
-│ `css/        │ │ `js/main.js` │ │ `assets/`    │
-│  style.css`  │ │              │ │              │
-└──────────────┘ └──────────────┘ └──────────────┘
-                       │
-         ┌─────────────┴─────────────┐
-         │                           │
-         ▼                           ▼
-┌──────────────────┐      ┌──────────────────┐
-│  DOM Selectors & │      │  Event Listeners │
-│  Event Handling  │      │  (Click, Scroll, │
-│  `js/main.js`    │      │   Keyboard)      │
-└──────────────────┘      └──────────────────┘
-         │
-         ▼
-┌─────────────────────────────────────────┐
-│    User-Visible Updates & Interactions  │
-│  (Modal displays, navigation, scrolling)│
-└─────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────┐
+│                Build configuration (Node >=22.19, ESM)            │
+│  `eleventy.config.js`  +  `src/_data/site.js` (env -> site config) │
+└──────────────┬──────────────────────────┬────────────────────────┘
+               │                          │
+               ▼                          ▼
+┌────────────────────────────┐  ┌──────────────────────────────────┐
+│  Content + templates       │  │  Build-time library (`lib/`)     │
+│  `src/*.njk` pages         │  │  images.js (eleventy-img)        │
+│  `src/_data/*.js` data     │◄─┤  css.js (Lightning CSS bundle)   │
+│  `src/_includes/` layout   │  │  js.js (content hash), schema.js │
+│  `src/css/`, `src/js/`     │  │  seo.js, icons.js, dates.js,     │
+└──────────────┬─────────────┘  │  discord.js                      │
+               │ eleventy       └──────────────────────────────────┘
+               ▼
+┌──────────────────────────────────────────────────────────────────┐
+│  Static output `_site/` (HTML, css/style.css, js/, img/, assets/) │
+└──────────────┬───────────────────────────────────────────────────┘
+               ▼
+┌──────────────────────────────────────────────────────────────────┐
+│  Post-build gates: `scripts/check-seo.js` -> `scripts/check-perf.js`│
+│  rules in `lib/check-seo.js`, `lib/check-perf.js`; failure moves   │
+│  output to `_site.rejected/` (`lib/reject-output.js`)              │
+└──────────────┬───────────────────────────────────────────────────┘
+               ▼
+┌──────────────────────────────────────────────────────────────────┐
+│  Browser: `/js/main.js` loader -> `src/js/modules/*.js` by data-js │
+└──────────────────────────────────────────────────────────────────┘
 ```
 
 ## Component Responsibilities
 
 | Component | Responsibility | File |
 |-----------|----------------|------|
-| Mobile Menu | Toggle navigation on mobile devices, close on link click | `js/main.js` initMobileMenu() |
-| Lightbox Gallery | Display gallery images in fullscreen modal with navigation controls | `js/main.js` initLightbox() |
-| Recruitment Terminal | Simulate boot sequence and display recruitment status in terminal format | `js/main.js` initRecruitmentTerminal() |
-| Scroll Spy | Highlight active navigation link based on current scroll position | `js/main.js` initScrollSpy() |
-| Easter Egg Console | Display hidden decryption overlay with narrative content | `js/main.js` initEasterEgg() |
-| Page Styling | Apply tactical/HUD theme with dark colors, glows, and grid backgrounds | `css/style.css` |
+| Eleventy config | Filters, shortcodes, global data, passthrough, dev-page preprocessor | `eleventy.config.js` |
+| Site config | Single source of URL, pathPrefix, indexable flag, Discord invite, social links; validates env | `src/_data/site.js` |
+| Content data | Gallery, join page FAQ/steps, operations, navigation, Discord badge | `src/_data/*.js` |
+| Base layout | HTML shell, skip link, header/footer, module script with `?v=jsHash` | `src/_includes/layouts/base.njk` |
+| Head partial | Meta, canonical, OG, JSON-LD, robots noindex, stylesheet `?v=cssHash` | `src/_includes/partials/head.njk` |
+| Image pipeline | Encodes variants into `.cache/img/`, copied to `<output>/img/` | `lib/images.js` |
+| CSS bundle | Lightning CSS bundle of `src/css/style.css` + partials, hashed | `lib/css.js`, `src/css/style.11ty.js` |
+| JS version hash | sha256 over `src/js/**` for cache busting | `lib/js.js` |
+| JSON-LD | Organization/WebSite graph (home), BreadcrumbList/FAQPage (subpages) | `lib/schema.js` |
+| Index predicate | Which URLs are indexable (head, sitemap, gate share it) | `lib/seo.js` |
+| Icons | Inline SVG paths for `{% icon %}` shortcode | `lib/icons.js` |
+| SEO gate | Rules G0–G12 over build output | `lib/check-seo.js`, `scripts/check-seo.js` |
+| Perf gate | Rules P0–P11 + BUDGET over build output | `lib/check-perf.js`, `scripts/check-perf.js` |
+| Client loader | Maps `data-js` hooks to lazily imported modules | `src/js/main.js` |
+| Client features | menu, lightbox, terminal, scroll-spy, easter-egg, discord-badge, hash-redirect | `src/js/modules/*.js` |
 
 ## Pattern Overview
 
-**Overall:** Vanilla JavaScript Event-Driven Single Page Application (SPA)
+**Overall:** Static site generator (Eleventy 3) with data-driven Nunjucks templates, build-time asset pipelines, post-build validation gates, and progressive-enhancement ES modules in the browser.
 
 **Key Characteristics:**
-- No framework dependencies (pure vanilla JS)
-- DOM-based state management (visibility classes and inline styles)
-- Event listener attachment on DOMContentLoaded
-- Modular initialization functions for each feature
-- Responsive design with mobile-first approach
-- Dark tactical HUD-inspired visual theme
+- Single source of truth per fact: `src/_data/site.js` for URL/invite; `src/_data/join.js` feeds both visible FAQ and FAQPage JSON-LD.
+- Build-time code lives in `lib/` (never rendered by Eleventy); CLIs in `scripts/` only run, never imported.
+- Memoized per-build helpers (`getCssBundle`, `getJsHash`, `processImages`) reset in `eleventy.before`.
+- Builds fail loudly: invalid env, unknown icon, bad ISO date, gate violations all throw / exit 1.
+- No root-level legacy `index.html`/`css/`/`js/` remain; all source is under `src/`.
 
 ## Layers
 
-**HTML Structure Layer:**
-- Purpose: Define semantic page structure with sections for hero, about, gallery, recruitment
-- Location: `index.html` (root)
-- Contains: Navigation header, main content sections, footer, modal containers
-- Depends on: CSS for styling, JavaScript for interactivity
-- Used by: Browser renders to display page content
+**Configuration:**
+- Purpose: Environment-driven build settings
+- Location: `eleventy.config.js`, `src/_data/site.js`, `.nvmrc`, `package.json`
+- Depends on: env vars `SITE_URL`, `PATH_PREFIX`, `SITE_INDEXABLE`, `ALLOW_LOCAL_SITE_URL`, `INCLUDE_DEV_PAGES`, `DISCORD_FETCH`
+- Used by: every template, `lib/`, gates
 
-**CSS Visual Layer:**
-- Purpose: Apply dark tactical theme, responsive layout, animations, and visual effects
-- Location: `css/style.css`
-- Contains: CSS variables for colors, typography, grid backgrounds, scanline effects, component styling
-- Depends on: Google Fonts for typefaces (Inter, Montserrat, Share Tech Mono)
-- Used by: HTML elements through class/id selectors
+**Data:**
+- Purpose: Page content as JS modules
+- Location: `src/_data/`
+- Used by: templates, `lib/images.js` (imports `gallery.js`, `operations.js`)
 
-**JavaScript Interactivity Layer:**
-- Purpose: Handle user interactions and manage modal/menu states
-- Location: `js/main.js`
-- Contains: Five initialization functions for different features, event handlers
-- Depends on: DOM structure from index.html
-- Used by: Browser executes on DOMContentLoaded event
+**Templates:**
+- Purpose: Pages and partials
+- Location: `src/*.njk`, `src/_includes/`, `src/_dev/` (dev-only, `devOnly` front matter)
+- Depends on: data, filters (`isIndexableUrl`, `schemaGraph`, `pageGraph`, `jsonLd`, `plDate`), shortcodes (`picture`, `icon`)
+
+**Build library:**
+- Location: `lib/`
+- Contains: pure helpers and asset pipelines; Node built-ins plus eleventy-img / lightningcss
+
+**Gates / scripts:**
+- Location: `scripts/`
+- Contains: `clean.js`, `check-seo.js`, `check-perf.js`, `warm-images.js`
+
+**Client runtime:**
+- Location: `src/js/` (passthrough-copied to `js/`)
+- Contains: `main.js` loader and one module per feature exporting `init(el)`
 
 ## Data Flow
 
-### Primary Page Load Path
+### Build Path (`npm run build`)
 
-1. **Browser loads HTML** (`index.html` root)
-2. **CSS applies styling** (`css/style.css` linked in `<head>`)
-3. **DOMContentLoaded fires** (browser event)
-4. **JavaScript initializes** (`js/main.js` script at end of `<body>`)
-   - initMobileMenu() - Attaches click handlers to menu toggle
-   - initLightbox() - Builds image data array, attaches click/keyboard handlers to gallery items
-   - initRecruitmentTerminal() - Sets up IntersectionObserver for recruitment section
-   - initScrollSpy() - Sets up IntersectionObserver for navigation sections
-   - initEasterEgg() - Attaches click/keyboard handlers to version number trigger
-5. **Page is interactive** - User can click, scroll, navigate
+1. `scripts/clean.js` removes `_site/` (allow-list from `lib/reject-output.js`)
+2. Eleventy loads `eleventy.config.js`, which imports `src/_data/site.js` (throws if `SITE_URL` missing in build mode)
+3. `eleventy.before` resets CSS bundle and JS hash; global data `images`, `cssHash`, `jsHash` computed
+4. Pages in `src/*.njk` render via `layouts/base.njk`; `src/css/style.11ty.js` emits `/css/style.css`
+5. `eleventy.after` copies used image variants from `.cache/img/` to `_site/img/`
+6. `scripts/check-seo.js` then `scripts/check-perf.js`; failure renames output to `_site.rejected/`
 
-### Lightbox Gallery Flow
+### Client Path
 
-1. User clicks gallery item (`gallery-item` div, `js/main.js:91`)
-2. Click handler calls `openLightbox(index)` (`js/main.js:61`)
-3. Function updates image src and caption from `imageSources` array
-4. Lightbox container display set to 'flex' to show modal
-5. User can navigate with prev/next buttons or arrow keys
-6. Close button, outer click, or Escape key closes modal
+1. `base.njk` loads `<script type="module" src="/js/main.js?v=…">`
+2. `src/js/main.js` scans `[data-js]`, looks up a frozen loader map (own keys only)
+3. Imports `./modules/<name>.js` + same `?v=` and calls `mod.init(el)`
 
-### Recruitment Terminal Flow
+### Discord Badge
 
-1. Page scrolls into view of recruitment section
-2. IntersectionObserver detects section (threshold 0.3)
-3. `runBootSequence(consoleEl)` called (`js/main.js:141`)
-4. Text output added to terminal with timestamps and status tags
-5. Console auto-scrolls to show new messages
-6. Terminal runs once per page load (booted flag prevents repeat)
-
-### Mobile Menu Flow
-
-1. User clicks hamburger menu toggle button
-2. Click handler toggles `active` class on nav list
-3. CSS rule displays/hides mobile menu based on class
-4. When nav link clicked, menu closes automatically
-5. Overflow hidden on body prevents background scroll when menu open
+1. `src/_data/discordBadge.js` fetches invite counts once per process via `lib/discord.js` (skipped when `DISCORD_FETCH=0`), falling back to `site.discord.membersBackstop`
+2. Fallback text baked into HTML; `src/js/modules/discord-badge.js` updates live in browser
 
 **State Management:**
-- Local variables in JavaScript functions (closures maintain state)
-- DOM class attributes for CSS-driven visibility (menu-toggle.open, nav.active)
-- Inline style property manipulation (display, overflow)
-- Single boolean flag for terminal bootstrap sequence (booted)
+- Build: module-level memoization in `lib/css.js`, `lib/js.js`, `lib/images.js`, `src/_data/discordBadge.js`
+- Client: closure state inside each module's `init`; DOM classes for visibility
 
 ## Key Abstractions
 
-**Modal Windows:**
-- Purpose: Display fullscreen overlays for user interactions
-- Examples: Lightbox gallery viewer, Easter egg decryption console
-- Pattern: Hidden by default (display: none), shown on trigger (display: flex), closed by button/ESC/outer-click
-- Implementation: `js/main.js` lines 61-77 (lightbox), lines 216-250 (easter egg)
+**Feature module contract:**
+- Purpose: Progressive enhancement per hook
+- Examples: `src/js/modules/menu.js`, `src/js/modules/lightbox.js`
+- Pattern: `export function init(el)`; registered in `loaders` in `src/js/main.js`; markup carries `data-js="<name>"`
 
-**IntersectionObserver Pattern:**
-- Purpose: Detect when page sections enter/leave viewport
-- Examples: Recruitment terminal bootstrap, scroll spy navigation
-- Pattern: Create observer with threshold, observe target elements, run callback when visible
-- Implementation: `js/main.js` lines 128-138 (terminal), lines 190-205 (scroll spy)
+**Data-file-as-content:**
+- Examples: `src/_data/join.js`, `src/_data/operations.js`, `src/_data/gallery.js`
+- Pattern: default-exported objects/arrays; unconfirmed facts carry a `draft` field (FACTS marker, see `FACTS.md`)
 
-**Event Listener Wrapper:**
-- Purpose: Centralize event binding and cleanup
-- Examples: Click handlers, keyboard handlers, scroll handlers
-- Pattern: Query all target elements, forEach attach listener
-- Implementation: `js/main.js` initMobileMenu, initLightbox (lines 12-36, 90-119)
+**Gate rule module + CLI split:**
+- Examples: `lib/check-seo.js` + `scripts/check-seo.js`
+- Pattern: rules exported for tests; CLI runs unconditionally (no main-module guard)
 
 ## Entry Points
 
-**index.html (Page Load):**
-- Location: `index.html` (repository root)
-- Triggers: User navigates to URL or browser refresh
-- Responsibilities: 
-  - Render semantic HTML structure
-  - Load CSS stylesheet
-  - Load JavaScript module
-  - Display initial page content (hero section)
-  - Define modals and footer
-
-**js/main.js DOMContentLoaded:**
-- Location: `js/main.js` lines 1-7
-- Triggers: Browser finishes parsing HTML
-- Responsibilities:
-  - Initialize all interactive components
-  - Attach event listeners
-  - Set up observers
-  - Prepare page for user interaction
+**Build:** `package.json` scripts `dev`, `build`, `test` -> `eleventy.config.js`
+**Pages:** `src/index.njk` (/), `src/operacje.njk` (/operacje/), `src/jak-dolaczyc.njk` (/jak-dolaczyc/), `src/404.njk`, plus `src/robots.txt.njk`, `src/sitemap.xml.njk`, `src/site.webmanifest.njk`, `src/web.config.njk` (IIS)
+**Browser:** `src/js/main.js`
+**CI:** `.github/workflows/pages.yml` (npm test + build, deploys `_site/` to GitHub Pages on main)
 
 ## Architectural Constraints
 
-- **Threading:** Single-threaded JavaScript event loop (no Web Workers or async operations)
-- **Global state:** No module-level singletons; state is local to function scopes (initMobileMenu, initLightbox, etc.)
-- **Circular imports:** None (single HTML file, single CSS file, single JS file - no module imports)
-- **DOM Dependency:** All JavaScript depends on specific DOM structure defined in index.html (selectors must match)
-- **No API Integration:** Currently no backend communication; api/ directory is empty/reserved
-- **Client-side only:** No server-side rendering or dynamic content generation
+- **Threading:** Single build process; tests spawn isolated Eleventy builds in parallel into `_test/<name>/` (`test/helpers.js`), hence `scripts/warm-images.js` as `pretest`.
+- **Global state:** memoized singletons in `lib/css.js`, `lib/js.js`, `lib/images.js`, `src/_data/discordBadge.js`.
+- **Circular imports:** None; `lib/images.js` imports from `src/_data/`, `src/_data/site.js` imports `lib/seo.js`.
+- **Path prefix:** All URLs root-relative; `HtmlBasePlugin` rewrites them. CSS `url()` must be relative to output `css/style.css` (not rebased).
+- **Indexability:** noindex by default; only `SITE_INDEXABLE=1` with https URL and `/` prefix allows indexing.
+- **Output-only static:** no server runtime.
 
 ## Anti-Patterns
 
-### Direct DOM Manipulation Without Abstraction
+### Building module specifiers from attribute text
 
-**What happens:** Each feature function directly queries, modifies, and styles DOM elements inline
-**Why it's wrong:** Hard to test, scattered concerns, brittle selectors, style logic mixed with behavior
-**Do this instead:** Abstract common patterns (like modal opening/closing) into reusable helper functions
-- Example fix: Create `showModal(element)` and `hideModal(element)` utility functions to replace scattered display property assignments
+**What happens:** Tempting to `import('./modules/' + el.dataset.js)`.
+**Why it's wrong:** Arbitrary module loading; breaks cache-busting.
+**Do this instead:** Add a literal entry to the frozen `loaders` map in `src/js/main.js`.
 
-### Hardcoded Selectors in Multiple Functions
+### Hardcoding the site URL / Discord invite
 
-**What happens:** Gallery image sources built from hardcoded data attribute and innerText selectors
-**Why it's wrong:** If HTML structure changes, selectors break; maintainability suffers
-**Do this instead:** Pass configuration objects or export gallery data structure from data layer
-- Example: Create `js/gallery-data.js` with image array, import in main.js instead of building from DOM
+**What happens:** Copying `https://discord.gg/...` or a domain into a template.
+**Why it's wrong:** `site.js` is documented as the only literal copy.
+**Do this instead:** Use `site.discord.invite`, `site.url` from `src/_data/site.js`.
 
-### Intersection Observer Created Without Explicit Cleanup
+### Passthrough-copying CSS or `.cache/img`
 
-**What happens:** Observers created in initRecruitmentTerminal and initScrollSpy but never disconnected
-**Why it's wrong:** Memory leak if script runs multiple times; observers keep running in background
-**Do this instead:** Store observer reference, add cleanup function, call on page unload
-- Example: Add `window.addEventListener('beforeunload', () => observer.disconnect())`
+**Why it's wrong:** Bypasses the bundle/hash and can ship stale variants.
+**Do this instead:** Add a partial `@import` in `src/css/style.css`; register images in `lib/images.js`.
+
+## Error Handling
+
+**Strategy:** Fail the build loudly; degrade gracefully only for network (Discord).
+
+**Patterns:**
+- `throw new Error` in config/data/lib on invalid input (`src/_data/site.js`, `lib/dates.js`, `lib/icons.js`, `lib/discord.js`)
+- Gates exit 1 and move output to `<dir>.rejected`
+- Client modules guard-clause and return when elements are missing
+
+## Cross-Cutting Concerns
+
+**Logging:** `process.stdout/stderr.write` in scripts; none in client.
+**Validation:** env validation in `src/_data/site.js`; output validation in gates.
+**Authentication:** Not applicable.
 
 ---
 
-*Architecture analysis: 2026-10-02*
+*Architecture analysis: 2026-10-13*

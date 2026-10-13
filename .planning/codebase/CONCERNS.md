@@ -1,276 +1,150 @@
 ---
-last_mapped_commit: 63f2ad5fb842c140afe59fe486169f7da112193b
-last_mapped_at: 2026-10-02
+last_mapped_commit: 498f19eefca8ec513547073c1d87eb4bb2a09b7d
+last_mapped_at: 2026-10-13
 ---
 # Codebase Concerns
 
-**Analysis Date:** 2026-10-02
+**Analysis Date:** 2026-10-13
+
+Sources cross-checked against code: `.planning/phases/03-performance-assets/03-REVIEW-DISPOSITION.md` (9 open of 12), `.planning/phases/04-join-operations-pages/04-REVIEW.md` + `04-REVIEW-DISPOSITION.md` (8 open of 8), `FACTS.md`.
 
 ## Tech Debt
 
-**Hardcoded Configuration Values:**
-- Issue: Discord invite link appears in 3+ places (HTML and JavaScript) making updates difficult and error-prone
-- Files: `index.html` (lines 230, 265), `js/main.js` (line 174)
-- Impact: Any change to Discord link requires multiple edits; risk of inconsistency
-- Fix approach: Extract to a single configuration object or constants file (`js/config.js`) that all modules reference
+**Unconfirmed drafted facts block the indexable build:**
+- Issue: 13 registered entries (FACTS-01..13) in `FACTS.md` are still "do potwierdzenia". Drafted copy carries `TODO(FACTS-NN)` markers.
+- Files: `src/_data/join.js:52,73` (FACTS-04/05), `src/_data/operations.js:42,67,77,84,94,104,114` (FACTS-07..13), front matter `todo:` in `src/404.njk`, `src/jak-dolaczyc.njk`, `src/operacje.njk`; marker emitted by `src/_includes/partials/head.njk:17`
+- Impact: G10 in `lib/check-seo.js:388-395` fails any `SITE_INDEXABLE=1` build while a marker exists, so the site cannot go live/indexable.
+- Fix approach: Clan confirms copy, delete `draft` lines / `todo` keys, update `FACTS.md` rows. Fix WR-02 (below) first or confirmation breaks tests.
 
-**Monolithic JavaScript File:**
-- Issue: All functionality crammed into single `js/main.js` without modularization or separation of concerns
-- Files: `js/main.js`
-- Impact: Difficult to test individual components, hard to maintain, no code reuse patterns
-- Fix approach: Break into separate modules: `js/menu.js`, `js/lightbox.js`, `js/recruitment.js`, `js/scrollspy.js`, `js/easteregg.js`
+**Stale project documentation in CLAUDE.md:**
+- Issue: `.claude/CLAUDE.md` Technology Stack / Conventions / Architecture sections describe the pre-migration site (root `index.html`, `css/style.css`, `js/main.js`, Google Fonts, Font Awesome CDN, "no build step"). The repo is Eleventy 3 (`eleventy.config.js`, `src/`, `lib/`, `scripts/`), self-hosted fonts (`src/fonts/`), inline icons (`lib/icons.js`), modular JS (`src/js/modules/`).
+- Impact: Agents reading CLAUDE.md get wrong file paths and wrong constraints.
+- Fix approach: Regenerate those sections from `.planning/codebase/*.md`.
 
-**Unmodularized CSS:**
-- Issue: Single monolithic `css/style.css` with 1400+ lines mixing component styles, utilities, and media queries
-- Files: `css/style.css`
-- Impact: Difficult to locate specific styles, no clear separation between components
-- Fix approach: Split into modular files: `css/variables.css`, `css/base.css`, `css/components/*.css`, `css/media-queries.css`
+**Legacy/leftover artifacts:**
+- No tracked legacy root files remain (`index.html`, `css/`, `js/`, `assets/` at root are gone; verified via `git ls-files`).
+- Untracked local leftovers: `_site.rejected/` (rejected build output, gitignored), `_test/`, `.gsd/dispatch-isolation-sentinel.json`, `.planning/milestone.lock`, `.planning/state.json`.
+- Dev-only templates `src/_dev/*.njk` (font-test, layout-test, og-override, layout-empty) live in the source tree; covered by `test/devpages.test.js` - keep them excluded from production output.
 
-**Inline Styles in HTML:**
-- Issue: Multiple inline `style` attributes throughout HTML (lines 100, 118, 126, 217, 219, 230, 271)
-- Files: `index.html` (inline styles on h3, div, a elements)
-- Impact: Violates separation of concerns, makes styling hard to maintain, difficult to apply consistent updates
-- Fix approach: Move all inline styles to CSS classes in `css/style.css`
+**Duplicated scroll-lock logic:**
+- Issue: Three modules set `document.body.style.overflow` independently with different reset values (`'auto'` vs `''`).
+- Files: `src/js/modules/lightbox.js:44,59`, `src/js/modules/easter-egg.js:12,17`, `src/js/modules/menu.js:14,23`
+- Impact: Phase 03 WR-02 - `'auto'` overrides the `overflow-x: clip` guard after closing lightbox/easter egg, re-enabling horizontal overflow.
+- Fix approach: Reset to `''` everywhere, or pass a shared lock helper via `init()` (not a static import - see IN-03).
 
-**Magic Numbers and Hard-coded Values:**
-- Issue: DOM queries, timeout values, and layout constants scattered throughout JavaScript
-- Files: `js/main.js` (threshold: 0.3, timeouts: 600ms, 1400ms, 2200ms, 41 chars width in mobile menu)
-- Impact: No easy way to adjust timing, responsive breakpoints, or observer thresholds
-- Fix approach: Create `js/constants.js` with all magic numbers and configuration
+**Large committed source images:**
+- Issue: `src/images/` holds ~20 MB of originals (`funny.png` 5.1 MB, `hero-bg.jpg` 4.7 MB, `jo_1967.png` 3.8 MB, `cos.png` 3.7 MB).
+- Impact: Repo bloat, slow clones and slow `scripts/warm-images.js` / eleventy-img runs.
+- Fix approach: Pre-downscale originals to max needed width (e.g. 2560px) or move to Git LFS.
 
 ## Known Bugs
 
-**Easter Egg Text Overflow:**
-- Symptoms: Easter egg modal content (`#decryption-overlay`) has 7 extremely long paragraphs that may be cut off or cause layout shift on small screens
-- Files: `index.html` (lines 284-290)
-- Trigger: Click version number in footer to open easter egg modal on mobile device
-- Workaround: Increase viewport height or manually scroll within modal
-- Severity: Low - aesthetic issue only
+**Confirming FACTS breaks `npm test` (04 WR-02):**
+- Symptoms: Tests assert draft markers exist.
+- Files: `test/pages.test.js:139,271,341,345,352,396,406`
+- Trigger: Deleting a `draft` line as documented in `FACTS.md`/`README.md`; also adding a recap dated today (strict `<` at `:345`).
+- Workaround: None. Fix: guard with `if ("draft" in x)`, use `<=`.
 
-**Scroll Position Loss on Mobile Menu Toggle:**
-- Symptoms: When mobile menu opens/closes, `document.body.style.overflow` is manipulated which can reset scroll position
-- Files: `js/main.js` (lines 23, 32)
-- Trigger: Toggle menu on mobile, then close and scroll
-- Cause: Setting/unsetting overflow property can cause jank
-- Fix approach: Use transform-based scroll locking or `overflow: hidden` with `pointer-events: none` on body
+**Anchors hidden under fixed header; FAQ deep links stay collapsed (04 WR-03):**
+- Files: `src/css/partials/pages.css:59-61`, `src/jak-dolaczyc.njk`, `src/operacje.njk`, `src/_data/join.js:42-43`
+- Trigger: Visit `/jak-dolaczyc/#mody` or `/operacje/#relacje`. No `scroll-margin-top` exists anywhere.
+- Fix: `scroll-margin-top` on `.page-block, .faq-item` (100px / 120px mobile); open `details.faq-item` matching `location.hash` (extend `src/js/modules/hash-redirect.js`).
 
-**Gallery Lightbox Navigation Out of Sync:**
-- Symptoms: If gallery items are reordered in DOM dynamically, lightbox index tracking breaks
-- Files: `js/main.js` (line 55: `imageSources` array built once at init)
-- Trigger: Add/remove gallery items after page load
-- Cause: `imageSources` array created once during initialization, doesn't update if DOM changes
-- Workaround: Refresh page if gallery content changes
+**Schedule vs. timeline mismatch (04 IN-01):**
+- Files: `src/_data/operations.js:11,50-63`, `src/_data/join.js:69`
+- Issue: "19:00 start, 2-3 h" vs. mission at 19:15 and debrief "ok. 21:30". Add to FACTS-07 for clan to settle.
+
+**Recap card brackets clipped (04 IN-02):**
+- Files: `src/css/partials/pages.css:243-247` (`overflow: hidden` on `.recap-card`) vs `src/css/partials/components.css:29-39`
+- Fix: drop `overflow: hidden` or use `overflow: clip; overflow-clip-margin: 2px`.
+
+**Lightbox alt text static English (03 IN-03):**
+- Files: `src/js/modules/lightbox.js`
+- Fix: Copy the thumbnail's Polish `alt` into the lightbox `<img>` on navigation.
+
+**Stale image data in dev server (03 WR-05):**
+- Files: `lib/images.js` (`processImages()` memoized per process)
+- Trigger: Edit `src/images/` or `src/_data/gallery.js` during `npm run dev`; restart required.
 
 ## Security Considerations
 
-**Hardcoded Sensitive Links:**
-- Risk: Discord invite link is visible in plain text in source and easily accessible
-- Files: `index.html` (lines 230, 265), `js/main.js` (line 174)
-- Current mitigation: None - link is public but exposed
-- Recommendations: Consider this acceptable for public recruitment links, but ensure:
-  - Never put actual API keys or tokens in HTML/JS
-  - If this link needs rotation, implement server-side redirect
-  - Monitor Discord link for abuse if heavily shared
+**Discord badge leaks visitor IP to Discord (04 WR-01, GDPR):**
+- Risk: Client `fetch` to `https://discord.com/api/v10/invites/...` without consent - same reason Google Fonts was removed.
+- Files: `src/js/modules/discord-badge.js:14-31`, hook in `src/index.njk:138`, build-time data `src/_data/discordBadge.js`
+- Current mitigation: `credentials: 'omit'`, `referrerPolicy: 'no-referrer'`, 5 s timeout.
+- Recommendations: Bake the build-time count and delete the module, or fetch only on user click, or add a privacy note linked from `src/_includes/partials/footer.njk`.
 
-**No Content Security Policy (CSP):**
-- Risk: No CSP headers means easier exploitation if CDN is compromised
-- Files: Server configuration (not in repo)
-- Current mitigation: None
-- Recommendations: Add CSP header restricting scripts to `self` and `https://cdnjs.cloudflare.com`, `https://fonts.googleapis.com`
+**Destructive test against real repo root (04 WR-04):**
+- Risk: `test/reject-output.test.js:246-253` runs real `scripts/clean.js` with `.` and `..`; a regression in `isDisposableOutput` (`lib/reject-output.js`) would `rmSync` the repo.
+- Recommendations: Run against a copied fake root (fix in 04-REVIEW.md).
 
-**External CDN Dependencies:**
-- Risk: Relies on external CDNs for Font Awesome, Google Fonts, and cdnjs
-- Files: `index.html` (lines 14-16)
-- Current mitigation: HTTPS used, but no fallbacks
-- Recommendations:
-  - Download Font Awesome locally or use SVG icons
-  - Download Google Fonts as web fonts to assets
-  - Implement fallback system fonts if CDN fails
-  - Add integrity hashes to all external script/stylesheet loads
+**Image containment check too broad (03 IN-01):**
+- Files: `lib/images.js` - source path checked against repo root, not `src/images/`. Tighten to `src/images/`.
 
-**No Input Validation:**
-- Risk: If recruitment form is implemented in future, no validation framework in place
-- Files: `js/main.js` (form-related code not yet implemented)
-- Current mitigation: Form not yet active
-- Recommendations: Add validation library and sanitization when form is enabled
+**CI pinning:** `.github/workflows/pages.yml` pins actions to SHAs, minimal permissions; `.github/dependabot.yml` updates them. No concern.
 
 ## Performance Bottlenecks
 
-**Expensive Backdrop Filter Effects:**
-- Problem: Header and multiple modals use `backdrop-filter: blur(10px)` which requires GPU compositing and is expensive on mobile
-- Files: `css/style.css` (lines 132-133, 247, 798)
-- Cause: Blur effect recomputed on every frame when scrolling/interaction
-- Impact: Noticeable jank on mobile devices, 30-50% frame time loss on older phones
-- Improvement path:
-  1. Test on target devices
-  2. Consider replacing blur with solid semi-transparent background on mobile
-  3. Use media query `@media (prefers-reduced-motion)` to disable effects for users who prefer reduced motion
+**Perf gate blind spots (03 WR-03, WR-04, IN-06):**
+- Files: `lib/check-perf.js` (522 lines), `scripts/check-perf.js`
+- Problem: Most image variants (thumbnails, logo, desktop hero) never sized/checked; initial-JS budget P10 fails open for external and inline scripts; P3 third-party host list covers only the replaced CDNs.
+- Improvement path: Enumerate all `<img>/<source>` srcset entries; count inline + external scripts in P10; generalize P3 to "any non-self origin".
 
-**Fixed Positioning Performance:**
-- Problem: Multiple fixed-position elements (header, grid-bg, body::before overlay) cause layout reflows
-- Files: `css/style.css` (lines 238-241, 62-73, 76-89)
-- Cause: Fixed elements are not part of normal flow but force browser to repaint other layers
-- Impact: Scroll jank on mobile, increased CPU usage
-- Improvement path: Use `will-change: transform` or `transform3d` to promote elements to separate layers
-
-**Scanline Overlay Animation:**
-- Problem: `body::before` element with complex gradient and `opacity: 0.4` is drawn on every frame
-- Files: `css/style.css` (lines 59-73)
-- Cause: Semi-transparent overlay causes blending on every pixel
-- Impact: Reduced frame rate during scrolling
-- Improvement path: Use Canvas element instead of CSS gradient for scanline effect, or use a small repeating SVG background
-
-**Unoptimized Images:**
-- Problem: Hero background image `assets/hero-bg.jpg` and gallery images not optimized for web
-- Files: `index.html` (line 384), `index.html` (lines 145-177)
-- Impact: Slow initial page load, particularly on mobile
-- Improvement path:
-  1. Use WebP format with JPEG fallback
-  2. Implement responsive images with `srcset`
-  3. Add explicit width/height attributes to prevent layout shift
-  4. Compress all JPG/PNG files (target < 100KB per image)
-
-**FontAwesome CDN Loading:**
-- Problem: Font Awesome 6.0 full CSS (all 1500+ icons) loaded even though only ~5 icons used
-- Files: `index.html` (line 16)
-- Impact: ~90KB additional CSS download
-- Improvement path: Replace with inline SVGs or use icon font subset tool
+**Image processing cost:** `scripts/warm-images.js` runs as `pretest`; large originals make cold runs slow (`.cache/`).
 
 ## Fragile Areas
 
-**Mobile Menu Toggle Logic:**
-- Files: `js/main.js` (lines 12-36)
-- Why fragile: Relies on specific DOM structure (`.menu-toggle`, `nav ul`, `nav ul li a`). If HTML structure changes, entire menu breaks. No error handling if elements don't exist.
-- Safe modification: Add defensive checks and abstract selectors into constants. Consider using dataset attributes for safer selection.
-- Test coverage: No tests for menu open/close/keyboard interaction
+**SEO/perf gate scripts:**
+- Files: `lib/check-seo.js` (530 lines), `lib/check-perf.js`, `lib/html.js`, `scripts/check-seo.js:47`
+- Why fragile: Regex/string-based HTML parsing; `lib/html.js:44-46` `String.fromCodePoint` throws on entities > U+10FFFF and `checkSite` is unwrapped, so `removeRejectedOutput` is skipped and a bad `_site/` stays (04 IN-04).
+- Safe modification: Clamp code points; wrap `checkSite` in try/catch routing to rejection. Run `test/seo-gate.test.js`, `test/perf-gate.test.js`.
 
-**Lightbox Image Selection:**
-- Files: `js/main.js` (lines 43-120)
-- Why fragile: Selects gallery items and builds array once at page load. Array order must match gallery DOM order. If gallery item HTML structure changes, array building breaks.
-- Safe modification: Always query DOM fresh when navigating rather than relying on pre-built array. Add validation that `data-src` attribute exists.
-- Test coverage: No tests for lightbox navigation, keyboard controls
+**JS module cache-busting:**
+- Files: `src/js/main.js:9-18`, `test/js-version.test.js:87-95`
+- Why fragile: `?v=` only applies to `import()` in `main.js` loader map; any static `import` between modules bypasses it (04 IN-03). Loader has no rejection handling (03 IN-02).
+- Safe modification: Never import between modules; pass shared helpers via `init()`. Add a test asserting no `import` in `src/js/modules/`; add `.catch` to loader.
 
-**Scroll Spy Observer:**
-- Files: `js/main.js` (lines 184-206)
-- Why fragile: Uses `rootMargin: '-30% 0px -60% 0px'` which is magic number and fragile. Issues if viewport changes dramatically or sections have different heights. `getAttribute('id')` can fail if sections don't have IDs.
-- Safe modification: Calculate margins based on viewport height. Validate all sections have IDs before use.
-- Test coverage: No tests for navigation highlight as user scrolls
+**Site URL config:**
+- Files: `src/_data/site.js` - throws on missing/invalid `SITE_URL` in build mode; `PATH_PREFIX` must match host. Always set both (see `.github/workflows/pages.yml`).
 
-**Recruitment Terminal Boot Sequence:**
-- Files: `js/main.js` (lines 141-181)
-- Why fragile: Hard-coded timeouts (600ms, 1400ms, 2200ms) without configuration. If timing needs adjustment for A/B testing or animation tuning, code must be modified. Observer threshold (0.3) is magic number.
-- Safe modification: Move timing values to configuration. Consider using Promise-based animation queuing.
-- Test coverage: No tests for terminal animation sequence
+**Font size caps:** Three inconsistent caps (03 IN-04) across `lib/woff2.js` / `lib/check-perf.js` / tests - unify into one constant.
 
 ## Scaling Limits
 
-**No Pagination for Gallery:**
-- Current capacity: 4 gallery items hardcoded in HTML
-- Limit: Adding 20+ images breaks mobile layout and performance
-- Scaling path: Implement lazy-loading gallery with pagination/infinite-scroll, load images on demand
-
-**No Member Roster System:**
-- Current capacity: Roster section HTML exists but unused; no API or data source
-- Limit: Cannot scale to 50+ members without backend
-- Scaling path: Create CMS or API endpoint for member data, render roster dynamically
-
-**No Event Calendar Data Source:**
-- Current capacity: Calendar section exists in CSS but no data binding
-- Limit: Events are hard-coded; cannot scale to recurring operations
-- Scaling path: Connect to Google Calendar API or implement event management backend
-
-**Monolithic Frontend:**
-- Current capacity: Single HTML file works for current scope
-- Limit: Cannot scale to multiple pages (rules, calendar detail, member profiles)
-- Scaling path: Migrate to static site generator (Hugo, 11ty) or SPA framework (Vue, React)
+**Content in JS data files:**
+- Current capacity: Operations recaps and FAQ hand-edited in `src/_data/operations.js`, `src/_data/join.js`.
+- Limit: Each recap requires code edit + rebuild; no CMS.
+- Scaling path: Move to Markdown collection (`src/relacje/*.md`) if recap volume grows.
 
 ## Dependencies at Risk
 
-**Font Awesome CDN:**
-- Risk: Entire icon system depends on external CDN; if down, all icons disappear
-- Impact: Discord/YouTube/Facebook icons missing, navigation appears broken
-- Migration plan: Download Font Awesome locally or convert to SVG icons (smaller, no dependency)
+**sharp override:**
+- Risk: `package.json` `overrides.sharp: 0.35.5` pinned under `@11ty/eleventy-img` 7.0.0; native binary; mismatch on upgrade.
+- Migration plan: Re-verify override when bumping eleventy-img.
 
-**Google Fonts CDN:**
-- Risk: Share Tech Mono, Montserrat, Inter fonts load from external CDN
-- Impact: If CDN down, fallback to system fonts (likely), but layout may shift
-- Migration plan: Download font files locally, use `@font-face` with woff2 format
-
-**cdnjs CDN:**
-- Risk: Font Awesome hosted on cdnjs which is third-party CDN
-- Impact: If cdnjs experiences issues, no icons load
-- Migration plan: Use jsDelivr or unpkg as more reliable alternatives, or self-host
+**Separate tool package:** `tools/seo-images/package.json` has its own lockfile outside Dependabot scope unless configured.
 
 ## Missing Critical Features
 
-**No Analytics:**
-- Problem: No way to track user behavior, conversion (Discord link clicks), or traffic patterns
-- Blocks: Cannot measure effectiveness of recruitment page
-- Recommendation: Add Google Analytics 4 with event tracking for link clicks, section views
+**Roster page:**
+- Problem: Not implemented; depends on external Discord bot data format (scheduled last per project constraints).
 
-**No Form Validation:**
-- Problem: Recruitment form HTML exists but no submit handler or validation
-- Blocks: Cannot collect recruit applications
-- Recommendation: Implement form validation with error messages; integrate with Google Forms or Discord webhook
+**Privacy note:** No privacy policy page, needed if the live Discord fetch stays.
 
-**No Error Tracking:**
-- Problem: No error logging if JavaScript breaks
-- Blocks: Cannot know if users experience issues
-- Recommendation: Add Sentry or similar error tracking
-
-**No Accessibility Features:**
-- Problem: No ARIA labels for complex components, no skip links
-- Blocks: Site not fully accessible to screen reader users
-- Recommendation: Add ARIA attributes, skip-to-content link, test with screen readers
-
-**No Testing Framework:**
-- Problem: No unit tests, integration tests, or E2E tests
-- Blocks: Refactoring is risky; bugs introduced easily
-- Recommendation: Add Vitest for unit tests, Playwright for E2E tests
+**Final host cutover:** IIS target (`src/web.config.njk`) built locally only; no automated indexable deploy - by design, but blocked by FACTS.
 
 ## Test Coverage Gaps
 
-**Mobile Menu Interactions:**
-- What's not tested: Menu toggle, link clicks closing menu, keyboard navigation (none implemented)
-- Files: `js/main.js` (initMobileMenu function)
-- Risk: Changes to menu logic could break navigation
-- Priority: High - core navigation feature
+**Phantom-modified test files (line endings):**
+- What's affected: `git status` lists `test/deps.test.js`, `facts.test.js`, `fonts.test.js`, `icons.test.js`, `images.test.js`, `seo-assets.test.js`, `seo-files.test.js`, `workflow.test.js` as modified, but `git diff` is empty — content matches HEAD; the flag is a CRLF/LF normalization artifact on Windows.
+- Risk: Noise only (can hide a real change in `git status`). Priority: Low. Clear with a renormalize (`git add --renormalize .`) or by re-checking-out the files.
 
-**Lightbox Gallery:**
-- What's not tested: Opening/closing lightbox, keyboard controls (arrow keys, Escape), boundary conditions (first/last image), touch swipe gestures
-- Files: `js/main.js` (initLightbox function)
-- Risk: Gallery could break silently; users unable to view full-size images
-- Priority: High - primary content interaction
+**Client JS behaviour:**
+- What's not tested: Real-browser behaviour of `src/js/modules/*.js` (scroll lock, focus, anchors); `test/client.test.js`/`modules.test.js` are static/node-level. No E2E.
+- Risk: WR-02/WR-03-type UI regressions go unnoticed. Priority: Medium.
 
-**Scroll Spy Navigation Highlighting:**
-- What's not tested: Nav links highlighting when sections are in view, behavior at boundaries, multiple rapid scrolls
-- Files: `js/main.js` (initScrollSpy function)
-- Risk: Navigation highlight could be wrong, confusing users about current section
-- Priority: Medium - UX issue but not critical
-
-**Responsive Layout:**
-- What's not tested: Layout at 320px, 768px, 1024px, 1440px breakpoints; menu on mobile; gallery grid responsiveness
-- Files: `css/style.css` (media queries at 992px, 768px, 480px)
-- Risk: Site could be broken on some devices; poor UX
-- Priority: High - affects all mobile users
-
-**Easter Egg Easter Egg:**
-- What's not tested: Opening/closing decryption overlay, keyboard escape, scroll behavior in modal
-- Files: `js/main.js` (initEasterEgg function), `css/style.css` (decryption-overlay)
-- Risk: Easter egg could malfunction silently
-- Priority: Low - fun but non-critical
-
-**Terminal Animation Sequence:**
-- What's not tested: Boot sequence timing, observer intersection detection, terminal autoscroll
-- Files: `js/main.js` (initRecruitmentTerminal, runBootSequence)
-- Risk: Terminal could show wrong messages or timing could be off
-- Priority: Medium - recruitment visual element
-
-**No Cross-Browser Testing:**
-- What's not tested: Safari (backdrop-filter support), Firefox (grid-auto-fit behavior), older Chrome (CSS Grid support)
-- Risk: Features could break on 20% of users
-- Priority: High - must support major browsers
+**Gate exception paths:** No test for `lib/html.js` invalid entity crash path. Priority: Low.
 
 ---
 
-*Concerns audit: 2026-10-02*
+*Concerns audit: 2026-10-13*

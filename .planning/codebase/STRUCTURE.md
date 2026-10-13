@@ -1,215 +1,110 @@
 ---
-last_mapped_commit: 63f2ad5fb842c140afe59fe486169f7da112193b
-last_mapped_at: 2026-10-02
+last_mapped_commit: 498f19eefca8ec513547073c1d87eb4bb2a09b7d
+last_mapped_at: 2026-10-13
 ---
 # Codebase Structure
 
-**Analysis Date:** 2026-10-02
+**Analysis Date:** 2026-10-13
 
 ## Directory Layout
 
 ```
 IBC-Website/
-├── .git/                  # Git repository metadata
-├── .planning/
-│   └── codebase/          # GSD codebase documentation (this directory)
-│       ├── ARCHITECTURE.md
-│       └── STRUCTURE.md
-├── api/                   # Reserved for backend API integration (currently empty)
-├── assets/                # Static image files
-│   ├── cos.png            # Gallery image: observation point
-│   ├── funny.png          # Gallery image: humorous moment
-│   ├── hero-bg.jpg        # Hero section background
-│   ├── hero.jpg           # Hero section image
-│   ├── jo_1967.png        # Gallery image: operation Crimson Dawn
-│   ├── logo.png           # Clan logo (48x48 PNG)
-│   ├── op_patrol.jpg      # Gallery image: patrol operation
-│   ├── patrol.jpg         # Additional patrol image
-│   └── sniper.jpg         # Sniper/tactical image
-├── css/
-│   └── style.css          # All page styling (single CSS file, ~800+ lines)
-├── js/
-│   └── main.js            # All page interactivity (single JS file, ~260 lines)
-├── index.html             # Single-page application root HTML
-└── LICENSE                # Project license file
+├── .github/            # CI (workflows/pages.yml) and dependabot.yml
+├── eleventy.config.js  # Eleventy 3 config (filters, shortcodes, passthrough)
+├── package.json        # scripts: dev, build, test; ESM ("type": "module")
+├── .nvmrc              # Node version for CI
+├── FACTS.md            # Registry of unconfirmed content (draft markers)
+├── README.md           # Usage, deploy (Wdrożenie), cutover checklist
+├── lib/                # Build-time Node modules (never rendered)
+├── scripts/            # CLIs run by npm scripts (clean, gates, warm-images)
+├── src/                # Eleventy input
+│   ├── _data/          # Global data (site, gallery, join, operations, navigation, discordBadge)
+│   ├── _includes/      # layouts/base.njk, partials/*.njk
+│   ├── _dev/           # Dev-only test pages (devOnly front matter)
+│   ├── assets/         # brand/, icons/, og/ (passthrough -> assets/)
+│   ├── css/            # style.css entry + partials/, style.11ty.js emitter
+│   ├── fonts/          # Self-hosted Montserrat woff2 + OFL.txt
+│   ├── images/         # Source images processed by eleventy-img
+│   ├── js/             # main.js loader + modules/
+│   └── *.njk           # Pages and generated files
+├── test/               # node:test suites, helpers.js, fixtures/
+└── tools/              # One-off tooling (seo-images generator, fonts notes)
 ```
 
 ## Directory Purposes
 
-**`.git/`:**
-- Purpose: Version control metadata
-- Contains: Commit history, branch information, git configuration
-- Key files: `.git/config`, `.git/HEAD`, `.git/objects`
+**`lib/`:** build helpers — `images.js`, `css.js`, `js.js`, `schema.js`, `seo.js`, `icons.js`, `dates.js`, `discord.js`, `html.js`, `image-size.js`, `woff2.js`, `reject-output.js`, `check-seo.js`, `check-perf.js`.
 
-**`.planning/codebase/`:**
-- Purpose: GSD (Getting Shit Done) documentation for codebase analysis
-- Contains: Architecture and structure reference documents for development planning
-- Key files: `ARCHITECTURE.md`, `STRUCTURE.md`, `CONVENTIONS.md`, `TESTING.md` (as created)
+**`scripts/`:** `clean.js`, `check-seo.js`, `check-perf.js`, `warm-images.js` — CLIs only, never imported.
 
-**`api/`:**
-- Purpose: Reserved for future backend API integration
-- Contains: Currently empty
-- Notes: Placeholder directory for server-side code when backend is added
+**`src/_data/`:** content and config as default-exported JS. Key: `site.js`.
 
-**`assets/`:**
-- Purpose: Store static image assets used on the page
-- Contains: PNG and JPG images (logo, hero background, gallery photos)
-- Key files:
-  - `logo.png` - Clan logo (dimensions: 48x48, used in header navigation)
-  - `hero-bg.jpg` - Hero section background image
-  - `hero.jpg` - Alternative hero section image
-  - Gallery images: `op_patrol.jpg`, `jo_1967.png`, `cos.png`, `funny.png`, `patrol.jpg`, `sniper.jpg`
+**`src/_includes/partials/`:** `head.njk`, `header.njk`, `footer.njk`, `breadcrumbs.njk`, `discord-cta.njk`.
 
-**`css/`:**
-- Purpose: Centralize all page styling
-- Contains: Single CSS file with complete design system
-- Key sections in `style.css`:
-  - CSS custom properties (colors, fonts, transitions) - lines 1-35
-  - Base/reset styles - lines 38-90
-  - Typography - lines 93+
-  - Layout components (header, hero, sections, footer)
-  - Responsive design (mobile breakpoints)
-  - Tactical/HUD visual effects (scanlines, glows, grid backgrounds)
+**`src/css/partials/`:** `fonts`, `base`, `components`, `header`, `hero`, `sections`, `gallery`, `recruitment`, `pages`, `footer`, `responsive` — imported in cascade order by `src/css/style.css`.
 
-**`js/`:**
-- Purpose: Centralize all client-side JavaScript functionality
-- Contains: Single JavaScript file with modular initialization functions
-- Key functions in `main.js`:
-  - `initMobileMenu()` - Mobile navigation toggle (lines 12-36)
-  - `initLightbox()` - Gallery image viewer (lines 43-120)
-  - `initRecruitmentTerminal()` - Terminal simulation (lines 122-139)
-  - `runBootSequence()` - Terminal text output (lines 141-181)
-  - `initScrollSpy()` - Active nav highlighting (lines 183-206)
-  - `initEasterEgg()` - Hidden console trigger (lines 208-259)
+**`src/js/modules/`:** `menu.js`, `lightbox.js`, `terminal.js`, `scroll-spy.js`, `easter-egg.js`, `discord-badge.js`, `hash-redirect.js`.
+
+**`test/`:** one `*.test.js` per concern (build, seo, perf-gate, schema, modules, pages, links, fonts, images...); `helpers.js` builds into `_test/<name>/`.
+
+**`tools/seo-images/`:** separate package (own `package.json`) generating OG/icons into `src/assets/`.
 
 ## Key File Locations
 
 **Entry Points:**
-- `index.html` - Main single-page application file (297 lines)
-  - Contains full semantic HTML structure
-  - Loads CSS stylesheet via `<link>` tag
-  - Loads JavaScript via `<script>` tag at end of body
-  - Defines all page sections: header, hero, about, gallery, recruitment, footer
+- `eleventy.config.js`: build config
+- `src/index.njk`, `src/operacje.njk`, `src/jak-dolaczyc.njk`, `src/404.njk`: pages
+- `src/js/main.js`: client entry
 
 **Configuration:**
-- CSS variables defined in `css/style.css` root selector (lines 4-35)
-  - Color scheme: `--bg-primary`, `--accent-color`, `--text-primary`, etc.
-  - Typography: `--font-hud`, `--font-body`
-  - Transitions: `--transition-speed`
-- No external configuration files (.env, config.json, etc.)
+- `src/_data/site.js`: URL, pathPrefix, indexable, Discord, social
+- `src/_data/navigation.js`: header/footer nav
+- `.github/workflows/pages.yml`: CI/deploy
+- `src/web.config.njk`: IIS config for final host
 
 **Core Logic:**
-- `js/main.js` - All interactivity logic (260 lines)
-  - DOMContentLoaded event handler calls all initialization functions
-  - Each feature isolated in its own init function
-  - Event listeners attached to specific DOM selectors
-  - Modal and menu state managed via class toggling and inline styles
-
-**Styling:**
-- `css/style.css` - Complete design system (800+ lines)
-  - Responsive grid layout with CSS Grid and Flexbox
-  - Dark tactical theme with accent gold/sand colors
-  - Mobile-first approach with media queries
-  - Tactical effects: scanlines, grid backgrounds, glows
+- `lib/images.js`, `lib/css.js`, `lib/schema.js`, `lib/check-seo.js`, `lib/check-perf.js`
 
 **Testing:**
-- No automated tests present
-- No test directory or test files
-- Testing would be manual or browser-based
+- `test/helpers.js`, `test/*.test.js`, `test/fixtures/`
 
 ## Naming Conventions
 
-**Files:**
-
-- **HTML:** Single file `index.html` - standard convention for SPAs
-- **CSS:** Single file `style.css` - monolithic approach (all styles in one file)
-- **JavaScript:** Single file `main.js` - monolithic approach (all functionality in one file)
-- **Images:** Descriptive lowercase names with hyphens: `hero-bg.jpg`, `op_patrol.jpg`, `jo_1967.png`
-
-**Directories:**
-
-- **Lowercase with no hyphens:** `css`, `js`, `assets`, `api` - standard web project convention
-- **Dot-prefix for hidden:** `.git`, `.planning` - standard convention for metadata/config directories
-
-**CSS Classes:**
-
-- **BEM-inspired:** `.gallery-item`, `.gallery-overlay`, `.lightbox-content`, `hud-border`, `hud-badge`
-- **State classes:** `.active`, `.active-nav`, `.open` - indicate dynamic state
-- **Utility classes:** `.hidden`, `hud-btn`, `hud-border` - reusable styling
-
-**CSS IDs:**
-
-- **Page sections:** `#hero`, `#about`, `#gallery`, `#recruitment`
-- **Components:** `#lightbox`, `#terminal-console`, `#mobile-nav`, `#decryption-overlay`
-- **Interactive elements:** `#easteregg-trigger`, `#decryption-close`
-
-**JavaScript Functions:**
-
-- **camelCase:** `initMobileMenu`, `openLightbox`, `updateLightboxContent`, `showNext`, `closeLightbox`
-- **init prefix:** All main feature functions start with `init` (initMobileMenu, initLightbox, etc.)
-- **descriptive names:** Function names describe their purpose clearly
-
-**JavaScript Variables:**
-
-- **camelCase for variables:** `booted`, `currentIndex`, `imageSources`, `consoleEl`, `navLinks`
-- **const for constants:** Query selectors and configuration values
-- **let for mutable:** Loop iterators, state variables within functions
+**Files:** kebab-case (`check-seo.js`, `discord-cta.njk`, `scroll-spy.js`); page templates use Polish slugs matching the URL (`jak-dolaczyc.njk` -> `/jak-dolaczyc/`).
+**Data files:** camelCase key names (`discordBadge.js` -> `discordBadge` global).
+**Directories:** lowercase; Eleventy-special dirs prefixed `_` (`_data`, `_includes`, `_dev`).
+**Versioned assets:** `og-default-v1.jpg` — bump suffix to bust caches.
 
 ## Where to Add New Code
 
-**New Feature/Component:**
-- If minimal (< 50 lines of JS): Add function to `js/main.js`, call in DOMContentLoaded
-- If complex: Consider creating `js/feature-name.js` and importing it in index.html
-- Add corresponding HTML sections to `index.html`
-- Add styling to `css/style.css` (or create `css/feature-name.css` if substantial)
+**New page:**
+- Template: `src/<polish-slug>.njk` with `layout: layouts/base.njk`, `title`, `description`, `permalink`, `breadcrumb`
+- Content data: `src/_data/<name>.js`
+- Nav entry: `src/_data/navigation.js`
+- Styles: `src/css/partials/pages.css` or new partial imported in `src/css/style.css`
+- Tests: `test/pages.test.js` or new `test/<name>.test.js`
 
-**New Styling:**
-- If feature-specific: Add to relevant section in `css/style.css`
-- If complex/large: Consider creating `css/feature-name.css` and linking in `index.html` `<head>`
-- Always use CSS custom variables for colors (`var(--accent-color)`) not hardcoded values
+**New client feature:**
+- `src/js/modules/<name>.js` exporting `init(el)`; add literal loader in `src/js/main.js`; mark markup with `data-js="<name>"`; test in `test/modules.test.js`/`test/client.test.js`
 
-**New Page Section:**
-- Add semantic HTML section to `index.html` with appropriate id attribute
-- Create `.section-container` wrapper div (pattern used in about, gallery, recruitment)
-- Add section-specific CSS to `css/style.css` using class selectors
-- Add initialization function to `js/main.js` if interactivity needed
-- Add navigation link to header nav list
+**New image:** file in `src/images/`, register in `lib/images.js` (or via `gallery.js`/`operations.js`), render with `{% picture images.<key>, {...} %}`.
 
-**New Gallery Image:**
-- Add PNG/JPG to `assets/`
-- Add `gallery-item` div to gallery grid in `index.html` with:
-  - `data-src="assets/image-name.jpg"` attribute
-  - Image `<img>` tag with `loading="lazy"`
-  - `.gallery-overlay` div with `<h3>` title and `<p>` description
-- No JavaScript changes needed - existing lightbox handles dynamically
+**New icon:** add path to `lib/icons.js`, use `{% icon "name" %}`.
 
-**New Modal/Overlay:**
-- Pattern: Create container div with id, hidden by default (display: none)
-- Add trigger element (button or clickable element) with click handler
-- Create init function in `js/main.js` to attach event listeners
-- Use pattern from lightbox and easter egg (e.g., close on button, ESC key, outer click)
-- CSS: Use `.lightbox` pattern as template for styling
+**Build helper:** `lib/<name>.js` (Node built-ins preferred); CLI wrapper in `scripts/` if needed.
+
+**Gate rule:** `lib/check-seo.js` or `lib/check-perf.js` (BUDGET), plus tests in `test/seo-gate.test.js` / `test/perf-gate.test.js`.
 
 ## Special Directories
 
-**`api/` (Empty/Reserved):**
-- Purpose: Placeholder for backend API integration
-- Generated: No (manually created directory)
-- Committed: Yes (exists in repository)
-- Notes: Currently unused; prepare when backend service needed
-
-**`assets/` (Static Resources):**
-- Purpose: Store all image files referenced in HTML
-- Generated: No (manually created during design)
-- Committed: Yes (all images tracked in git)
-- Notes: Images use relative paths in HTML (`assets/image.jpg`)
-
-**`.planning/` (Documentation):**
-- Purpose: GSD workflow documentation and planning
-- Generated: Partially (created by GSD tools)
-- Committed: Yes (documentation tracked in git)
-- Notes: Read-only for development; updated by planning tools
+**`_site/`:** build output — Generated: Yes, Committed: No
+**`_site.rejected/`:** gate-rejected output — Generated: Yes, Committed: No
+**`_test/`:** per-test build outputs — Generated: Yes, Committed: No
+**`.cache/img/`:** content-addressed image variants — Generated: Yes, Committed: No
+**`src/_dev/`:** dev-only pages, excluded from production builds unless `INCLUDE_DEV_PAGES=1` — Committed: Yes
+**`.planning/`:** GSD planning artifacts — Committed: Yes
 
 ---
 
-*Structure analysis: 2026-10-02*
+*Structure analysis: 2026-10-13*

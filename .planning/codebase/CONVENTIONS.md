@@ -1,231 +1,112 @@
 ---
-last_mapped_commit: 63f2ad5fb842c140afe59fe486169f7da112193b
-last_mapped_at: 2026-10-02
+last_mapped_commit: 498f19eefca8ec513547073c1d87eb4bb2a09b7d
+last_mapped_at: 2026-10-13
 ---
 # Coding Conventions
 
-**Analysis Date:** 2026-10-02
+**Analysis Date:** 2026-10-13
+
+Eleventy 3 static site, ESM throughout (`"type": "module"` in `package.json`), Node >= 22.19 (`.nvmrc`). Note: the conventions section of `.claude/CLAUDE.md` describes the pre-migration single-file site and is stale; follow this document.
 
 ## Naming Patterns
 
 **Files:**
-- HTML: `index.html` (single entry point)
-- CSS: `style.css` (single stylesheet in `css/` directory)
-- JavaScript: `main.js` (single script in `js/` directory)
-- Pattern: lowercase with hyphens for directories (`css/`, `js/`, `assets/`)
+- kebab-case everywhere: `lib/check-seo.js`, `lib/image-size.js`, `src/js/modules/scroll-spy.js`, `src/_includes/partials/discord-cta.njk`
+- Pages are Polish slugs as `.njk`: `src/jak-dolaczyc.njk`, `src/operacje.njk`; permalinks set in front matter (`permalink: /jak-dolaczyc/`)
+- Generated non-HTML outputs use `<name>.<ext>.njk`: `src/robots.txt.njk`, `src/sitemap.xml.njk`, `src/site.webmanifest.njk`, `src/web.config.njk`
+- Tests: `test/<area>.test.js` (`test/seo-gate.test.js`); shared helpers in `test/helpers.js`
+- CLI wrappers in `scripts/` share names with their rule modules in `lib/` (`scripts/check-seo.js` -> `lib/check-seo.js`)
 
 **Functions:**
-- camelCase for all function names
-- Examples: `initMobileMenu()`, `initLightbox()`, `runBootSequence()`, `openLightbox()`, `closeLightbox()`
-- Nested functions follow same pattern: `updateLightboxContent()`, `showNext()`, `showPrev()`
-- Descriptive verb-first naming: functions start with action words (`init*`, `open*`, `close*`, `write*`, `update*`, `show*`)
+- camelCase, verb-first: `formatPlDate`, `inviteApiUrl`, `floorCount`, `checkSite`, `removeRejectedOutput`, `buildSchemaGraph`, `renderIcon`
+- Client feature modules export a single `init(el)` (`src/js/modules/menu.js`)
 
 **Variables:**
-- camelCase for all variable names
-- Examples: `toggle`, `navList`, `currentIndex`, `imageSources`, `consoleEl`, `booted`
-- Descriptive names avoid abbreviations except for common DOM suffixes (`El` for element, `Btn` for button, `Str` for string)
-- Constants: Use descriptive camelCase in function scope; no module-level constants
+- camelCase; module-level constants are also camelCase (`localUrl`, `nonIndexableUrls`, `inviteApiBase` in `lib/discord.js`), not SCREAMING_CASE
+- DOM suffixes `El`, `Btn` (`consoleEl`)
 
-**CSS Classes:**
-- kebab-case for all CSS class names
-- Examples: `.hud-border`, `.gallery-item`, `.menu-toggle`, `.lightbox-close`, `.calendar-day`
-- Semantic naming: class names describe purpose/component, not styling
-- No object-oriented naming patterns (avoid `.red`, `.bold`); use semantic names (`.danger-color`, `.text-muted`)
+**Types:**
+- No TypeScript, no JSDoc types. Contracts described in plain `//` comments above functions.
 
-**CSS Custom Properties:**
-- kebab-case with double-dash prefix
-- Organized by category: `--bg-*`, `--text-*`, `--accent-*`, `--border-*`, `--transition-*`
-- Examples: `--bg-primary`, `--text-secondary`, `--accent-color`, `--border-color`, `--grid-line-color`
-- All defined in `:root` for global availability (`css/style.css` lines 4-35)
+**CSS:**
+- kebab-case classes, component-prefixed (`.discord-badge-members`, `.page-block`, `.req-list`); state classes `.active`, `.open`
+- Custom properties in `:root` (`src/css/partials/base.css`)
+- JS hooks use `data-js="<feature>"` attributes, never classes (`data-js="discord-badge"`)
 
 ## Code Style
 
 **Formatting:**
-- No automated formatter configured (no .prettierrc, eslint, or similar)
-- Manual formatting conventions observed:
-  - 2-space indentation (observed in HTML and CSS)
-  - Consistent line breaks between logical sections
-  - CSS properties organized by type (spacing, colors, transitions)
+- No formatter/linter config (no Prettier, ESLint, EditorConfig). Match surrounding file.
+- 2-space indent, semicolons, trailing commas in multi-line literals in Node code
+- Quotes split by layer:
+  - Node/build code (`lib/`, `scripts/`, `test/`, `eleventy.config.js`, `src/_data/`): double quotes
+  - Browser code (`src/js/`): single quotes, no trailing commas (`src/js/main.js`)
+- Template literals for interpolated messages
+- LF line endings in the repo; tests normalise `\r\n` when reading text (`test/workflow.test.js`)
 
 **Linting:**
-- No linter configured (no .eslintrc files present)
-- Manual code quality standards observed:
-  - Early returns for guard clauses: `if (!lightbox || items.length === 0) return;` (`js/main.js:52`)
-  - Defensive DOM checks before accessing elements
-  - Consistent error handling patterns
-
-**Semicolons:**
-- Present on all statements in JavaScript
-- Consistent use across all `.js` files
-
-**Quotes:**
-- Single quotes in HTML attributes: `class="menu-toggle"`, `id="hero"`
-- Template literals used for complex HTML generation (`js/main.js:156-160`)
+- None. Correctness enforced by the `node:test` suite and the post-build gates (`scripts/check-seo.js`, `scripts/check-perf.js`).
 
 ## Import Organization
 
-**JavaScript:**
-- No module system used (vanilla JavaScript)
-- All code in single `js/main.js` file loaded at end of HTML document
-- DOMContentLoaded event handler wraps initialization: `document.addEventListener('DOMContentLoaded', () => { ... })`
+**Order:**
+1. Node built-ins with `node:` prefix (`import { readFileSync } from "node:fs";`)
+2. Third-party (`@11ty/eleventy`, `@11ty/eleventy-img`, `lightningcss`)
+3. Local modules via relative paths with `.js` extension (`../lib/seo.js`, `./helpers.js`)
 
-**CSS:**
-- @import statement for Google Fonts at top of stylesheet (`css/style.css:1`)
-- External Font Awesome CDN linked in HTML `<head>` section
-- Single stylesheet linked in HTML: `<link rel="stylesheet" href="css/style.css">`
+**Path Aliases:**
+- None. Use relative paths; compute repo paths with `fileURLToPath(new URL("..", import.meta.url))` (`test/helpers.js`, `scripts/check-seo.js`).
 
-**HTML:**
-- Semantic HTML5 structure: `<header>`, `<nav>`, `<main>`, `<section>`, `<footer>`
-- External resources in `<head>`: fonts, stylesheets, preconnect directives
-- Structured data (JSON-LD) for SEO in `<head>` (lines 26-35)
+**Client modules:**
+- `src/js/main.js` is the only `<script type="module">`; it lazy-loads features from a frozen loader map keyed by `data-js` names. Add new features as `src/js/modules/<name>.js` exporting `init(el)` and register a literal specifier in `loaders` (`'./modules/<name>.js' + version`). Never build a specifier from attribute text.
 
 ## Error Handling
 
 **Patterns:**
-- Guard clauses with early returns prevent further execution
-  - Example: `if (!lightbox || items.length === 0) return;` (`js/main.js:52`)
-  - Example: `if (!toggle && navList) { ... }` (`js/main.js:17`)
-- DOM existence checks before accessing properties
-  - Example: `const consoleEl = document.getElementById('terminal-console'); if (!consoleEl) return;` (`js/main.js:124-125`)
-- Safe array/collection access via Array.from() and map/forEach
-- No try/catch blocks (not needed for vanilla DOM manipulation)
-- No error logging or reporting (runs silently on failure)
-
-**Null/Undefined Handling:**
-- Ternary operators for conditional logic: `isActive ? 'true' : 'false'` (`js/main.js:22`)
-- Logical operators for default values: `message || 'unknown'` pattern not used; always provide full values
+- Build-time code fails loudly: validate input and `throw new Error(...)` with a message that includes the bad value (`lib/dates.js`, `lib/discord.js`, `lib/icons.js`, `lib/schema.js`, `lib/woff2.js`). A typo must fail the build, not ship.
+- Config guards at import time: `src/_data/site.js` throws if `SITE_URL` is blank in a production build (override with `ALLOW_LOCAL_SITE_URL=1` for local/test builds only)
+- Network is the exception: `fetchInviteCounts` in `lib/discord.js` never throws or logs, so Discord can never break the build; `DISCORD_FETCH=0` disables it
+- Gate scripts collect problems into an array, print each to stderr prefixed `check-seo: ` / `check-perf: `, then `process.exit(1)` and move the output to `<dir>.rejected` (`lib/reject-output.js`)
+- Client modules use guard clauses (`if (!el) return;`) and never throw
+- `try { ... } catch { ... }` without binding when the error is unused (`src/_data/site.js`)
 
 ## Logging
 
-**Framework:** `console` methods (browser console only)
+**Framework:** `process.stdout.write` / `process.stderr.write` in `scripts/` only.
 
 **Patterns:**
-- No console logging in production code
-- Console output left to browser DevTools inspection
-- Application uses custom terminal display for status messages (`js/main.js:142-164`)
-
-**Custom Logging:**
-- Terminal simulation for recruitment section
-- Status messages written via `writeToConsole()` helper function
-- Messages timestamped in `HH:MM:SS` format
-- Status levels: `'info'` (default), `'success'`, `'error'`, `'warn'` (`js/main.js:142`)
+- Prefix every line with the tool name (`check-seo: LOCAL build (...)`)
+- No `console.*` in `lib/` or `src/js/`; the recruitment terminal UI writes its own lines (`src/js/modules/terminal.js`)
 
 ## Comments
 
 **When to Comment:**
-- Section headers with dashes: `/* --- FEATURE NAME --- */` separate major sections
-- Inline comments explain non-obvious logic
-- No comments for obvious code (e.g., `const toggle = document.querySelector('.menu-toggle');` doesn't need explanation)
+- Every file opens with a header comment: what it is, where it runs ("Build-time code outside src/"), and which requirement/decision IDs it implements
+- Reference planning IDs inline: requirement IDs (`SEO-08`, `CONT-07`), decisions (`D-14`), review findings (`CR-01`, `WR-03`, `IN-02`), pitfalls (`Pitfall 11`). Keep this practice so tests and code trace back to `.planning/`.
+- Explain the why and examples of input -> output (`// 246 -> 200, 99 -> 90, 9 -> 9.`)
+- Section headers `/* --- NAME --- */` in client JS, CSS and long test files
 
-**Examples:**
-- Section header: `/* --- MOBILE MENU --- */` (`js/main.js:11`)
-- Inline logic: `// Lock background scroll` (`js/main.js:65`)
-- Nested explanation: `// Close menu when a link is clicked` (`js/main.js:26`)
-
-**Code Comments:**
-- Comments placed above or inline with complex logic
-- Polish language used in some messages (target audience is Polish gaming clan)
-- No JSDoc or TypeScript doc comments (vanilla JavaScript project)
+**JSDoc/TSDoc:**
+- Not used.
 
 ## Function Design
 
-**Size:**
-- Functions are small, focused on single responsibility
-- Largest function: `runBootSequence()` is ~40 lines but manages timed sequential output only
-- Most functions: 10-25 lines
-- Example small function: `closeLightbox()` (3 lines, `js/main.js:74-77`)
+**Size:** Small pure helpers in `lib/` (5-25 lines); gate rule modules (`lib/check-seo.js`, `lib/check-perf.js`) are the large files (~520 lines).
 
-**Parameters:**
-- Functions accept minimal parameters
-- Example: `openLightbox(index)` takes only index, uses closure to access `imageSources`
-- Complex data passed via closures or module scope, not parameters
-- No destructuring patterns used
+**Parameters:** Pass config explicitly (`checkSite(outDir, site)`) rather than reading globals, so tests can inject fixture configs. Options objects with destructured defaults are fine (`createBadge(apiUrl, { members, online } = {})`).
 
-**Return Values:**
-- Most functions return nothing (void) - perform side effects on DOM
-- Guard clause functions early return without value: `if (!lightbox) return;`
-- Nested functions use closure variables instead of returning data
-
-**Arrow Functions:**
-- Used consistently for event handlers and callbacks
-- Pattern: `element.addEventListener('click', () => { ... })`
-- Arrow functions preserve `this` context (not critical here as no classes used)
+**Return Values:** Pure functions return values; validators return arrays of problem strings; client `init` returns nothing.
 
 ## Module Design
 
-**Exports:**
-- Single file (`js/main.js`) exports nothing - all functions are module-private
-- No module.exports or ES6 export statements
-- Functions scoped to file; only DOMContentLoaded callback is public entry point
+**Exports:** Named exports in `lib/` and client modules. Default export only for Eleventy config (`eleventy.config.js`) and `_data` files (`src/_data/site.js`).
 
-**Barrel Files:**
-- Not applicable; single JavaScript file
+**Single source of truth:** Shared logic lives once in `lib/` and is imported by both Eleventy and the gates/tests (`lib/seo.js` `isIndexableUrl`, `lib/html.js` re-exported by `test/helpers.js`). Site URL, path prefix and Discord invite come only from `src/_data/site.js`.
 
-**Scoping:**
-- All functions are file-scoped (not globally accessible)
-- Only `document.addEventListener('DOMContentLoaded')` handler exposes entry point
-- Variables declared with `const`/`let` (no `var`)
-- Closure pattern used to maintain state: `currentIndex` in lightbox feature
+**Barrel Files:** Not used.
 
-## HTML Semantic Structure
-
-**File:** `index.html`
-
-**Organization:**
-- Proper semantic HTML5 elements: `<header>`, `<nav>`, `<main>`, `<section>`, `<footer>`
-- Each section has unique `id` for navigation: `id="hero"`, `id="about"`, `id="gallery"`, `id="recruitment"`
-- Accessibility attributes: `aria-label`, `aria-expanded`, `aria-controls` on interactive elements
-
-**Attributes:**
-- Images have `alt` text and dimensions: `alt="IBC Logo" class="logo-img" width="48" height="48"`
-- Lazy loading: `decoding="async"` on images
-- ARIA roles for accessibility
-
-## CSS Organization
-
-**Structure:** `css/style.css` (1449 lines)
-
-**Organization by Section:**
-1. Custom variables in `:root` (lines 3-35)
-2. Base styles: `*`, `html`, `body` (lines 38-89)
-3. Typography (lines 93-125)
-4. Reusable HUD components (lines 127-236)
-5. Header/Navigation (lines 237-364)
-6. Hero section (lines 365-468)
-7. Section general styles (lines 530-558)
-8. About section (lines 559-620)
-9. Roster section (lines 621-716)
-10. Gallery section (lines 717-870)
-11. Recruitment section (lines 871-1001)
-12. Footer (lines 1003-1071)
-13. Calendar section (lines 1072-1255)
-14. Easter egg overlay (lines 1256-1365)
-15. Responsive media queries (lines 1366-1449)
-
-**Custom Properties:**
-- All colors defined as CSS variables in `:root`
-- Transition speeds unified: `--transition-speed: 0.25s` (line 34)
-- Font stacks defined: `--font-hud`, `--font-body` (lines 25-26)
-- Opacity and colors use RGB format for variable reuse: `--accent-rgb: 203, 177, 138` (line 11)
-
-**Class Naming Convention:**
-- Component-based: `.hud-*`, `.gallery-*`, `.calendar-*`, `.terminal-*`, `.recruitment-*`
-- State modifiers: `.active`, `.open`, `.today`, `.empty`, `.danger`
-- Pseudo-elements for decorative elements: `::before`, `::after` for corners, brackets, animations
-
-## Accessibility Considerations
-
-**HTML:**
-- Semantic elements properly used
-- ARIA attributes on interactive elements: `aria-label`, `aria-expanded`, `aria-controls`
-- Form labels associated via `<label>` elements
-- Skip links could be added for keyboard navigation
-
-**CSS:**
-- Color contrast verified: `--text-muted: #8e9fa9` has WCAG AA compliant contrast > 4.5:1 (line 23 comment)
-- Focus states possible but not explicitly styled
-- Animated elements have reasonable opacity changes (blinking status dot, 2s cycle)
+**Dependencies:** Keep devDependencies minimal and pinned (`package.json`; `test/deps.test.js` enforces). Prefer Node built-ins.
 
 ---
 
-*Convention analysis: 2026-10-02*
+*Convention analysis: 2026-10-13*
