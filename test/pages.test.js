@@ -5,7 +5,8 @@
 // (node --test runs files in parallel).
 import { before, test } from "node:test";
 import assert from "node:assert/strict";
-import { attrValues, block, build, read } from "./helpers.js";
+import { spawnSync } from "node:child_process";
+import { attrValues, block, build, read, repoRoot } from "./helpers.js";
 import * as htmlLib from "../lib/html.js";
 import join from "../src/_data/join.js";
 import operations from "../src/_data/operations.js";
@@ -296,5 +297,124 @@ for (const [key, variant] of Object.entries(variants)) {
     assert.ok(!html.includes('"Event"'), "operations page carries Event structured data");
     const canonical = canonicalOf(html);
     assert.ok(read(outDirs[key], "sitemap.xml").includes(`<loc>${canonical}</loc>`), `sitemap lacks ${canonical}`);
+  });
+}
+
+// ---------------------------------------------------------------------------------------------
+// Recaps (CONT-04, D-11, D-12) and the Polish date formatter (Pitfall 11)
+
+// lib/dates.js is loaded lazily so that a missing module fails these tests as assertions.
+async function loadDates() {
+  try {
+    return await import("../lib/dates.js");
+  } catch {
+    return {};
+  }
+}
+
+test("(unit) formatPlDate formats ISO dates as Polish long dates", async () => {
+  const { formatPlDate } = await loadDates();
+  assert.equal(typeof formatPlDate, "function", "lib/dates.js does not export formatPlDate");
+  assert.equal(formatPlDate("2026-09-20"), "20 września 2026");
+  assert.equal(formatPlDate("2026-03-07"), "7 marca 2026");
+});
+
+test("(unit) formatPlDate formats in UTC whatever the process timezone (Pitfall 11)", () => {
+  const datesUrl = new URL("../lib/dates.js", import.meta.url).href;
+  const script = `import(${JSON.stringify(datesUrl)}).then((m) => console.log(new Date("2026-09-20T00:00:00Z").getDate() + "|" + m.formatPlDate("2026-09-20")));`;
+  const result = spawnSync(process.execPath, ["-e", script], {
+    env: { ...process.env, TZ: "America/Los_Angeles" },
+    encoding: "utf8",
+  });
+  const [localDay, formatted] = result.stdout.trim().split("|");
+  assert.equal(localDay, "19", `the child process did not run west of UTC:\n${result.stderr}`);
+  assert.equal(formatted, "20 września 2026", `formatPlDate shifted the day under TZ=America/Los_Angeles:\n${result.stderr}`);
+});
+
+test("(unit) formatPlDate rejects invalid or non-ISO input", async () => {
+  const { formatPlDate } = await loadDates();
+  assert.equal(typeof formatPlDate, "function", "lib/dates.js does not export formatPlDate");
+  for (const input of ["2026-02-30", "2026-9-20", "20.09.2026", "", undefined, null, 20260920]) {
+    assert.throws(() => formatPlDate(input), `formatPlDate(${JSON.stringify(input)}) did not throw`);
+  }
+});
+
+test("(data) operations.recaps: 3–5 drafted entries with mission types and committed images (CONT-04, D-11)", () => {
+  const recaps = operations.recaps;
+  assert.ok(Array.isArray(recaps), "operations.recaps is not an array");
+  assert.ok(recaps.length >= 3 && recaps.length <= 5, `operations.recaps has ${recaps.length} entries, expected 3–5`);
+  const typeNames = operations.missionTypes.map((type) => type.name);
+  const committed = spawnSync("git", ["ls-files", "src/images"], { cwd: repoRoot, encoding: "utf8" }).stdout.split(/\r?\n/);
+  const dates = recaps.map((recap) => recap.date);
+  assert.equal(new Set(dates).size, dates.length, `duplicate recap dates: ${dates.join(", ")}`);
+  for (const recap of recaps) {
+    assert.match(recap.draft || "", /^TODO\(FACTS-\d+\)$/, `recap "${recap.title}" has no TODO(FACTS-NN) draft marker`);
+    assert.ok(typeNames.includes(recap.type), `recap "${recap.title}" type "${recap.type}" is not one of ${typeNames.join(", ")}`);
+    assert.ok(committed.includes(`src/images/${recap.file}`), `recap image ${recap.file} is not a committed original under src/images/`);
+    assert.match(recap.date, /^\d{4}-\d{2}-\d{2}$/, `recap "${recap.title}" date is not ISO`);
+    assert.ok(recap.date < operations.lastUpdate.date, `recap "${recap.title}" is dated after the last update`);
+    for (const field of ["title", "setting", "text", "alt"]) {
+      assert.equal(typeof recap[field], "string", `recap ${recap.file}.${field} is not a string`);
+      assert.ok(recap[field].trim() !== "", `recap ${recap.file}.${field} is empty`);
+      assert.doesNotMatch(recap[field], /TODO|FACTS-\d+/, `recap ${recap.file}.${field} holds a marker (markers belong in draft)`);
+    }
+  }
+  assert.match((operations.lastUpdate || {}).draft || "", /^TODO\(FACTS-\d+\)$/, "lastUpdate has no draft marker");
+});
+
+// Every <article class="recap-card ..."> as { raw, datetime, meta }.
+function recapCards(html) {
+  return Array.from(html.matchAll(/<article class="recap-card hud-border">([\s\S]*?)<\/article>/g), (match) => {
+    const meta = /<p class="recap-meta">([\s\S]*?)<\/p>/.exec(match[1]);
+    const time = meta ? /<time datetime="([^"]*)">/.exec(meta[1]) : null;
+    return { raw: match[1], meta: meta ? htmlLib.visibleText(meta[1]) : null, datetime: time ? time[1] : null };
+  });
+}
+
+for (const [key] of Object.entries(variants)) {
+  const page = () => read(outDirs[key], operationsPage);
+
+  test(`(${key} build) operations page: 3–5 recap cards, newest first (CONT-04, D-12)`, () => {
+    const cards = recapCards(page());
+    assert.ok(cards.length >= 3 && cards.length <= 5, `${cards.length} recap cards, expected 3–5`);
+    const datetimes = cards.map((card) => card.datetime);
+    for (const value of datetimes) assert.match(value || "", /^\d{4}-\d{2}-\d{2}$/, `recap <time datetime="${value}"> is not an ISO date`);
+    for (let index = 1; index < datetimes.length; index += 1) {
+      assert.ok(datetimes[index - 1] >= datetimes[index], `recaps are not newest first: ${datetimes.join(", ")}`);
+    }
+    assert.deepEqual(datetimes, (operations.recaps || []).map((recap) => recap.date).sort().reverse());
+  });
+
+  test(`(${key} build) operations page: each recap card has one lazy responsive picture and a meta line`, async () => {
+    const { formatPlDate } = await loadDates();
+    assert.equal(typeof formatPlDate, "function", "lib/dates.js does not export formatPlDate");
+    const cards = recapCards(page());
+    assert.ok(cards.length >= 3, "no recap cards");
+    const byDate = new Map((operations.recaps || []).map((recap) => [recap.date, recap]));
+    for (const card of cards) {
+      const recap = byDate.get(card.datetime);
+      assert.ok(recap, `card dated ${card.datetime} matches no recap`);
+      assert.equal((card.raw.match(/<picture>/g) || []).length, 1, `recap ${recap.file} needs exactly one <picture>`);
+      const img = /<img\s[^>]*>/.exec(card.raw);
+      assert.ok(img, `recap ${recap.file} has no <img>`);
+      assert.ok(img[0].includes('loading="lazy"'), `recap ${recap.file} image is not lazy`);
+      assert.match(img[0], /\swidth="\d+"/, `recap ${recap.file} image has no numeric width`);
+      assert.match(img[0], /\sheight="\d+"/, `recap ${recap.file} image has no numeric height`);
+      const alt = attrValues(img[0], "alt")[0];
+      assert.ok(alt && alt.trim() !== "", `recap ${recap.file} image has an empty alt`);
+      assert.ok(card.meta.includes(formatPlDate(recap.date)), `meta "${card.meta}" lacks the Polish date`);
+      assert.ok(card.meta.includes(recap.setting), `meta "${card.meta}" lacks the setting`);
+      assert.ok(card.meta.includes(recap.type), `meta "${card.meta}" lacks the type`);
+      assert.ok(card.raw.includes(`<!-- ${recap.draft} -->`), `recap ${recap.file} lacks <!-- ${recap.draft} -->`);
+    }
+  });
+
+  test(`(${key} build) operations page: manual "Ostatnia aktualizacja" date with its marker`, () => {
+    const html = page();
+    const lastUpdate = operations.lastUpdate || {};
+    const updated = /<p class="recaps-updated">([\s\S]*?)<\/p>/.exec(html);
+    assert.ok(updated, "no p.recaps-updated");
+    assert.match(updated[1], new RegExp(`Ostatnia aktualizacja: <time datetime="${lastUpdate.date}">`), updated[1]);
+    assert.ok(updated[1].includes(`<!-- ${lastUpdate.draft} -->`), `p.recaps-updated lacks <!-- ${lastUpdate.draft} -->`);
   });
 }
