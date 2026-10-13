@@ -13,7 +13,6 @@ const loaders = Object.freeze({
   terminal: () => import('./modules/terminal.js' + version),
   'scroll-spy': () => import('./modules/scroll-spy.js' + version),
   'easter-egg': () => import('./modules/easter-egg.js' + version),
-  'discord-badge': () => import('./modules/discord-badge.js' + version),
   'hash-redirect': () => import('./modules/hash-redirect.js' + version)
 });
 

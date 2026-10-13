@@ -495,7 +495,7 @@ const oldAgeLine = "Ukończone 16 lat";
 const oldDaysLabel = "Pt/Sob/Ndz";
 
 for (const [key] of Object.entries(variants)) {
-  test(`(${key} build) the home teaser states the confirmed facts and keeps terminal, CTA and badge (D-06, D-09)`, () => {
+  test(`(${key} build) the home teaser states the confirmed facts and keeps terminal and CTA, without the Discord member badge (D-06, D-09, WR-01)`, () => {
     const home = read(outDirs[key], "index.html");
     for (const text of ["Zalecane 16+", "TeamSpeak", "ACRE2", "ok. 90 GB", "Start misji w weekendy", "19:00", "20+", "Aktywnych członków", "Pełna instrukcja", "Wejdź na Discord", "Instrukcja Zaciągu", "Wymagania wstępne"]) {
       assert.ok(home.includes(text), `home lacks "${text}"`);
@@ -506,7 +506,7 @@ for (const [key] of Object.entries(variants)) {
     assert.ok(!teaser.includes("recruitment-steps"), "the teaser still has the step list");
     assert.ok(teaser.includes('data-js="terminal"'), "the teaser lost the terminal");
     assert.ok(teaser.includes("Wejdź na Discord"), "the teaser lost the Discord CTA");
-    assert.equal(teaser.split('class="discord-badge"').length - 1, 1, "the teaser needs exactly one Discord badge");
+    assert.ok(!teaser.includes("discord-badge") && !teaser.includes("data-api-url"), "the Discord member badge was removed (quick 261013-vh0, review WR-01)");
     assert.ok(teaser.indexOf("Pełna instrukcja") < teaser.indexOf("recruitment-cta-group"), "Pełna instrukcja must come before the CTA group");
   });
 
