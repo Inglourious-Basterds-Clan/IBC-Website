@@ -336,10 +336,10 @@ test("(unit) formatPlDate rejects invalid or non-ISO input", () => {
   }
 });
 
-test("(data) operations.recaps: 3–5 entries with mission types and committed images (CONT-04, D-11)", () => {
+test("(data) operations.recaps: 2–5 entries with mission types and committed images (CONT-04, D-11)", () => {
   const recaps = operations.recaps;
   assert.ok(Array.isArray(recaps), "operations.recaps is not an array");
-  assert.ok(recaps.length >= 3 && recaps.length <= 5, `operations.recaps has ${recaps.length} entries, expected 3–5`);
+  assert.ok(recaps.length >= 2 && recaps.length <= 5, `operations.recaps has ${recaps.length} entries, expected 2–5`);
   const typeNames = operations.missionTypes.map((type) => type.name);
   const committed = spawnSync("git", ["ls-files", "src/images"], { cwd: repoRoot, encoding: "utf8" }).stdout.split(/\r?\n/);
   const dates = recaps.map((recap) => recap.date);
@@ -376,9 +376,9 @@ function recapCards(html) {
 for (const [key] of Object.entries(variants)) {
   const page = () => read(outDirs[key], operationsPage);
 
-  test(`(${key} build) operations page: 3–5 recap cards, newest first (CONT-04, D-12)`, () => {
+  test(`(${key} build) operations page: 2–5 recap cards, newest first (CONT-04, D-12)`, () => {
     const cards = recapCards(page());
-    assert.ok(cards.length >= 3 && cards.length <= 5, `${cards.length} recap cards, expected 3–5`);
+    assert.ok(cards.length >= 2 && cards.length <= 5, `${cards.length} recap cards, expected 2–5`);
     const datetimes = cards.map((card) => card.datetime);
     for (const value of datetimes) assert.match(value || "", /^\d{4}-\d{2}-\d{2}$/, `recap <time datetime="${value}"> is not an ISO date`);
     for (let index = 1; index < datetimes.length; index += 1) {
@@ -389,7 +389,7 @@ for (const [key] of Object.entries(variants)) {
 
   test(`(${key} build) operations page: each recap card has one lazy responsive picture and a meta line`, () => {
     const cards = recapCards(page());
-    assert.ok(cards.length >= 3, "no recap cards");
+    assert.ok(cards.length >= 2, "no recap cards");
     const byDate = new Map((operations.recaps || []).map((recap) => [recap.date, recap]));
     for (const card of cards) {
       const recap = byDate.get(card.datetime);

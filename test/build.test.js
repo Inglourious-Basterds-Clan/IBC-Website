@@ -128,8 +128,6 @@ test("originals stay in git (D-02)", () => {
     "jo_1967.png",
     "logo.png",
     "op_patrol.jpg",
-    "patrol.jpg",
-    "sniper.jpg",
   ]);
 });
 
