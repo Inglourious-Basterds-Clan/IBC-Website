@@ -3,16 +3,16 @@ gsd_state_version: "1.0"
 current_phase: 04
 current_phase_name: Join & Operations Pages
 status: executing
-stopped_at: Completed 04-04-PLAN.md
-last_updated: "2026-10-13T17:57:06.572Z"
+stopped_at: Completed 04-05-PLAN.md
+last_updated: "2026-10-13T18:05:33.673Z"
 last_activity: 2026-10-13
 last_activity_desc: Phase 04 execution resumed (wave continue)
-state_head: 8e84a5b6e58a92a66826ca1f02687e398d85a8f4
+state_head: cabf76dd17c175594ecf5a930529dd489644cd1f
 progress:
   total_phases: 5
   completed_phases: 3
   total_plans: 32
-  completed_plans: 28
+  completed_plans: 29
   percent: 60
 ---
 
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-10-11)
 ## Current Position
 
 Phase: 04 (Join & Operations Pages) — EXECUTING
-Plan: 2 of 8
+Plan: 3 of 8
 Status: Ready to execute
 Last activity: 2026-10-13 — Phase 04 execution resumed (wave continue)
 
@@ -83,6 +83,7 @@ Progress: [██████░░░░] 60%
 | Phase 03 P10 | 22 min | 3 tasks | 12 files |
 | Phase 03 P11 | 49 min | 3 tasks | 44 files |
 | Phase 04 P04 | 7 min | 2 tasks | 9 files |
+| Phase 04 P05 | 6 min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -155,6 +156,8 @@ Recent decisions affecting current work:
 - [Phase 03]: UAT 8/8 passed 2026-10-11; mobile PSI Performance 100 (target 90, baseline 67); verification re-run passed 7/7
 - [Phase 04]: 04-04: sniper.jpg recap labelled modern (Współczesność · Takistan) instead of Cold War because the image shows modern gear
 - [Phase 04]: 04-04: formatPlDate is strict ISO + UTC; invalid dates fail the build (Pitfall 11)
+- [Phase 04]: G11 compares visible breadcrumb links only when the BreadcrumbList itself is valid, so each broken case reports its own problem
+- [Phase 04]: G12 compares JSON-LD strings after whitespace collapse only and the visible FAQ through lib/html.js visibleText, the same decoding as test/pages.test.js
 
 ### Pending Todos
 
@@ -187,6 +190,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-10-13T17:57:06.366Z
-Stopped at: Completed 04-04-PLAN.md
+Last session: 2026-10-13T18:05:33.474Z
+Stopped at: Completed 04-05-PLAN.md
 Resume file: None

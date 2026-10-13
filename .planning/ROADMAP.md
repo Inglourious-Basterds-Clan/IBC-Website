@@ -133,7 +133,7 @@ Plans:
   4. Every fact Claude drafted is marked TODO and listed in `FACTS.md`. The production build stays blocked until the user confirms each one and the markers are removed.
   5. The home page shows a live Discord members/online badge. It falls back to a static number when the request fails or JS is off, and its label doesn't contradict the "20+ aktywnych członków" claim.
 
-**Plans**: 4/8 plans executed
+**Plans**: 5/8 plans executed
 
 Plans:
 **Wave 1**
@@ -143,7 +143,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 - [x] 04-04-PLAN.md — /operacje/ from operations.js: schedule, mission types, eras, typowy wieczór, Najbliższe misje, 4 drafted recap cards with images (wave 2)
-- [ ] 04-05-PLAN.md — Gate rules G11 (breadcrumbs/BreadcrumbList) and G12 (FAQPage = visible FAQ) with fixtures (wave 2)
+- [x] 04-05-PLAN.md — Gate rules G11 (breadcrumbs/BreadcrumbList) and G12 (FAQPage = visible FAQ) with fixtures (wave 2)
 
 **Wave 3** *(blocked on Wave 2 completion)*
 - [ ] 04-06-PLAN.md — Subpage styles: one pages.css partial for breadcrumbs, join page and operations page within the CSS budget (wave 3)
@@ -181,7 +181,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5. Phases 2 and 3 both 
 | 1. Eleventy Foundation | 7/7 | Complete    | 2026-10-06 |
 | 2. Technical SEO | 6/6 | Complete    | 2026-10-08 |
 | 3. Performance & Assets | 11/11 | Complete    | 2026-10-11 |
-| 4. Join & Operations Pages | 4/8 | In Progress | - |
+| 4. Join & Operations Pages | 5/8 | In Progress | - |
 | 5. Accessibility & Visual Refresh | 0/TBD | Not started | - |
 
 ## Backlog
