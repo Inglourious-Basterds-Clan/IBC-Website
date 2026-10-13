@@ -29,6 +29,7 @@ result: [pending]
 
 ### 3. Live Discord badge + WR-01 privacy decision
 expected: No layout shift when the live count arrives; JS-off fallback "Discord: 200+ osób" visible; backstop value 240 accepted or replaced; WR-01 (browser fetch sends visitor IP to Discord) either accepted as locked D-15 or changed (bake-only / click-to-load / privacy note)
+note: Resolved by removal (2026-10-13, quick 261013-vh0): the owner removed the badge, its browser fetch and the build-time count, so WR-01 is fixed and no badge is left to check.
 result: [pending]
 
 ### 4. Subpages at 1280 px and 390 px — breadcrumbs, FAQ keyboard, deep link
@@ -36,7 +37,7 @@ expected: Breadcrumbs 'Start › …' fully visible below the fixed header; 23 p
 result: [pending]
 
 ### 5. Home teaser at 1280 px and 390 px
-expected: Teaser shows four short requirements, terminal, 'Instrukcja Zaciągu' summary, 'Pełna instrukcja →', 'Wejdź na Discord' and the badge; stat reads '19:00 / Start misji w weekendy'; nav shows Start / O nas / Operacje / Dołącz and marks the current page; 'Pełna instrukcja →' does not float mid-card
+expected: Teaser shows four short requirements, terminal, 'Instrukcja Zaciągu' summary, 'Pełna instrukcja →', 'Wejdź na Discord' (no badge: removed in quick 261013-vh0); stat reads '19:00 / Start misji w weekendy'; nav shows Start / O nas / Operacje / Dołącz and marks the current page; 'Pełna instrukcja →' does not float mid-card
 result: [pending]
 
 ### 6. /operacje/ at 1280 px and 390 px

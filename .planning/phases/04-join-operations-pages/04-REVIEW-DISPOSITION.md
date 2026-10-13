@@ -5,7 +5,7 @@ titles: json
 findings:
   - id: WR-01
     severity: warning
-    disposition: skipped
+    disposition: fixed
     title: "Live Discord badge sends every home-page visitor's IP address to Discord (GDPR), the same problem that led to removing Google Fonts"
   - id: WR-02
     severity: warning
@@ -44,7 +44,7 @@ recorded: 2026-10-13T20:35:03.216Z
 
 | Finding | Severity | Disposition | Source |
 |---------|----------|-------------|--------|
-| WR-01 | warning | skipped | 04-REVIEW-FIX.md |
+| WR-01 | warning | fixed | badge removed — quick 261013-vh0; supersedes D-15/D-16 live badge |
 | WR-02 | warning | fixed | 04-REVIEW-FIX.md |
 | WR-03 | warning | fixed | 04-REVIEW-FIX.md |
 | WR-04 | warning | fixed | 04-REVIEW-FIX.md |

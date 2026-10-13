@@ -47,7 +47,7 @@ Requirements for this milestone. Each maps to a roadmap phase.
 - [x] **CONT-04**: `/operacje/` shows 3–5 dated operation recaps
 - [x] **CONT-05**: Nav links to real pages, and old `#hash` links redirect to the matching new page
 - [x] **CONT-06**: Facts drafted by Claude are marked TODO and listed in `FACTS.md`; the user confirms them before publishing
-- [x] **CONT-07**: Live Discord badge (members/online) with a static fallback, labelled so it doesn't conflict with "20+ aktywnych członków"
+- [x] **CONT-07**: Live Discord badge (members/online) with a static fallback, labelled so it doesn't conflict with "20+ aktywnych członków" *(Removed 2026-10-13 by owner decision: the badge sent visitor IPs to Discord, review 04 WR-01; quick 261013-vh0.)*
 
 ### Accessibility
 
