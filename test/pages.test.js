@@ -1,6 +1,6 @@
 // Build-output checks of the content subpages, at the root and under /IBC-Website/:
 // CONT-01 (join requirements, numbered steps, Discord CTA), CONT-02 (FAQ), CONT-03/CONT-04
-// (operations page, later plans) and the visible part of SEO-06 (breadcrumb trail plus a
+// (operations page) and the visible part of SEO-06 (breadcrumb trail plus a
 // BreadcrumbList whose items are absolute, prefix-correct URLs). Build names start with "pages-"
 // (node --test runs files in parallel).
 import { before, test } from "node:test";
@@ -8,6 +8,7 @@ import assert from "node:assert/strict";
 import { attrValues, block, build, read } from "./helpers.js";
 import * as htmlLib from "../lib/html.js";
 import join from "../src/_data/join.js";
+import operations from "../src/_data/operations.js";
 import site from "../src/_data/site.js";
 
 const variants = {
@@ -204,5 +205,96 @@ for (const [key, variant] of Object.entries(variants)) {
     const home = read(outDirs[key], "index.html");
     assert.ok(!home.includes('class="breadcrumbs"'), "home renders breadcrumbs");
     assert.ok(!home.includes("BreadcrumbList"), "home carries a BreadcrumbList");
+  });
+}
+
+// ---------------------------------------------------------------------------------------------
+// /operacje/ (CONT-03, CONT-04, D-10, D-13, SEO-06)
+
+const operationsPage = "operacje/index.html";
+
+// Markup of the .page-block #id up to the next .page-block or the end of the section (operations
+// blocks nest a <div>, so the non-greedy pageBlock helper above does not fit).
+function operationsBlock(html, id) {
+  const start = html.indexOf(`<div class="page-block" id="${id}">`);
+  assert.ok(start !== -1, `no .page-block #${id}`);
+  const rest = html.slice(start + 1);
+  const ends = [rest.indexOf('<div class="page-block"'), rest.indexOf("</section>")].filter((index) => index !== -1);
+  return html.slice(start, start + 1 + Math.min(...ends));
+}
+
+for (const [key, variant] of Object.entries(variants)) {
+  const page = () => read(outDirs[key], operationsPage);
+
+  test(`(${key} build) operations page: one h1, title and description`, () => {
+    const html = page();
+    assert.equal(html.split("<h1").length - 1, 1, "expected exactly one <h1");
+    assert.match(html, /<title>Operacje klanu Arma 3 – harmonogram, misje i relacje \| IBC<\/title>/);
+    const description = /<meta name="description" content="([^"]*)">/.exec(html);
+    assert.ok(description && description[1].trim() !== "", "missing or empty meta description");
+  });
+
+  test(`(${key} build) operations page: schedule, mission types and eras (CONT-03, D-02)`, () => {
+    const text = plainText(block(page(), "main"));
+    for (const fact of ["19:00", "2–3", "PvE", "Joint Operations", "Zeus", "Wietnam", "Zimna wojna"]) {
+      assert.ok(text.includes(fact), `operations page lacks "${fact}"`);
+    }
+    assert.doesNotMatch(text, /hardcore/i, "D-03: no hardcore milsim promises");
+  });
+
+  test(`(${key} build) operations page: the five-step evening timeline in order (CONT-03, D-02)`, () => {
+    const timeline = /<ol class="evening-timeline">([\s\S]*?)<\/ol>/.exec(operationsBlock(page(), "typowy-wieczor"));
+    assert.ok(timeline, "#typowy-wieczor has no ol.evening-timeline");
+    assert.equal(timeline[1].split("<li>").length - 1, 5, "expected exactly 5 timeline steps");
+    const names = Array.from(timeline[1].matchAll(/<h3>([\s\S]*?)<\/h3>/g), (match) => htmlLib.visibleText(match[1]));
+    assert.deepEqual(names, operations.evening.steps.map((step) => step.name));
+    assert.equal(names[0], "Sloty");
+    assert.equal(names[4], "Przegląd OCAP");
+    assert.equal((timeline[1].match(/<span class="evening-time">/g) || []).length, 5, "every step needs a time");
+  });
+
+  test(`(${key} build) operations page: "Najbliższe misje" points to Discord and lists no dates (D-10)`, () => {
+    const upcoming = operationsBlock(page(), "najblizsze-misje");
+    assert.ok(upcoming.includes('<div class="upcoming">'), "no div.upcoming");
+    const anchors = Array.from(upcoming.matchAll(/<a\s[^>]*>/g), (match) => match[0]);
+    assert.ok(anchors.some((anchor) => attrValues(anchor, "href")[0] === site.discord.invite), "no Discord link in #najblizsze-misje");
+    assert.ok(!upcoming.includes("<time"), "#najblizsze-misje must not hold a <time> element");
+    assert.doesNotMatch(upcoming, /\d{4}-\d{2}-\d{2}/, "#najblizsze-misje must not list dates");
+  });
+
+  test(`(${key} build) operations page: drafted evening and OCAP texts carry their markers (CONT-06)`, () => {
+    const evening = operationsBlock(page(), "typowy-wieczor");
+    assert.ok(operations.evening.draft, "the evening times must stay marked until confirmed");
+    assert.ok(evening.includes(`<!-- ${operations.evening.draft} -->`), `#typowy-wieczor lacks <!-- ${operations.evening.draft} -->`);
+    for (const step of operations.evening.steps.filter((entry) => entry.draft)) {
+      assert.ok(evening.includes(`<!-- ${step.draft} -->`), `step ${step.name} lacks <!-- ${step.draft} -->`);
+    }
+  });
+
+  test(`(${key} build) operations page: breadcrumb trail and prefix-correct BreadcrumbList (SEO-06)`, () => {
+    const html = page();
+    const nav = /<nav class="breadcrumbs" aria-label="Ścieżka nawigacji">([\s\S]*?)<\/nav>/.exec(html);
+    assert.ok(nav, "no nav.breadcrumbs");
+    const links = Array.from(nav[1].matchAll(/<a\s[^>]*>[\s\S]*?<\/a>/g), (match) => match[0]);
+    assert.deepEqual(links.map(plainText), ["Start", "Operacje"]);
+    assert.deepEqual(links.map((link) => attrValues(link, "href")[0]), [variant.prefix, variant.prefix + "operacje/"]);
+    assert.ok(links[1].includes('aria-current="page"'), "the last crumb lacks aria-current=page");
+    assert.ok(!links[0].includes("aria-current"), "only the last crumb is the current page");
+
+    const canonical = canonicalOf(html);
+    assert.equal(canonical, variant.base + "operacje/");
+    const blocks = jsonLdBlocks(html);
+    assert.equal(blocks.length, 1, "expected exactly one ld+json script");
+    const list = blocks[0]["@graph"].find((node) => node["@type"] === "BreadcrumbList");
+    assert.ok(list, "no BreadcrumbList");
+    assert.deepEqual(list.itemListElement.map((item) => item.item), [variant.base, canonical]);
+    assert.deepEqual(list.itemListElement.map((item) => item.name), ["Start", "Operacje"]);
+  });
+
+  test(`(${key} build) operations page has no Event markup and is in the sitemap`, () => {
+    const html = page();
+    assert.ok(!html.includes('"Event"'), "operations page carries Event structured data");
+    const canonical = canonicalOf(html);
+    assert.ok(read(outDirs[key], "sitemap.xml").includes(`<loc>${canonical}</loc>`), `sitemap lacks ${canonical}`);
   });
 }

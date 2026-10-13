@@ -1,0 +1,66 @@
+---
+layout: layouts/base.njk
+title: "Operacje klanu Arma 3 – harmonogram, misje i relacje"
+description: "Operacje IBC, polskiego klanu Arma 3 milsim: harmonogram, rodzaje misji, epoki, przebieg typowego wieczoru i relacje z ostatnich operacji."
+permalink: /operacje/
+breadcrumb: "Operacje"
+todo: "FACTS-06"
+---
+<section class="subpage">
+  <div class="section-container">
+    <div class="section-header">
+      <h1>Operacje</h1>
+      <p>Status // Harmonogram i raporty z operacji</p>
+    </div>
+    <p class="page-lead">Gramy głównie w weekendy wieczorem. Poniżej znajdziesz harmonogram, rodzaje misji, epoki, przebieg typowego wieczoru i relacje z ostatnich operacji.</p>
+
+    <div class="page-block" id="harmonogram">
+      <h2>Harmonogram</h2>
+      <ul class="schedule-list">
+        {%- for item in operations.schedule %}
+        <li><h3>{{ item.label }}</h3><p>{{ item.text }}</p></li>
+        {%- endfor %}
+      </ul>
+    </div>
+
+    <div class="page-block" id="rodzaje-misji">
+      <h2>Rodzaje misji</h2>
+      <ul class="type-list">
+        {%- for type in operations.missionTypes %}
+        <li><h3>{{ type.name }}</h3><p>{{ type.text }}</p></li>
+        {%- endfor %}
+      </ul>
+    </div>
+
+    <div class="page-block" id="epoki">
+      <h2>Epoki i scenariusze</h2>
+      <ul class="era-list">
+        {%- for era in operations.eras %}
+        <li>{{ era }}</li>
+        {%- endfor %}
+      </ul>
+      <p>{{ operations.erasNote }}</p>
+    </div>
+
+    <div class="page-block" id="typowy-wieczor">
+      <h2>Typowy wieczór</h2>
+      {% if operations.evening.draft %}<!-- {{ operations.evening.draft }} -->{% endif %}
+      <ol class="evening-timeline">
+        {%- for s in operations.evening.steps %}
+        <li>{% if s.draft %}<!-- {{ s.draft }} -->{% endif %}<span class="evening-time">{{ s.time }}</span><h3>{{ s.name }}</h3><p>{{ s.text }}</p></li>
+        {%- endfor %}
+      </ol>
+    </div>
+
+    <div class="page-block" id="najblizsze-misje">
+      <div class="upcoming">
+        <h2>{{ operations.upcoming.title }}</h2>
+        <p>{{ operations.upcoming.text }}</p>
+        <a href="{{ site.discord.invite }}" target="_blank" rel="noopener noreferrer" class="hud-btn active">{% icon "discord" %} Wejdź na Discord</a>
+      </div>
+    </div>
+
+    <div class="page-block" id="relacje">
+    </div>
+  </div>
+</section>
