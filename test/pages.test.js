@@ -404,3 +404,68 @@ for (const [key] of Object.entries(variants)) {
     assert.ok(updated[1].includes(`<!-- ${lastUpdate.draft} -->`), `p.recaps-updated lacks <!-- ${lastUpdate.draft} -->`);
   });
 }
+
+/* --- NAV TO REAL PAGES WITH BUILD-TIME aria-current (CONT-05, D-07) --- */
+const navLabels = ["Start", "O nas", "Operacje", "Dołącz"];
+const navHrefs = ["/#hero", "/#about", "/operacje/", "/jak-dolaczyc/"];
+
+// Every <a> opening tag + label inside the fragment, in document order.
+function navAnchors(fragment) {
+  return Array.from(fragment.matchAll(/(<a\s[^>]*>)([\s\S]*?)<\/a>/g), (match) => ({
+    tag: match[1],
+    href: attrValues(match[1], "href")[0],
+    label: match[2].trim(),
+  }));
+}
+
+function headerNav(html) {
+  const nav = block(block(html, "header"), "nav");
+  assert.ok(nav, "header has no <nav>");
+  return navAnchors(nav);
+}
+
+function footerNav(html) {
+  const start = html.indexOf('<ul class="footer-links">');
+  assert.ok(start !== -1, "footer has no ul.footer-links");
+  return navAnchors(html.slice(start, html.indexOf("</ul>", start)));
+}
+
+const navPages = ["index.html", "operacje/index.html", "jak-dolaczyc/index.html", "404.html"];
+const currentNav = { "operacje/index.html": "Operacje", "jak-dolaczyc/index.html": "Dołącz" };
+
+for (const [key, variant] of Object.entries(variants)) {
+  const expectedHrefs = navHrefs.map((href) => variant.prefix + href.slice(1));
+
+  test(`(${key} build) header and footer nav read Start / O nas / Operacje / Dołącz on every page (CONT-05)`, () => {
+    for (const rel of navPages) {
+      const html = read(outDirs[key], rel);
+      for (const [where, links] of [["header", headerNav(html)], ["footer", footerNav(html)]]) {
+        assert.deepEqual(links.map((link) => link.label), navLabels, `${rel} ${where} labels`);
+        assert.deepEqual(links.map((link) => link.href), expectedHrefs, `${rel} ${where} hrefs`);
+      }
+      for (const link of footerNav(html)) assert.ok(!/active-nav|aria-current/.test(link.tag), `${rel} footer marks ${link.label}`);
+    }
+  });
+
+  test(`(${key} build) subpages mark exactly their own header link with aria-current (D-07)`, () => {
+    for (const [rel, label] of Object.entries(currentNav)) {
+      const html = read(outDirs[key], rel);
+      const marked = headerNav(html).filter((link) => link.tag.includes('aria-current="page"'));
+      assert.deepEqual(marked.map((link) => link.label), [label], `${rel} aria-current links`);
+      assert.ok(/\sclass="active-nav"/.test(marked[0].tag), `${rel}: the current link lacks class active-nav`);
+      const active = headerNav(html).filter((link) => link.tag.includes("active-nav"));
+      assert.deepEqual(active.map((link) => link.label), [label], `${rel} active-nav links`);
+      // Pitfall 15: the breadcrumb keeps its own aria-current, so a subpage has two.
+      assert.equal(html.split('aria-current="page"').length - 1, 2, `${rel}: expected header + breadcrumb aria-current`);
+    }
+  });
+
+  test(`(${key} build) home marks only Start with active-nav and 404 marks nothing`, () => {
+    const home = headerNav(read(outDirs[key], "index.html"));
+    assert.deepEqual(home.filter((link) => link.tag.includes("active-nav")).map((link) => link.label), ["Start"]);
+    assert.ok(home.every((link) => !link.tag.includes("aria-current")), "home header carries aria-current");
+    const notFound = read(outDirs[key], "404.html");
+    assert.ok(!notFound.includes("active-nav"), "404 marks a nav link active");
+    assert.ok(!notFound.includes("aria-current"), "404 carries aria-current");
+  });
+}

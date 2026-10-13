@@ -354,3 +354,13 @@ test("hash-redirect is a no-op without a hook or without legacy links", () => {
   assert.deepEqual(env.calls, []);
   assert.deepEqual(env.listeners, [], "a listener was attached");
 });
+
+test("scroll-spy on home manages only the hash links, never the page links (D-07, Pitfall 3)", () => {
+  const links = ["/#hero", "/#about", "/operacje/", "/jak-dolaczyc/"].map((href) => createLink(href, "/"));
+  const env = loadScrollSpy({ pathname: "/", links });
+  env.intersect(env.sections.find((section) => section.getAttribute("id") === "about"));
+  assert.deepEqual(activeHashes(env.links), ["#about"]);
+  env.intersect(env.sections.find((section) => section.tagName === "HEADER"));
+  assert.deepEqual(activeHashes(env.links), ["#hero"]);
+  for (const link of env.links.slice(2)) assert.equal(link.classList.contains("active-nav"), false, `${link.pathname} was highlighted`);
+});

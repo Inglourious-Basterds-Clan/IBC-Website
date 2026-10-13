@@ -7,8 +7,8 @@ import { build, read, attrValues, block } from "./helpers.js";
 import site from "../src/_data/site.js";
 
 const prefix = "/IBC-Website/";
-const navLabels = ["System", "O nas", "Galeria", "Rekrutacja"];
-const navHrefs = ["/#hero", "/#about", "/#gallery", "/#recruitment"];
+const navLabels = ["Start", "O nas", "Operacje", "Dołącz"];
+const navHrefs = ["/#hero", "/#about", "/operacje/", "/jak-dolaczyc/"];
 const inviteDomainPattern = /https?:\/\/(?:www\.)?discord(?:\.gg|(?:app)?\.com\/invite)\/[A-Za-z0-9-]+/g;
 const lightboxAttrs = ["data-lightbox-avif", "data-lightbox-webp", "data-lightbox-jpeg"];
 
@@ -192,7 +192,7 @@ function anchorByLabel(html, label) {
 test("the old recruitment anchor is gone and its legacy link points at the join page (CONT-05, D-08)", () => {
   for (const [html, joinUrl] of [[rootHtml, "/jak-dolaczyc/"], [prefixHtml, `${prefix}jak-dolaczyc/`]]) {
     assert.ok(!html.includes('id="recruitment"'), "an element still carries the old section id");
-    assert.ok(!attrValues(html, "href").includes("#recruitment"), "in-page link to the old anchor");
+    for (const value of attrValues(html, "href")) assert.ok(!value.endsWith("#recruitment"), `link to the old anchor: ${value}`);
 
     const legacy = anchorTags(html).filter((tag) => tag.includes('data-legacy-hash="recruitment"'));
     assert.equal(legacy.length, 1, "expected exactly one legacy recruitment link");

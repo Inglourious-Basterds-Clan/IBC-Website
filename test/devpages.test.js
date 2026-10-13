@@ -10,7 +10,7 @@ import { build, read, attrValues, block, repoRoot } from "./helpers.js";
 import site from "../src/_data/site.js";
 
 const defaultTitle = "Inglourious Basterds Clan | IBC";
-const navLabels = ["System", "O nas", "Galeria", "Rekrutacja"];
+const navLabels = ["Start", "O nas", "Operacje", "Dołącz"];
 const activeNav = ' class="active-nav"';
 
 let includedDir;
