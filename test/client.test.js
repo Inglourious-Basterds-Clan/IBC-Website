@@ -9,6 +9,7 @@ import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import * as terminal from "../src/js/modules/terminal.js";
 import { init as initScrollSpy } from "../src/js/modules/scroll-spy.js";
+import { init as initHashRedirect } from "../src/js/modules/hash-redirect.js";
 
 const jsDir = fileURLToPath(new URL("../src/js/", import.meta.url));
 const terminalPath = join(jsDir, "modules", "terminal.js");
@@ -51,10 +52,12 @@ function createElement(tagName) {
   };
 }
 
-function createConsoleEl(discordUrl) {
+// section: the enclosing <section> that closest("section") answers (null outside one).
+function createConsoleEl(discordUrl, section = null) {
   const el = createElement("div");
   el.id = "terminal-console";
   el.getAttribute = (name) => (name === "data-discord-url" && discordUrl !== undefined ? discordUrl : null);
+  el.closest = (selector) => (selector === "section" ? section : null);
   return el;
 }
 
@@ -84,8 +87,8 @@ function createLink(href, pathname) {
 
 // Installs document, window and IntersectionObserver stubs on globalThis.
 function installDom({ pathname = "/", sections = [] } = {}) {
-  const recruitment = sections.find((section) => section.getAttribute("id") === "recruitment") ||
-    createSection("SECTION", "recruitment");
+  const recruitment = sections.find((section) => section.getAttribute("id") === "rekrutacja") ||
+    createSection("SECTION", "rekrutacja");
   const observers = [];
 
   globalThis.IntersectionObserver = class IntersectionObserver {
@@ -102,10 +105,7 @@ function installDom({ pathname = "/", sections = [] } = {}) {
   };
 
   globalThis.document = {
-    getElementById(id) {
-      if (id === "recruitment") return recruitment;
-      return null;
-    },
+    getElementById: () => null,
     querySelector: () => null,
     querySelectorAll(selector) {
       if (selector === "section, header") return sections;
@@ -128,7 +128,7 @@ function installDom({ pathname = "/", sections = [] } = {}) {
 function bootTerminal(t, discordUrl) {
   t.mock.timers.enable({ apis: ["setTimeout"] });
   const env = installDom();
-  const consoleEl = createConsoleEl(discordUrl);
+  const consoleEl = createConsoleEl(discordUrl, env.recruitment);
   terminal.init(consoleEl);
   env.intersect(env.recruitment);
   t.mock.timers.runAll();
@@ -175,6 +175,19 @@ test("terminal boots without data-discord-url", (t) => {
   );
 });
 
+test("terminal observes its enclosing section, not a fixed id (Pitfall 1)", () => {
+  const env = installDom();
+  terminal.init(createConsoleEl("https://invite.example/TEST123", env.recruitment));
+  assert.equal(env.observers.length, 1, "expected one IntersectionObserver");
+  assert.deepEqual(env.observers[0].targets, [env.recruitment]);
+});
+
+test("terminal is a no-op outside a section", () => {
+  const env = installDom();
+  assert.doesNotThrow(() => terminal.init(createConsoleEl("https://invite.example/TEST123", null)));
+  assert.equal(env.observers.length, 0, "terminal created an IntersectionObserver without a section");
+});
+
 test("terminal.js has no invite literal and writeToConsole uses textContent", () => {
   assert.deepEqual(terminalSource.match(inviteDomainPattern) || [], [], "terminal.js contains an invite literal");
   assert.ok(terminalSource.includes("getAttribute('data-discord-url')"), "terminal.js does not read data-discord-url");
@@ -215,7 +228,7 @@ test("every file under src/js passes node --check", () => {
 });
 
 /* --- SCROLL-SPY (FOUND-06) --- */
-const sectionIds = ["hero", "about", "gallery", "recruitment"];
+const sectionIds = ["hero", "about", "gallery", "rekrutacja"];
 
 function homeSections() {
   return [createSection("HEADER", null), ...sectionIds.map((id) => createSection("SECTION", id))];
@@ -274,4 +287,70 @@ test("scroll-spy ignores nav links without a hash", () => {
   env.intersect(env.sections.find((section) => section.getAttribute("id") === "about"));
   assert.equal(plain.classList.contains("active-nav"), false, "hash-less link was highlighted");
   assert.deepEqual(activeHashes(env.links), ["#about"]);
+});
+
+/* --- LEGACY HASH REDIRECT (CONT-05, D-08) --- */
+const joinHref = "https://x.example/IBC-Website/jak-dolaczyc/";
+
+function createLegacyLink(value = "recruitment", href = joinHref) {
+  return { href, getAttribute: (name) => (name === "data-legacy-hash" ? value : null) };
+}
+
+// The hooked section: querySelectorAll('a[data-legacy-hash]') answers with the given links.
+function createRedirectSection(links) {
+  return {
+    tagName: "SECTION",
+    querySelectorAll: (selector) => (selector === "a[data-legacy-hash]" ? links : []),
+  };
+}
+
+// A stub window whose location records replace() calls and whose listeners can be fired.
+function installRedirectWindow(hash) {
+  const calls = [];
+  const listeners = [];
+  globalThis.window = {
+    location: {
+      hash,
+      replace(url) {
+        calls.push(url);
+      },
+    },
+    addEventListener(type, fn) {
+      listeners.push({ type, fn });
+    },
+  };
+  return { calls, listeners };
+}
+
+test("hash-redirect sends #recruitment to the legacy link's resolved href once", () => {
+  const env = installRedirectWindow("#recruitment");
+  initHashRedirect(createRedirectSection([createLegacyLink()]));
+  assert.deepEqual(env.calls, [joinHref]);
+});
+
+test("hash-redirect leaves existing, empty and unknown hashes alone", () => {
+  for (const hash of ["#about", "#hero", "#gallery", "", "#", "#RECRUITMENT", "#recruitment%20", "#//evil.example"]) {
+    const env = installRedirectWindow(hash);
+    initHashRedirect(createRedirectSection([createLegacyLink()]));
+    assert.deepEqual(env.calls, [], `${JSON.stringify(hash)} navigated`);
+  }
+});
+
+test("hash-redirect follows a later hashchange to #recruitment", () => {
+  const env = installRedirectWindow("#about");
+  initHashRedirect(createRedirectSection([createLegacyLink()]));
+  assert.deepEqual(env.calls, []);
+  const hashchange = env.listeners.filter((listener) => listener.type === "hashchange");
+  assert.equal(hashchange.length, 1, "expected one hashchange listener");
+  window.location.hash = "#recruitment";
+  hashchange[0].fn();
+  assert.deepEqual(env.calls, [joinHref]);
+});
+
+test("hash-redirect is a no-op without a hook or without legacy links", () => {
+  const env = installRedirectWindow("#recruitment");
+  assert.doesNotThrow(() => initHashRedirect(null));
+  initHashRedirect(createRedirectSection([]));
+  assert.deepEqual(env.calls, []);
+  assert.deepEqual(env.listeners, [], "a listener was attached");
 });

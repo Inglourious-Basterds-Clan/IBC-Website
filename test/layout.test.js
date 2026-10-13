@@ -76,7 +76,7 @@ test("home page keeps its structure and ids", () => {
     '<section id="hero" class="hero">',
     'id="about"',
     'id="gallery"',
-    'id="recruitment"',
+    '<section id="rekrutacja" class="recruitment" data-js="hash-redirect">',
     'id="lightbox"',
     'id="decryption-overlay"',
     'id="easteregg-trigger"',
@@ -116,7 +116,7 @@ test("prefix build puts every internal URL under the prefix", () => {
   const [logoSrc] = attrValues(logoImg, "src");
   assert.ok(logoSrc && logoSrc.startsWith(`${prefix}img/`), `logo img src "${logoSrc}" does not start with ${prefix}img/`);
 
-  const gallery = prefixHtml.slice(prefixHtml.indexOf('<div class="gallery-grid"'), prefixHtml.indexOf('id="recruitment"'));
+  const gallery = prefixHtml.slice(prefixHtml.indexOf('<div class="gallery-grid"'), prefixHtml.indexOf('id="rekrutacja"'));
   const gallerySrcs = attrValues(gallery, "src");
   assert.equal(gallerySrcs.length, 4, "expected 4 gallery img src values");
   for (const value of gallerySrcs) assert.ok(value.startsWith(`${prefix}img/`), `gallery img src "${value}" missing the prefix`);
@@ -181,4 +181,25 @@ test("prefix build prefixes nav hrefs and leaves the CTA alone", () => {
   );
   const cta = anchorTags(header).find((tag) => tag.includes("header-cta"));
   assert.ok(cta && cta.includes(`href="${site.discord.invite}"`), "CTA href changed under the prefix");
+});
+
+// The opening <a> tag whose text (after inner markup) is label, or undefined.
+function anchorByLabel(html, label) {
+  const match = Array.from(html.matchAll(/(<a\s[^>]*>)([\s\S]*?)<\/a>/g)).find((candidate) => candidate[2].trim() === label);
+  return match ? match[1] : undefined;
+}
+
+test("the old recruitment anchor is gone and its legacy link points at the join page (CONT-05, D-08)", () => {
+  for (const [html, joinUrl] of [[rootHtml, "/jak-dolaczyc/"], [prefixHtml, `${prefix}jak-dolaczyc/`]]) {
+    assert.ok(!html.includes('id="recruitment"'), "an element still carries the old section id");
+    assert.ok(!attrValues(html, "href").includes("#recruitment"), "in-page link to the old anchor");
+
+    const legacy = anchorTags(html).filter((tag) => tag.includes('data-legacy-hash="recruitment"'));
+    assert.equal(legacy.length, 1, "expected exactly one legacy recruitment link");
+    assert.deepEqual(attrValues(legacy[0], "href"), [joinUrl], "legacy link href");
+
+    const apply = anchorByLabel(html, "Złóż podanie");
+    assert.ok(apply, "hero Złóż podanie button missing");
+    assert.deepEqual(attrValues(apply, "href"), [joinUrl], "Złóż podanie href");
+  }
 });

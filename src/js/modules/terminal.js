@@ -1,10 +1,10 @@
 /* --- TACTICAL RECRUITMENT TERMINAL --- */
-// Hook: data-js="terminal" on #terminal-console. The invite comes only from its
-// data-discord-url attribute (build-time config) and is written with textContent.
+// Hook: data-js="terminal" on #terminal-console; boots when its enclosing section is seen.
+// The invite comes only from data-discord-url (build-time config), written with textContent.
 export function init(el) {
   if (!el) return;
   const discordUrl = el.getAttribute('data-discord-url') || '';
-  const recSection = document.getElementById('recruitment');
+  const recSection = el.closest('section');
   if (!recSection) return;
 
   let booted = false;

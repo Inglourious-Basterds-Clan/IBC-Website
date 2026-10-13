@@ -10,7 +10,8 @@ const loaders = Object.freeze({
   terminal: () => import('./modules/terminal.js'),
   'scroll-spy': () => import('./modules/scroll-spy.js'),
   'easter-egg': () => import('./modules/easter-egg.js'),
-  'discord-badge': () => import('./modules/discord-badge.js')
+  'discord-badge': () => import('./modules/discord-badge.js'),
+  'hash-redirect': () => import('./modules/hash-redirect.js')
 });
 
 export function initFeatures(root, featureLoaders) {

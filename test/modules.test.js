@@ -11,7 +11,7 @@ import { build, read, attrValues, listFiles } from "./helpers.js";
 
 const jsDir = fileURLToPath(new URL("../src/js/", import.meta.url));
 const mainPath = join(jsDir, "main.js");
-const hookNames = ["menu", "scroll-spy", "lightbox", "terminal", "easter-egg", "discord-badge"];
+const hookNames = ["menu", "scroll-spy", "lightbox", "terminal", "easter-egg", "discord-badge", "hash-redirect"];
 const globalKeys = ["document", "window", "IntersectionObserver"];
 
 afterEach(() => {
