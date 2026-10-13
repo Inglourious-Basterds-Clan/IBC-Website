@@ -7,6 +7,7 @@ import { before, test } from "node:test";
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import { attrValues, block, build, read, repoRoot } from "./helpers.js";
+import { formatPlDate } from "../lib/dates.js";
 import * as htmlLib from "../lib/html.js";
 import join from "../src/_data/join.js";
 import operations from "../src/_data/operations.js";
@@ -303,18 +304,7 @@ for (const [key, variant] of Object.entries(variants)) {
 // ---------------------------------------------------------------------------------------------
 // Recaps (CONT-04, D-11, D-12) and the Polish date formatter (Pitfall 11)
 
-// lib/dates.js is loaded lazily so that a missing module fails these tests as assertions.
-async function loadDates() {
-  try {
-    return await import("../lib/dates.js");
-  } catch {
-    return {};
-  }
-}
-
-test("(unit) formatPlDate formats ISO dates as Polish long dates", async () => {
-  const { formatPlDate } = await loadDates();
-  assert.equal(typeof formatPlDate, "function", "lib/dates.js does not export formatPlDate");
+test("(unit) formatPlDate formats ISO dates as Polish long dates", () => {
   assert.equal(formatPlDate("2026-09-20"), "20 września 2026");
   assert.equal(formatPlDate("2026-03-07"), "7 marca 2026");
 });
@@ -331,9 +321,7 @@ test("(unit) formatPlDate formats in UTC whatever the process timezone (Pitfall 
   assert.equal(formatted, "20 września 2026", `formatPlDate shifted the day under TZ=America/Los_Angeles:\n${result.stderr}`);
 });
 
-test("(unit) formatPlDate rejects invalid or non-ISO input", async () => {
-  const { formatPlDate } = await loadDates();
-  assert.equal(typeof formatPlDate, "function", "lib/dates.js does not export formatPlDate");
+test("(unit) formatPlDate rejects invalid or non-ISO input", () => {
   for (const input of ["2026-02-30", "2026-9-20", "20.09.2026", "", undefined, null, 20260920]) {
     assert.throws(() => formatPlDate(input), `formatPlDate(${JSON.stringify(input)}) did not throw`);
   }
@@ -385,9 +373,7 @@ for (const [key] of Object.entries(variants)) {
     assert.deepEqual(datetimes, (operations.recaps || []).map((recap) => recap.date).sort().reverse());
   });
 
-  test(`(${key} build) operations page: each recap card has one lazy responsive picture and a meta line`, async () => {
-    const { formatPlDate } = await loadDates();
-    assert.equal(typeof formatPlDate, "function", "lib/dates.js does not export formatPlDate");
+  test(`(${key} build) operations page: each recap card has one lazy responsive picture and a meta line`, () => {
     const cards = recapCards(page());
     assert.ok(cards.length >= 3, "no recap cards");
     const byDate = new Map((operations.recaps || []).map((recap) => [recap.date, recap]));
