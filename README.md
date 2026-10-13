@@ -76,13 +76,15 @@ ALLOW_LOCAL_SITE_URL=1 npm run build
 
 `npm run dev` nie potrzebuje żadnej z tych zmiennych.
 
-**Kontrola SEO w buildzie:** po Eleventy `npm run build` uruchamia `scripts/check-seo.js`. Skrypt czyta gotowy folder `_site/` i sprawdza adresy kanoniczne (canonical), obrazek podglądu (`og:image`), opisy stron (meta description), dane strukturalne JSON-LD, `sitemap.xml`, `robots.txt` i znaczniki `noindex`. Najpierw wypisuje jedną linię z rodzajem buildu:
+**Kontrola SEO w buildzie:** po Eleventy `npm run build` uruchamia `scripts/check-seo.js`. Skrypt czyta gotowy folder `_site/` i sprawdza adresy kanoniczne (canonical), obrazek podglądu (`og:image`), opisy stron (meta description), dane strukturalne JSON-LD, `sitemap.xml`, `robots.txt`, znaczniki `noindex`, okruszki nawigacji na podstronach zgodne z danymi `BreadcrumbList` (reguła G11) oraz FAQ na stronie zgodne z danymi JSON-LD `FAQPage` (reguła G12). Najpierw wypisuje jedną linię z rodzajem buildu:
 
 - `check-seo: LOCAL build (...)`: build z adresem lokalnym, nigdy go nie wgrywaj,
 - `check-seo: preview build (noindex on every page) for ...`: podgląd ukryty przed wyszukiwarkami (np. GitHub Pages),
 - `check-seo: INDEXABLE build for ...`: build dla wyszukiwarek, tylko na docelową domenę.
 
 Jeśli coś jest nie tak, wypisuje po jednej linii `check-seo: ...` na każdy problem, przerywa build i przenosi odrzucony wynik z `_site/` do `_site.rejected/`. Folder `_site/` wtedy nie istnieje, więc nie da się go przez pomyłkę skopiować na serwer. `_site.rejected/` służy tylko do sprawdzenia, co poszło nie tak: nigdy go nie wgrywaj (następny odrzucony build go zastępuje). Ta sama kontrola działa w GitHub Actions przy każdym pull requeście i pushu.
+
+Kontrole buildu i `scripts/clean.js` przenoszą albo usuwają wyłącznie `_site/` albo folder wewnątrz `_test/`. Każdy inny folder podany przez `--dir` zostaje na miejscu, a kontrola wypisuje przy nim „DO NOT DEPLOY IT” (CR-01), więc literówka w ścieżce nigdy nie skasuje źródeł.
 
 **GitHub Pages:** workflow `.github/workflows/pages.yml` robi wszystko sam. Sam też ustawia `SITE_URL` i `PATH_PREFIX`, więc dla GitHub Pages nie musisz niczego ustawiać. Workflow:
 
@@ -131,13 +133,15 @@ Plik `src/_data/site.js` zawiera wartości domyślne i wspólne ustawienia stron
 - listę profili społecznościowych (`social`: YouTube, Facebook), z której korzystają stopka i dane JSON-LD,
 - domyślny obrazek podglądu linku (`ogImage`, `ogImageAlt`),
 - kolor motywu (`themeColor`),
-- link zaproszenia na Discord (`discord.invite`). Link do Discorda zmieniasz tylko tutaj; cała strona i terminal rekrutacyjny pobierają go z tego pliku.
+- link zaproszenia na Discord (`discord.invite`). Link do Discorda zmieniasz tylko tutaj; cała strona i terminal rekrutacyjny pobierają go z tego pliku,
+- zapasową liczbę członków Discorda (`discord.membersBackstop`). Build raz pyta Discorda o liczbę członków i wpisuje ją do plakietki Discorda na stronie głównej; gdy Discord nie odpowiada (brak sieci, błąd), używa tej wartości. W przeglądarce plakietka i tak aktualizuje się na żywo. Podnoś ją od czasu do czasu, gdy klan urośnie.
 
 Zmienne środowiskowe nadpisują te wartości dla jednego buildu:
 
 - `SITE_URL`: adres strony,
 - `PATH_PREFIX`: prefiks ścieżki,
-- `SITE_INDEXABLE`: `1` zdejmuje `noindex` (patrz „Indeksowanie w wyszukiwarkach (SITE_INDEXABLE)”).
+- `SITE_INDEXABLE`: `1` zdejmuje `noindex` (patrz „Indeksowanie w wyszukiwarkach (SITE_INDEXABLE)”),
+- `DISCORD_FETCH`: `0` (dokładnie `0`) wyłącza pytanie Discorda podczas buildu i plakietka dostaje `discord.membersBackstop`. Przydaje się przy buildzie bez internetu; `npm test` ustawia to sam dla każdego buildu testowego.
 
 Workflow `.github/workflows/pages.yml` ustawia `SITE_URL` i `PATH_PREFIX` dla podglądu na GitHub Pages. Nie wpisuj domeny ani linku zaproszenia nigdzie indziej w kodzie.
 
@@ -189,14 +193,39 @@ Lista kontrolna:
 
 > **Przekierowania HTTP → HTTPS i z `www`** to konfiguracja serwera IIS (moduł URL Rewrite), a nie część tego repozytorium. `web.config` z buildu celowo ich nie zawiera.
 
+## Strony: Jak dołączyć i Operacje
+
+Obie podstrony są budowane z plików danych, więc treść zmieniasz w danych, a nie w szablonie:
+
+- `/jak-dolaczyc/` (`src/jak-dolaczyc.njk`) bierze treść z `src/_data/join.js`: `requirements` (wymagania), `steps` (rekrutacja krok po kroku) i `faq` (najczęstsze pytania). Te same pytania i odpowiedzi trafiają do danych JSON-LD `FAQPage`, dlatego odpowiedzi to zwykły tekst: bez HTML i bez linków.
+- `/operacje/` (`src/operacje.njk`) bierze treść z `src/_data/operations.js`: harmonogram (`schedule`), rodzaje misji (`missionTypes`), epoki (`eras`), typowy wieczór (`evening`), blok „Najbliższe misje” (`upcoming`; misje ogłaszamy tylko na Discordzie, strona nie podaje dat) i relacje z operacji (`recaps`).
+
+**Nowa relacja z operacji:**
+
+1. Wrzuć zdjęcie do `src/images/` (potok obrazów sam zrobi miniatury).
+2. Dopisz wpis do `recaps` w `src/_data/operations.js`: `file` (nazwa pliku), `date` (data operacji w formacie `RRRR-MM-DD`), `title`, `setting` („epoka · mapa”), `type` (dokładnie jedna z nazw w `missionTypes`), `text` (2–3 zdania, bez nicków i nazwisk) i `alt` (opis zdjęcia).
+3. Zmień `lastUpdate.date` na dzisiejszą datę (wpisywana ręcznie, nigdy data buildu).
+
+Kolejność na stronie (najnowsze na górze) ustala się sama po dacie. Trzymaj na stronie 3–5 relacji: najstarszą usuń razem z jej zdjęciem, jeśli nikt go już nie używa.
+
+**Okruszki nawigacji** (link „Start”, a po nim nazwa podstrony) nad nagłówkiem podstrony powstają z klucza `breadcrumb` w front matter strony (`src/_includes/partials/breadcrumbs.njk`); ten sam klucz tworzy dane JSON-LD `BreadcrumbList`. Strona główna nie ma okruszków.
+
+**Stare linki.** Sekcja rekrutacji przeniosła się ze strony głównej na `/jak-dolaczyc/`. Stare linki do `/#recruitment` przekierowuje link z atrybutem `data-legacy-hash="recruitment"` na stronie głównej (moduł `hash-redirect`). Jeśli kiedyś usuniesz inną kotwicę, z której ktoś mógł linkować, dodaj link do jej nowego miejsca z takim samym atrybutem.
+
 ## Teksty robocze (FACTS.md)
 
-`FACTS.md` w katalogu głównym to rejestr tekstów roboczych napisanych przez Claude'a (np. opis strony głównej, teksty strony 404), które klan musi sprawdzić. Każdy taki tekst ma w źródle znacznik `TODO(FACTS-NN)` (albo `todo: "FACTS-NN"` w front matter strony), a w `FACTS.md` swój wiersz o tym samym numerze.
+`FACTS.md` w katalogu głównym to rejestr tekstów roboczych napisanych przez Claude'a (np. opis strony głównej, teksty strony 404), które klan musi sprawdzić. Każdy taki tekst ma w źródle znacznik w jednej z trzech postaci, a w `FACTS.md` swój wiersz o tym samym numerze:
+
+- komentarz `<!-- TODO(FACTS-NN) -->` w treści szablonu,
+- klucz `todo: "FACTS-NN"` w front matter strony,
+- pole `draft: "TODO(FACTS-NN)"` we wpisie w pliku danych w `src/_data/*.js` (np. pytanie FAQ albo relacja z operacji).
+
+Teksty nowych podstron to wiersze FACTS-03 do FACTS-13: opisy i wstępy obu podstron, dwie odpowiedzi FAQ, godziny typowego wieczoru, wyjaśnienie OCAP, data ostatniej aktualizacji i cztery relacje z operacji. Dopóki nie są potwierdzone, blokują build indeksowalny tak jak pozostałe.
 
 Jak potwierdzić tekst:
 
 1. Popraw albo zaakceptuj tekst w pliku podanym w kolumnie „Gdzie”.
-2. Usuń znacznik `TODO(FACTS-NN)` (albo linię `todo: "FACTS-NN"`).
+2. Usuń znacznik `TODO(FACTS-NN)` (albo linię `todo: "FACTS-NN"`, albo linię `draft: "TODO(FACTS-NN)"`).
 3. Zmień status wiersza w `FACTS.md` na `potwierdzone`.
 
 Teksty robocze blokują tylko build indeksowalny (`SITE_INDEXABLE=1`). Podgląd na GitHub Pages, zwykły `npm run build` i `npm run dev` działają z nimi normalnie, więc można je obejrzeć na żywo. `npm test` pilnuje, żeby znaczniki i tabela w `FACTS.md` się zgadzały.
@@ -238,7 +267,9 @@ Strona ma być szybka na telefonie, więc wszystkie zasoby są przygotowywane po
 
 **CSS.** Style są podzielone na części w `src/css/partials/`, jedną na sekcję strony. `src/css/style.css` tylko importuje je przez `@import` w kolejności kaskady; nowa część potrzebuje swojej linii `@import` we właściwym miejscu. `src/css/style.11ty.js` składa je przez Lightning CSS w jeden zminifikowany plik `css/style.css`, a strona dołącza go z `?v=<hash treści>`, więc przeglądarka pobiera nową wersję po każdej zmianie. Nie używaj atrybutów `style` ani elementów `<style>`: nowe style idą do części arkusza.
 
-**JS.** Każda funkcja strony (menu, lightbox, terminal, scroll-spy, easter egg) ma w HTML hak `data-js="<nazwa>"`. `src/js/main.js` to loader: w swojej mapie przypisuje każdej nazwie moduł i ładuje tylko moduły tych haków, które są na stronie. Każdy moduł to `src/js/modules/<hook>.js` z funkcją `init(el)`, która nic nie robi, gdy brakuje jej elementów. Nowa funkcja to nowy moduł plus wpis w mapie w `src/js/main.js`.
+**JS.** Każda funkcja strony (`menu`, `lightbox`, `terminal`, `scroll-spy`, `easter-egg`, `discord-badge` dla plakietki Discorda i `hash-redirect` dla starych linków) ma w HTML hak `data-js="<nazwa>"`. `src/js/main.js` to loader: w swojej mapie przypisuje każdej nazwie moduł i ładuje tylko moduły tych haków, które są na stronie. Każdy moduł to `src/js/modules/<hook>.js` z funkcją `init(el)`, która nic nie robi, gdy brakuje jej elementów. Nowa funkcja to nowy moduł plus wpis w mapie w `src/js/main.js`.
+
+Strona ładuje `js/main.js?v=<hash>`, gdzie hash liczy `lib/js.js` z treści wszystkich plików w `src/js/`, a `main.js` dopisuje tę samą wersję do adresu każdego modułu (WR-01). Po każdej zmianie JS przeglądarka pobiera więc nowe pliki i nigdy nie łączy starych modułów z pamięci podręcznej z nowym HTML. Stare linki do `/#recruitment` obsługuje moduł `hash-redirect` przez link z `data-legacy-hash` (patrz „Strony: Jak dołączyć i Operacje”).
 
 **Kontrola wydajności w buildzie.** `npm run build` po kontroli SEO uruchamia `scripts/check-perf.js` (oba kroki są połączone `&&`, więc odrzucona kontrola SEO zatrzymuje build przed kontrolą wydajności). Skrypt czyta gotowy `_site/` i sprawdza reguły P1-P11: obraz główny i rozmiar jego wariantów na telefon, obrazy lightboksa, brak hostów czcionek i ikon z zewnątrz, brak stylów inline, jeden arkusz stylów, wymiary i leniwe ładowanie obrazów, brak oryginałów w wyniku, rozmiar CSS i JS po gzip oraz jeden plik czcionki. Jeśli coś jest nie tak, wypisuje po jednej linii `check-perf: ...` na problem i, tak jak kontrola SEO, przenosi odrzucony wynik do `_site.rejected/`. Po udanym buildzie wypisuje `check-perf: OK` i linię z rozmiarami i limitami.
 
@@ -250,6 +281,8 @@ Strona ma być szybka na telefonie, więc wszystkie zasoby są przygotowywane po
 
 ```text
 src/index.njk                    strona główna
+src/jak-dolaczyc.njk             podstrona /jak-dolaczyc/ (wymagania, rekrutacja, FAQ)
+src/operacje.njk                 podstrona /operacje/ (harmonogram, misje, typowy wieczór, relacje)
 src/404.njk                      polska strona 404 (zawsze noindex, poza mapą witryny)
 src/sitemap.xml.njk              mapa witryny (sitemap.xml)
 src/robots.txt.njk               robots.txt
@@ -257,8 +290,12 @@ src/site.webmanifest.njk         manifest (site.webmanifest)
 src/web.config.njk               web.config dla IIS: strona 404 i typ MIME manifestu
 src/_includes/layouts/base.njk   wspólny szablon wszystkich stron
 src/_includes/partials/          wspólne elementy: nagłówek strony (head i SEO), nawigacja, przycisk Discorda, stopka
+src/_includes/partials/breadcrumbs.njk  okruszki nawigacji podstron (z klucza breadcrumb w front matter)
 src/_data/site.js                adres strony, prefiks ścieżki, link do Discorda i inne wspólne ustawienia (jedno źródło)
 src/_data/navigation.js          pozycje menu nawigacji
+src/_data/join.js                treść /jak-dolaczyc/: wymagania, kroki rekrutacji, FAQ (też JSON-LD FAQPage)
+src/_data/operations.js          treść /operacje/: harmonogram, rodzaje misji, epoki, typowy wieczór, relacje
+src/_data/discordBadge.js        liczba członków Discorda do plakietki (raz na build, zapas: membersBackstop)
 src/_dev/                        strony testowe dla deweloperów, nigdy w buildzie produkcyjnym
 src/_data/gallery.js             lista zdjęć galerii (plik w src/images/, opis, kolejność)
 src/css/style.css                wejście arkusza stylów: tylko @import części w kolejności kaskady
@@ -270,6 +307,10 @@ src/fonts/                       czcionka Montserrat (woff2) i jej licencja OFL.
 src/images/                      oryginały zdjęć i logo: wejście potoku obrazów (lib/images.js), nie trafiają do _site/
 src/assets/                      karta OG, ikony i logo JSON-LD (pliki SEO kopiowane bez zmian)
 lib/                             funkcje używane podczas buildu: SEO (lib/seo.js, lib/check-seo.js), obrazy (lib/images.js), CSS (lib/css.js), ikony (lib/icons.js), odczyt czcionki (lib/woff2.js) i kontrola wydajności (lib/check-perf.js)
+lib/discord.js                   zapytanie o liczbę członków Discorda i tekst plakietki
+lib/dates.js                     polskie daty relacji („20 września 2026”)
+lib/js.js                        wersja (hash) plików JS dla js/main.js?v= (WR-01)
+lib/reject-output.js             odrzucanie wyniku buildu; rusza tylko _site/ albo folder w _test/ (CR-01)
 scripts/clean.js                 czyści _site/ przed każdym buildem
 scripts/check-seo.js             kontrola SEO uruchamiana po każdym buildzie
 scripts/check-perf.js            kontrola wydajności uruchamiana po kontroli SEO

@@ -1,5 +1,5 @@
 // D-20 / SEO-09: README documents the indexing switch and the cutover; 03-11 adds the asset
-// pipeline, the perf gate and its BUDGET contract.
+// pipeline, the perf gate and its BUDGET contract; 04-08 adds the Phase 4 pages, data and switches.
 // The README is Polish prose, so this checks the load-bearing headings, commands and names
 // only, plus that every repo path it points the user at exists.
 import { test } from "node:test";
@@ -65,5 +65,45 @@ test("(e) the paths the README points at exist", () => {
     "tools/fonts/README.md",
   ]) {
     assert.ok(existsSync(join(repoRoot, path)), `${path} is missing from the repo`);
+  }
+});
+
+// Repo paths named at the start of the "Struktura projektu" tree lines (first column).
+function treePaths() {
+  const tree = /## Struktura projektu\n\n```text\n([\s\S]*?)\n```/.exec(readme);
+  assert.ok(tree, "README.md has no Struktura projektu tree");
+  return tree[1].split("\n").map((line) => line.split(/\s+/)[0]).filter((path) => path !== "");
+}
+
+test("(f) README documents the Phase 4 pages, data files and switches", () => {
+  for (const needle of [
+    "src/_data/join.js",
+    "src/_data/operations.js",
+    "DISCORD_FETCH",
+    "membersBackstop",
+    "data-legacy-hash",
+    "G11",
+    "G12",
+    "breadcrumbs.njk",
+  ]) {
+    assert.ok(readme.includes(needle), `README.md does not mention ${needle}`);
+  }
+  const paths = treePaths();
+  for (const path of [
+    "src/jak-dolaczyc.njk",
+    "src/operacje.njk",
+    "src/_data/join.js",
+    "src/_data/operations.js",
+    "src/_data/discordBadge.js",
+    "src/_includes/partials/breadcrumbs.njk",
+    "lib/discord.js",
+    "lib/dates.js",
+    "lib/js.js",
+    "lib/reject-output.js",
+  ]) {
+    assert.ok(paths.includes(path), `the Struktura projektu tree does not list ${path}`);
+  }
+  for (const path of paths) {
+    assert.ok(existsSync(join(repoRoot, path)), `${path} (Struktura projektu) is missing from the repo`);
   }
 });

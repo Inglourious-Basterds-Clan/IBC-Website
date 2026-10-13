@@ -9,7 +9,7 @@ findings:
     title: "A mistyped `--dir` moves or recursively deletes source folders (`src/`, `.git/`, `node_modules/`)"
   - id: WR-01
     severity: warning
-    disposition: open
+    disposition: fixed
     title: "`/js/main.js` and its modules are not cache-busted, so returning visitors run stale JS against new HTML"
   - id: WR-02
     severity: warning
@@ -51,7 +51,7 @@ findings:
     severity: info
     disposition: open
     title: "The P3 host list covers only the replaced CDNs"
-open: 11
+open: 9
 total: 12
 recorded: 2026-10-11T11:15:17.278Z
 ---
@@ -61,7 +61,7 @@ recorded: 2026-10-11T11:15:17.278Z
 | Finding | Severity | Disposition | Source |
 |---------|----------|-------------|--------|
 | CR-01 | critical | fixed | 04-02 |
-| WR-01 | warning | open | - |
+| WR-01 | warning | fixed | 04-08 |
 | WR-02 | warning | open | - |
 | WR-03 | warning | open | - |
 | WR-04 | warning | open | - |
