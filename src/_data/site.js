@@ -88,7 +88,6 @@ export default {
   ogImageAlt: "Róża IBC i napis „Klan Arma 3 Milsim” na ciemnym tle pola walki", // og:image:alt
   discord: {
     invite: "https://discord.gg/DhJwkeehJK", // the only literal copy of the invite
-    membersBackstop: 240, // D-16: member count used when the build cannot reach Discord (live count was 246 on 2026-10-11)
   },
   // Social profiles (D-13) in display order; the Discord invite stays only in discord.invite.
   social: [

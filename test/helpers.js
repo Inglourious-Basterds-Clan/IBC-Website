@@ -21,7 +21,6 @@ const cmdPath = fileURLToPath(new URL("../node_modules/@11ty/eleventy/cmd.cjs", 
 // a developer shell or CI job env cannot leak into a variant; each test sets its own.
 // ALLOW_LOCAL_SITE_URL is stripped too, so an inherited opt-out cannot weaken the SITE_URL guard tests.
 // SITE_INDEXABLE is stripped so a developer shell cannot leak an indexable build into a test variant.
-// DISCORD_FETCH is stripped so an inherited value cannot turn the network back on (runBuild sets it).
 const buildEnvKeys = [
   "SITE_URL",
   "PATH_PREFIX",
@@ -29,7 +28,6 @@ const buildEnvKeys = [
   "ELEVENTY_RUN_MODE",
   "ALLOW_LOCAL_SITE_URL",
   "SITE_INDEXABLE",
-  "DISCORD_FETCH",
 ];
 
 // Copy of process.env without any build env key (case-insensitive), plus the variant env.
@@ -43,15 +41,14 @@ export function cleanEnv(env = {}) {
 }
 
 // Run Eleventy into <repoRoot>/_test/<name> and return { outDir, result } without
-// asserting, so a test can inspect a failing build. The only env default it adds is
-// DISCORD_FETCH=0, so no test build calls Discord (Pitfall 5); a variant may override it.
+// asserting, so a test can inspect a failing build.
 export function runBuild(name, env = {}) {
   const outDir = join(repoRoot, "_test", name);
   rmSync(outDir, { recursive: true, force: true });
 
   const result = spawnSync(process.execPath, [cmdPath, "--output=" + outDir, "--quiet"], {
     cwd: repoRoot,
-    env: cleanEnv({ DISCORD_FETCH: "0", ...env }),
+    env: cleanEnv(env),
     encoding: "utf8",
   });
   return { outDir, result };

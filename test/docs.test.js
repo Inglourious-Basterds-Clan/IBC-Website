@@ -79,8 +79,6 @@ test("(f) README documents the Phase 4 pages, data files and switches", () => {
   for (const needle of [
     "src/_data/join.js",
     "src/_data/operations.js",
-    "DISCORD_FETCH",
-    "membersBackstop",
     "data-legacy-hash",
     "G11",
     "G12",
@@ -94,9 +92,7 @@ test("(f) README documents the Phase 4 pages, data files and switches", () => {
     "src/operacje.njk",
     "src/_data/join.js",
     "src/_data/operations.js",
-    "src/_data/discordBadge.js",
     "src/_includes/partials/breadcrumbs.njk",
-    "lib/discord.js",
     "lib/dates.js",
     "lib/js.js",
     "lib/reject-output.js",

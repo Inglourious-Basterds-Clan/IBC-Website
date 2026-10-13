@@ -133,15 +133,13 @@ Plik `src/_data/site.js` zawiera wartości domyślne i wspólne ustawienia stron
 - listę profili społecznościowych (`social`: YouTube, Facebook), z której korzystają stopka i dane JSON-LD,
 - domyślny obrazek podglądu linku (`ogImage`, `ogImageAlt`),
 - kolor motywu (`themeColor`),
-- link zaproszenia na Discord (`discord.invite`). Link do Discorda zmieniasz tylko tutaj; cała strona i terminal rekrutacyjny pobierają go z tego pliku,
-- zapasową liczbę członków Discorda (`discord.membersBackstop`). Build raz pyta Discorda o liczbę członków i wpisuje ją do plakietki Discorda na stronie głównej; gdy Discord nie odpowiada (brak sieci, błąd), używa tej wartości. W przeglądarce plakietka i tak aktualizuje się na żywo. Podnoś ją od czasu do czasu, gdy klan urośnie.
+- link zaproszenia na Discord (`discord.invite`). Link do Discorda zmieniasz tylko tutaj; cała strona i terminal rekrutacyjny pobierają go z tego pliku.
 
 Zmienne środowiskowe nadpisują te wartości dla jednego buildu:
 
 - `SITE_URL`: adres strony,
 - `PATH_PREFIX`: prefiks ścieżki,
-- `SITE_INDEXABLE`: `1` zdejmuje `noindex` (patrz „Indeksowanie w wyszukiwarkach (SITE_INDEXABLE)”),
-- `DISCORD_FETCH`: `0` (dokładnie `0`) wyłącza pytanie Discorda podczas buildu i plakietka dostaje `discord.membersBackstop`. Przydaje się przy buildzie bez internetu; `npm test` ustawia to sam dla każdego buildu testowego.
+- `SITE_INDEXABLE`: `1` zdejmuje `noindex` (patrz „Indeksowanie w wyszukiwarkach (SITE_INDEXABLE)”).
 
 Workflow `.github/workflows/pages.yml` ustawia `SITE_URL` i `PATH_PREFIX` dla podglądu na GitHub Pages. Nie wpisuj domeny ani linku zaproszenia nigdzie indziej w kodzie.
 
@@ -267,7 +265,7 @@ Strona ma być szybka na telefonie, więc wszystkie zasoby są przygotowywane po
 
 **CSS.** Style są podzielone na części w `src/css/partials/`, jedną na sekcję strony. `src/css/style.css` tylko importuje je przez `@import` w kolejności kaskady; nowa część potrzebuje swojej linii `@import` we właściwym miejscu. `src/css/style.11ty.js` składa je przez Lightning CSS w jeden zminifikowany plik `css/style.css`, a strona dołącza go z `?v=<hash treści>`, więc przeglądarka pobiera nową wersję po każdej zmianie. Nie używaj atrybutów `style` ani elementów `<style>`: nowe style idą do części arkusza.
 
-**JS.** Każda funkcja strony (`menu`, `lightbox`, `terminal`, `scroll-spy`, `easter-egg`, `discord-badge` dla plakietki Discorda i `hash-redirect` dla starych linków) ma w HTML hak `data-js="<nazwa>"`. `src/js/main.js` to loader: w swojej mapie przypisuje każdej nazwie moduł i ładuje tylko moduły tych haków, które są na stronie. Każdy moduł to `src/js/modules/<hook>.js` z funkcją `init(el)`, która nic nie robi, gdy brakuje jej elementów. Nowa funkcja to nowy moduł plus wpis w mapie w `src/js/main.js`.
+**JS.** Każda funkcja strony (`menu`, `lightbox`, `terminal`, `scroll-spy`, `easter-egg` i `hash-redirect` dla starych linków) ma w HTML hak `data-js="<nazwa>"`. `src/js/main.js` to loader: w swojej mapie przypisuje każdej nazwie moduł i ładuje tylko moduły tych haków, które są na stronie. Każdy moduł to `src/js/modules/<hook>.js` z funkcją `init(el)`, która nic nie robi, gdy brakuje jej elementów. Nowa funkcja to nowy moduł plus wpis w mapie w `src/js/main.js`.
 
 Strona ładuje `js/main.js?v=<hash>`, gdzie hash liczy `lib/js.js` z treści wszystkich plików w `src/js/`, a `main.js` dopisuje tę samą wersję do adresu każdego modułu (WR-01). Po każdej zmianie JS przeglądarka pobiera więc nowe pliki i nigdy nie łączy starych modułów z pamięci podręcznej z nowym HTML. Stare linki do `/#recruitment` obsługuje moduł `hash-redirect` przez link z `data-legacy-hash` (patrz „Strony: Jak dołączyć i Operacje”).
 
@@ -295,7 +293,6 @@ src/_data/site.js                adres strony, prefiks ścieżki, link do Discor
 src/_data/navigation.js          pozycje menu nawigacji
 src/_data/join.js                treść /jak-dolaczyc/: wymagania, kroki rekrutacji, FAQ (też JSON-LD FAQPage)
 src/_data/operations.js          treść /operacje/: harmonogram, rodzaje misji, epoki, typowy wieczór, relacje
-src/_data/discordBadge.js        liczba członków Discorda do plakietki (raz na build, zapas: membersBackstop)
 src/_dev/                        strony testowe dla deweloperów, nigdy w buildzie produkcyjnym
 src/_data/gallery.js             lista zdjęć galerii (plik w src/images/, opis, kolejność)
 src/css/style.css                wejście arkusza stylów: tylko @import części w kolejności kaskady
@@ -307,7 +304,6 @@ src/fonts/                       czcionka Montserrat (woff2) i jej licencja OFL.
 src/images/                      oryginały zdjęć i logo: wejście potoku obrazów (lib/images.js), nie trafiają do _site/
 src/assets/                      karta OG, ikony i logo JSON-LD (pliki SEO kopiowane bez zmian)
 lib/                             funkcje używane podczas buildu: SEO (lib/seo.js, lib/check-seo.js), obrazy (lib/images.js), CSS (lib/css.js), ikony (lib/icons.js), odczyt czcionki (lib/woff2.js) i kontrola wydajności (lib/check-perf.js)
-lib/discord.js                   zapytanie o liczbę członków Discorda i tekst plakietki
 lib/dates.js                     polskie daty relacji („20 września 2026”)
 lib/js.js                        wersja (hash) plików JS dla js/main.js?v= (WR-01)
 lib/reject-output.js             odrzucanie wyniku buildu; rusza tylko _site/ albo folder w _test/ (CR-01)
