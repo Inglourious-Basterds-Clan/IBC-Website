@@ -175,7 +175,7 @@ test("every class selector in the bundle is used by a template or script (D-13)"
 });
 
 // The cascade order of the partials (D-12): the order of the original stylesheet's sections.
-const partialOrder = ["fonts", "base", "components", "header", "hero", "sections", "gallery", "recruitment", "footer", "responsive"];
+const partialOrder = ["fonts", "base", "components", "header", "hero", "sections", "gallery", "recruitment", "pages", "footer", "responsive"];
 
 test("the entry only imports partials (D-12)", () => {
   const entry = readFileSync(join(repoRoot, "src", "css", "style.css"), "utf8");

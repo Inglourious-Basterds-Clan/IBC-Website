@@ -1,0 +1,151 @@
+/* --- SUBPAGES (JAK DOŁĄCZYĆ, OPERACJE) --- */
+/* Phase 4 arranges the existing HUD primitives only: colours come from the :root tokens, and this
+   partial adds no custom property, effect, transition or animation (Phase 5 owns the visual refresh) */
+
+/* Breadcrumbs (SEO-06, D-17): the 100 px top padding clears the 79 px fixed header; max-width is the
+   1200 px container plus both 20 px gutters, so the trail lines up with the h1 */
+.breadcrumbs {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 100px 20px 0;
+}
+
+/* An ordered list, never an unordered one: header.css and menu.js target nav ul (Pitfall 12) */
+.breadcrumbs ol {
+  display: flex;
+  flex-wrap: wrap;
+  list-style: none;
+  font-family: var(--font-hud);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-muted);
+}
+
+/* The separator comes from CSS only, never from the markup */
+.breadcrumbs li + li::before {
+  content: "›";
+  margin: 0 8px;
+  color: var(--text-muted);
+}
+
+.breadcrumbs a {
+  color: var(--text-muted);
+}
+
+.breadcrumbs a:hover,
+.breadcrumbs a[aria-current="page"] {
+  color: var(--accent-color);
+}
+
+/* The trail already clears the header, so the section does not add a second 100 px gap */
+.breadcrumbs + .subpage {
+  padding-top: 32px;
+}
+
+/* The page's only h1, the same size as the home section titles, with no gradient (an effect) */
+.subpage .section-header h1 {
+  font-size: 2.2rem;
+  line-height: 1.2;
+  color: var(--text-primary);
+}
+
+.page-lead {
+  opacity: 1;
+  max-width: 70ch;
+}
+
+.page-block {
+  margin-top: 48px;
+}
+
+.page-block h2 {
+  font-size: 1.5rem;
+  line-height: 1.2;
+  color: var(--accent-color);
+  margin-bottom: 24px;
+}
+
+.page-cta {
+  margin-top: 48px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+/* Join steps (CONT-01): HUD counters 01-06 from a CSS counter, one bordered row per step */
+.join-steps {
+  list-style: none;
+  counter-reset: step;
+}
+
+.join-steps li {
+  counter-increment: step;
+  display: grid;
+  grid-template-columns: 48px 1fr;
+  column-gap: 16px;
+  padding: 16px 0;
+  border-top: 1px solid var(--border-color);
+}
+
+.join-steps li:last-child {
+  border-bottom: 1px solid var(--border-color);
+}
+
+.join-steps li::before {
+  content: counter(step, decimal-leading-zero);
+  grid-row: span 2;
+  font-family: var(--font-hud);
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--accent-color);
+}
+
+.join-steps h3 {
+  font-size: 1rem;
+  line-height: 1.2;
+  color: var(--accent-color);
+  margin-bottom: 4px;
+}
+
+/* FAQ (CONT-02, D-04): native details/summary with no JS. The summary keeps its native disclosure
+   marker and default focus ring, so it gets no list-style, display or outline rule */
+.faq-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.faq-item {
+  padding: 16px 24px;
+}
+
+.faq-item summary {
+  cursor: pointer;
+  font-family: var(--font-hud);
+  font-weight: 700;
+  line-height: 1.5;
+  color: var(--text-primary);
+}
+
+.faq-item[open] summary {
+  color: var(--accent-color);
+  margin-bottom: 8px;
+}
+
+/* The one mobile block of this partial: the 99 px mobile header needs a larger clearance (PD-1) */
+@media (max-width: 768px) {
+  .breadcrumbs {
+    padding-top: 120px;
+  }
+
+  .join-steps li {
+    column-gap: 8px;
+  }
+
+  .faq-item {
+    padding: 16px;
+  }
+}
