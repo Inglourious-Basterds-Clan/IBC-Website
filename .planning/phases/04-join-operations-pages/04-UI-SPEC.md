@@ -1,7 +1,8 @@
 ---
 phase: "04"
 slug: "join-operations-pages"
-status: draft
+status: approved
+reviewed_at: "2026-10-13"
 shadcn_initialized: false
 preset: none
 created: "2026-10-13"
@@ -103,7 +104,7 @@ Rules:
 | Accent (10%) | `#cbb18a` (`--accent-color`) | Only the elements listed below |
 | Destructive | `#ef4444` (`--danger-color`) | Not used in Phase 4. No destructive actions exist |
 
-Text roles (existing tokens): `--text-primary` `#e8ded0` (headings, body `p` at 0.85 opacity, recap titles, timeline step names, closed FAQ questions). `--text-secondary` `#cbb18a` (`.req-list li`, step `p`, FAQ answer `p` per plan 04-06, era tags). `--text-muted` `#8e9fa9` (breadcrumb "Start" link and separator, `.recap-meta`, `.recaps-updated`). Borders: `--border-color` (rows, tags, list rules). `--text-secondary` has the same hex as the accent today. It is a text role, not accent use, and Phase 5 may split the two (see PD-2).
+Text roles (existing tokens): `--text-primary` `#e8ded0` (headings, body `p` at 0.85 opacity, recap titles, timeline step names, closed FAQ questions). `--text-secondary` `#cbb18a` (`.req-list li`, era tags, Discord badge). Step `p` and FAQ answer `p` use the default `p` colour (`--text-primary` at 0.85), per the PD-2 decision. `--text-muted` `#8e9fa9` (breadcrumb "Start" link and separator, `.recap-meta`, `.recaps-updated`). Borders: `--border-color` (rows, tags, list rules). `--text-secondary` has the same hex as the accent today. It is a text role, not accent use, and Phase 5 may split the two (see PD-2).
 
 Accent reserved for:
 1. The filled primary Discord CTA `.hud-btn.active` ("Wejdź na Discord") on `/jak-dolaczyc/` `.page-cta`, the `/operacje/` `.upcoming` block and the home teaser
@@ -141,9 +142,9 @@ Two `aria-current="page"` per subpage (header nav link + breadcrumb) is the docu
 ### `/jak-dolaczyc/` (shipped markup, styled by 04-06 Task 1)
 - **Focal point:** the h1 "Jak dołączyć do IBC" with its accent left rule. The visual spine is the numbered step list `01–06`. **Primary action:** "Wejdź na Discord" (`.hud-btn.active`) in `.page-cta`. The fixed header's "Discord" button keeps a CTA in view while scrolling.
 - **Order (shipped):** h1/status → lead → `#wymagania` (`.req-list`) → `#kroki` (`ol.join-steps`) → `#faq` (`.faq-list`) → `.page-cta`.
-- **`.join-steps`:** `list-style: none; counter-reset: step`. Each `li` has `counter-increment: step; display: grid; grid-template-columns: 48px 1fr; column-gap: 16px; padding: 16px 0; border-top: 1px solid var(--border-color)`. The last `li` also gets `border-bottom`. `li::before { content: counter(step, decimal-leading-zero); grid-row: span 2; font-family: var(--font-hud); font-size: 1.5rem; font-weight: 700; line-height: 1.2; color: var(--accent-color); }`. `h3` is 1rem, 700, accent, `margin-bottom: 4px`. `p` is Body in `--text-secondary` (plan 04-06). At ≤ 768 px `column-gap: 8px`.
+- **`.join-steps`:** `list-style: none; counter-reset: step`. Each `li` has `counter-increment: step; display: grid; grid-template-columns: 48px 1fr; column-gap: 16px; padding: 16px 0; border-top: 1px solid var(--border-color)`. The last `li` also gets `border-bottom`. `li::before { content: counter(step, decimal-leading-zero); grid-row: span 2; font-family: var(--font-hud); font-size: 1.5rem; font-weight: 700; line-height: 1.2; color: var(--accent-color); }`. `h3` is 1rem, 700, accent, `margin-bottom: 4px`. `p` is Body in the default `p` colour (`--text-primary` at 0.85; PD-2 decision, overrides plan 04-06). At ≤ 768 px `column-gap: 8px`.
 - **`.faq-list`:** `display: flex; flex-direction: column; gap: 16px`.
-- **`.faq-item`** (`details.hud-border`, shipped): `padding: 16px 24px` (16 px at ≤ 768 px). `summary`: `cursor: pointer`, `--font-hud`, 700, line height 1.5, colour `--text-primary`. **Keep the native disclosure marker**: no `list-style: none`, no `display: flex`/`block` on `summary`, no `::-webkit-details-marker` hiding. `.faq-item[open] summary { color: var(--accent-color); margin-bottom: 8px; }`. `.faq-item p` uses `--text-secondary` (plan 04-06).
+- **`.faq-item`** (`details.hud-border`, shipped): `padding: 16px 24px` (16 px at ≤ 768 px). `summary`: `cursor: pointer`, `--font-hud`, 700, line height 1.5, colour `--text-primary`. **Keep the native disclosure marker**: no `list-style: none`, no `display: flex`/`block` on `summary`, no `::-webkit-details-marker` hiding. `.faq-item[open] summary { color: var(--accent-color); margin-bottom: 8px; }`. `.faq-item p` uses the default `p` colour (`--text-primary` at 0.85; PD-2 decision, overrides plan 04-06).
 
 ### `/operacje/` (markup by 04-04, styled by 04-06 Task 2)
 - **Focal point:** the h1 "Operacje". The visual anchor is the recap card grid (the only imagery on the page) together with the accent-ruled evening timeline. **Primary action:** "Wejdź na Discord" inside "Najbliższe misje".
@@ -219,26 +220,51 @@ Language is Polish only. The tone is "casual but disciplined" (D-03): no "hardco
 
 ## UI Considerations
 
-Applicable state considerations resolved: 11 covered, 4 backstop, 1 unresolved.
+Probe run 2026-10-13 after checker approval (`ui-consideration-probe`, 12 elements, 78 applicable considerations). Resolved by user decision (batch): 13 explicit, 4 backstop, 60 dismissed, 1 unresolved. Empty-state and error copy lives in the Copywriting Contract; this section covers state coverage only.
 
-| Category | Element(s) | Status | Resolution / Reason |
-|----------|------------|--------|---------------------|
-| empty | `/operacje/` "Najbliższe misje" | ✅ covered | The block always renders the documented "Najbliższe misje" empty-state copy and the "Wejdź na Discord" CTA, with no `<time>`, no ISO date and no list (04-04 test) |
-| zero-one-many | Recap cards | ✅ covered | Between 3 and 5 recap cards inclusive, newest first. The 3-column grid fits 3, 4 (3 + 1) and 5 (3 + 2) cards |
-| zero-one-many | Join steps / timeline / FAQ | ✅ covered | Exactly 6 steps numbered 01–06, exactly 5 timeline steps in the fixed order, between 12 and 16 FAQ items (tests) |
-| loading | Discord badge | ✅ covered | The baked "Discord: 200+ osób" is visible from first paint, and the live text replaces it in place with no layout shift |
-| error | Discord badge | ✅ covered | Any fetch failure leaves the baked fallback text unchanged and logs nothing |
-| error | JS disabled | ✅ covered | Both subpages render all content without JS. The FAQ opens natively, and `/#recruitment` falls back to home top with the "Pełna instrukcja →" and "Dołącz" links |
-| partial | Recap images | ✅ covered | Every recap `<img>` has numeric width/height, `loading="lazy"` and a 16:9 CSS aspect ratio, so no layout shift while images load (perf gate P6/P7) |
-| overflow | Discord badge | ✅ covered | The badge stays on one line and truncates with an ellipsis instead of wrapping |
-| interaction | FAQ keyboard | ✅ covered | Each FAQ `summary` keeps the native marker and default focus ring and toggles with Enter and Space (no `outline: none`, no `list-style: none` on `summary`) |
-| interaction | Recap cards | ✅ covered | Recap cards have no pointer cursor, no image zoom and no link, because they are not interactive |
-| motion | `pages.css` | ✅ covered | `pages.css` declares no `transition` or `animation` |
-| long-text | Era tags, breadcrumbs, h1 at 320 px | 🧪 backstop | At 320 px viewport no subpage element overflows horizontally: era tags and the breadcrumb trail wrap, and the 35.2 px h1 wraps by word |
-| layout | Breadcrumbs vs fixed header | 🧪 backstop | At 1280 px and 390 px the breadcrumb trail's top edge sits below the fixed header's bottom edge (header measured 79 px / 99 px) |
-| layout | Breadcrumb alignment | 🧪 backstop | At 1280 px the breadcrumb text's left edge equals the h1's left edge (`max-width: 1240px`) |
-| long-text | FAQ answers, recap texts | 🧪 backstop | Long Polish answers wrap inside `.faq-item` and `.recap-body` with no clipping at 390 px |
-| deep-link | `/jak-dolaczyc/#<faq-id>` | ⚠ unresolved | Non-Chromium browsers may scroll to a closed `<details>` without opening it (RESEARCH A5). Accepted with no JS planned. The planner treats this as an assumption |
+### Resolved: explicit
+
+| Category | Element(s) | Truth |
+|----------|------------|-------|
+| empty | `/operacje/` "Najbliższe misje" (E8) | The block always renders the "Najbliższe misje" empty-state copy (Copywriting Contract) and the "Wejdź na Discord" CTA, with no `<time>`, no ISO date and no list (04-04 test) |
+| zero-one-many | Recap cards (E9) | Between 3 and 5 recap cards inclusive, newest first; the 3-column grid fits 3, 4 (3 + 1) and 5 (3 + 2) cards |
+| zero-one-many | Join steps (E2), timeline (E7), FAQ (E3) | Exactly 6 steps numbered 01–06, exactly 5 timeline steps in fixed order, 12–16 FAQ items (tests) |
+| loading | Discord badge (E10) | The baked "Discord: 200+ osób" is visible from first paint; the live text replaces it in place with no layout shift |
+| error | Discord badge (E10) | Any fetch failure leaves the baked fallback text unchanged and logs nothing (D-16) |
+| error | JS disabled (E3, E11) | Both subpages render all content without JS; the FAQ opens natively; `/#recruitment` falls back to home top with the "Pełna instrukcja →" and "Dołącz" links |
+| partial | Recap images (E9) | Every recap `<img>` has numeric width/height, `loading="lazy"` and a 16:9 CSS aspect ratio, so no layout shift while images load (perf gate P6/P7) |
+| overflow | Discord badge (E10) | The badge stays on one line and truncates with an ellipsis instead of wrapping |
+| interaction | FAQ keyboard (E3) | Each `summary` keeps the native marker and default focus ring and toggles with Enter and Space (no `outline: none`, no `list-style: none` on `summary`) |
+| interaction | Recap cards (E9) | No pointer cursor, no image zoom, no link: recap cards are not interactive |
+| motion | `pages.css` | `pages.css` declares no `transition` or `animation` |
+| populated | Schedule/type lists (E5), era tags (E6) | Content comes from `src/_data/` at build time; every entry renders, none is truncated |
+| error | Discord CTA (E4) | The href comes only from `site.discord.invite`; the build fails rather than ship an empty or placeholder href (existing link tests) |
+
+### Resolved: backstop (visual check)
+
+| Category | Element(s) | Statement | Verification |
+|----------|------------|-----------|--------------|
+| long-text | Era tags, breadcrumbs, h1 (E1, E6) | At a 320 px viewport no subpage element overflows horizontally: era tags and the breadcrumb trail wrap, and the 35.2 px h1 wraps by word | backstop |
+| layout | Breadcrumbs vs fixed header (E1) | At 1280 px and 390 px the breadcrumb trail's top edge sits below the fixed header's bottom edge (header measured 79 px / 99 px) | backstop |
+| layout | Breadcrumb alignment (E1) | At 1280 px the breadcrumb text's left edge equals the h1's left edge (`max-width: 1240px`) | backstop |
+| long-text | FAQ answers, recap texts, steps, timeline, teaser (E2, E3, E7, E9, E12) | Long Polish text wraps inside its container with no clipping at 390 px | backstop |
+
+### Dismissed
+
+| Category | Element(s) | Reason |
+|----------|------------|--------|
+| loading, error, partial | E1, E2, E3, E5, E6, E7, E8, E11, E12 | Rendered at build time from `src/_data/`; no runtime data, so there is no loading, error or partial state |
+| loading | E4 Discord CTA | A plain external link; nothing loads |
+| empty | E2, E3, E5, E6, E7, E12 | Fixed content with counts enforced by tests; an empty list cannot ship |
+| zero-one-many, populated | E5, E6, E8, E12 | Fixed or deliberately listless content (E8 is always the empty state by design, D-10) |
+| overflow | E2, E3, E4, E5, E7, E8, E9, E11, E12 | Block layout with wrapping text; the only overflow risks are covered by the explicit badge row and the long-text backstops |
+| long-text | E4, E10, E11 | Short fixed labels (CTA, nav); badge covered by the ellipsis truth |
+
+### Unresolved
+
+| Category | Element(s) | Status |
+|----------|------------|--------|
+| deep-link | `/jak-dolaczyc/#<faq-id>` (E3) | ⚠ unresolved — planner must treat as assumption: non-Chromium browsers may scroll to a closed `<details>` without opening it (RESEARCH A5). Accepted with no JS planned |
 
 ---
 
@@ -246,13 +272,15 @@ Applicable state considerations resolved: 11 covered, 4 backstop, 1 unresolved.
 
 These points are where the contract differs from, or adds to, the action text of a remaining plan. They are listed so they are not silently applied. PD-1, PD-4 and PD-6 resolve a conflict with a plan's own must-have truth or with another plan. PD-2, PD-3 and PD-5 are recommendations.
 
+**Decisions (user, 2026-10-13):** PD-1, PD-3, PD-4, PD-6 and both additions are **accepted**: where the contract differs from the plan text, executors of 04-04 and 04-06 follow the contract. PD-2 is **accepted** (body colour for step and FAQ answer text). PD-5 is **declined** (one CTA).
+
 | ID | Plan | Plan text | Contract | Why |
 |----|------|-----------|----------|-----|
 | PD-1 (critical) | 04-06 Task 1 | Mobile `@media` block sets a "smaller breadcrumb padding" | ≤ 768 px `padding-top: 120px` (**larger**) | The measured mobile header is 99 px against 79 px on desktop. Any value under 100 px puts the trail under the header and breaks 04-06's own truth "breadcrumbs sit fully below the fixed header at 390 px" |
-| PD-2 | 04-06 Task 1 | Step `p` and FAQ answer `p` in "secondary text colour" | Contract keeps `--text-secondary` as planned. **Recommendation:** use the default `p` colour (`--text-primary` at 0.85) | `--text-secondary` has the same hex as the accent, so 15 answers and 6 step texts in sand dilute the 10 % accent. This is a user call, or it can be deferred to Phase 5 |
+| PD-2 | 04-06 Task 1 | Step `p` and FAQ answer `p` in "secondary text colour" | Default `p` colour (`--text-primary` at 0.85) | `--text-secondary` has the same hex as the accent, so 15 answers and 6 step texts in sand dilute the 10 % accent. Accepted by the user on 2026-10-13 |
 | PD-3 | 04-06 Task 1 | `.page-lead` "slightly larger text" | Body 16 px with `opacity: 1` and `max-width: 70ch` | A larger lead adds a fifth font size; the type scale allows 4 |
 | PD-4 | 04-06 Task 2 vs 04-04 Task 2 | `.recap-list` `minmax(280px, 1fr)` | `minmax(min(100%, 300px), 1fr)` | 280 px gives 4 columns of 282 px at a 1200 px container, but 04-04's `sizes` declares a 380 px slot (3 columns). 300 px yields 3 columns. `min(100%, …)` follows `gallery.css` and prevents overflow below 320 px |
-| PD-5 | 04-01 (shipped) | One `.page-cta` at the end of `/jak-dolaczyc/`, after 15 FAQ items | No change in the contract. **Optional:** a second "Wejdź na Discord" after `#kroki` | Readers finishing the steps are ready to act. The fixed header CTA already covers this, so it needs the user's approval and a test update |
+| PD-5 | 04-01 (shipped) | One `.page-cta` at the end of `/jak-dolaczyc/`, after 15 FAQ items | No change: one `.page-cta` only. **Declined** by the user on 2026-10-13 | Readers finishing the steps are ready to act. The fixed header CTA already covers this, so it needs the user's approval and a test update |
 | PD-6 | 04-06 Task 1 | `.breadcrumbs { max-width: 1200px; padding: 100px 20px 0 }`, `.breadcrumbs + .subpage { padding-top: 30px }` | `max-width: 1240px`; `padding-top: 32px` | With `box-sizing: border-box`, 1200 px puts the trail 20 px right of the h1 at wide viewports. 30 px is off the 4 px grid |
 | Addition | 04-06 | (not specified) | `.subpage .section-header h1 { font-size: 2.2rem; line-height: 1.2; color: var(--text-primary) }` | The subpage h1 renders at the browser default 32 px, smaller than home's 35.2 px section titles |
 | Addition | 04-04 | `.schedule-list` "label + text" | `<li><h3>label</h3><p>text</p></li>` | Same structure as `.type-list`, so one rule styles both |
@@ -271,12 +299,12 @@ Out of scope and noted for Phase 5: the mobile `nav ul { top: 65px }` panel open
 
 ## Checker Sign-Off
 
-- [ ] Dimension 1 Copywriting: PASS
-- [ ] Dimension 2 Visuals: PASS
-- [ ] Dimension 3 Color: PASS
-- [ ] Dimension 4 Typography: PASS
-- [ ] Dimension 5 Spacing: PASS
-- [ ] Dimension 6 Registry Safety: PASS
-- [ ] Dimension 7 Inventory Provenance: PASS
+- [x] Dimension 1 Copywriting: PASS
+- [x] Dimension 2 Visuals: PASS
+- [x] Dimension 3 Color: FLAG (accent breadth; resolved by the PD-2 decision)
+- [x] Dimension 4 Typography: PASS
+- [x] Dimension 5 Spacing: PASS
+- [x] Dimension 6 Registry Safety: PASS
+- [x] Dimension 7 Inventory Provenance: PASS
 
-**Approval:** pending
+**Approval:** approved 2026-10-13 (gsd-ui-checker: 6 PASS, 1 FLAG non-blocking)
