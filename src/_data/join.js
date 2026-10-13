@@ -40,7 +40,9 @@ export default {
   ],
   // Plain text only (no HTML, no links): the same strings become the FAQPage JSON-LD (D-05).
   // An id is the anchor a recruiter can link to (/jak-dolaczyc/#mody): unique ASCII kebab-case,
-  // different from the page block ids (wymagania, kroki, faq).
+  // different from the page block ids (wymagania, kroki, faq). The link only scrolls to the
+  // question (pages.css scroll-margin-top clears the fixed header); the accordion stays
+  // closed, because the id sits on the <details> itself and D-04 keeps the FAQ free of JS.
   faq: [
     {
       id: "wiek",

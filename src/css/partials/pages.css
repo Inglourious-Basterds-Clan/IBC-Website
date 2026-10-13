@@ -60,6 +60,12 @@
   margin-top: 48px;
 }
 
+/* Anchor targets (#kroki, #mody, #relacje...) clear the 79 px fixed header when linked to (WR-03) */
+.page-block,
+.faq-item {
+  scroll-margin-top: 100px;
+}
+
 .page-block h2 {
   font-size: 1.5rem;
   line-height: 1.2;
@@ -277,6 +283,11 @@
 @media (max-width: 768px) {
   .breadcrumbs {
     padding-top: 120px;
+  }
+
+  .page-block,
+  .faq-item {
+    scroll-margin-top: 120px;
   }
 
   .join-steps li {
