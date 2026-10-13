@@ -23,7 +23,7 @@ Requirements for this milestone. Each maps to a roadmap phase.
 - [x] **SEO-03**: Every page has absolute OG/Twitter tags with a 1200×630 OG image, so Discord link previews render correctly
 - [x] **SEO-04**: Favicons, web manifest and `theme-color` are present
 - [x] **SEO-05**: Home page has Organization + WebSite JSON-LD (alternateName "IBC", sameAs links, foundingDate 2018); SportsTeam and meta keywords are removed; no Event markup
-- [ ] **SEO-06**: Subpages show visible breadcrumbs and have BreadcrumbList JSON-LD
+- [x] **SEO-06**: Subpages show visible breadcrumbs and have BreadcrumbList JSON-LD
 - [x] **SEO-07**: Custom Polish 404 page
 - [x] **SEO-08**: Build fails on a missing or relative canonical/og:image, invalid JSON-LD, a page missing from the sitemap, or a leftover TODO marker
 - [x] **SEO-09**: Non-final hosts are served `noindex` automatically, and a domain cutover checklist is documented
@@ -41,10 +41,10 @@ Requirements for this milestone. Each maps to a roadmap phase.
 
 ### Content
 
-- [ ] **CONT-01**: `/jak-dolaczyc/` shows requirements and numbered join steps
-- [ ] **CONT-02**: `/jak-dolaczyc/` has a 12–16 question Polish FAQ
-- [ ] **CONT-03**: `/operacje/` shows schedule, mission types, eras and a "typowy wieczór" timeline
-- [ ] **CONT-04**: `/operacje/` shows 3–5 dated operation recaps
+- [x] **CONT-01**: `/jak-dolaczyc/` shows requirements and numbered join steps
+- [x] **CONT-02**: `/jak-dolaczyc/` has a 12–16 question Polish FAQ
+- [x] **CONT-03**: `/operacje/` shows schedule, mission types, eras and a "typowy wieczór" timeline
+- [x] **CONT-04**: `/operacje/` shows 3–5 dated operation recaps
 - [ ] **CONT-05**: Nav links to real pages, and old `#hash` links redirect to the matching new page
 - [ ] **CONT-06**: Facts drafted by Claude are marked TODO and listed in `FACTS.md`; the user confirms them before publishing
 - [ ] **CONT-07**: Live Discord badge (members/online) with a static fallback, labelled so it doesn't conflict with "20+ aktywnych członków"
@@ -112,7 +112,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SEO-03 | Phase 2 | Complete |
 | SEO-04 | Phase 2 | Complete |
 | SEO-05 | Phase 2 | Complete |
-| SEO-06 | Phase 4 | Pending |
+| SEO-06 | Phase 4 | Complete |
 | SEO-07 | Phase 2 | Complete |
 | SEO-08 | Phase 2 | Complete |
 | SEO-09 | Phase 2 | Complete |
@@ -124,10 +124,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PERF-06 | Phase 3 | Complete |
 | PERF-07 | Phase 3 | Complete |
 | PERF-08 | Phase 5 | Pending |
-| CONT-01 | Phase 4 | Pending |
-| CONT-02 | Phase 4 | Pending |
-| CONT-03 | Phase 4 | Pending |
-| CONT-04 | Phase 4 | Pending |
+| CONT-01 | Phase 4 | Complete |
+| CONT-02 | Phase 4 | Complete |
+| CONT-03 | Phase 4 | Complete |
+| CONT-04 | Phase 4 | Complete |
 | CONT-05 | Phase 4 | Pending |
 | CONT-06 | Phase 4 | Pending |
 | CONT-07 | Phase 4 | Pending |
