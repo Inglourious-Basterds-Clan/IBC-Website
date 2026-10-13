@@ -1,9 +1,9 @@
 ---
-status: complete
+status: diagnosed
 phase: 04-join-operations-pages
 source: [04-VERIFICATION.md]
 started: 2026-10-13T20:25:00Z
-updated: 2026-10-13T22:02:25.786Z
+updated: 2026-10-14T00:10:00Z
 ---
 
 ## Current Test
@@ -62,5 +62,13 @@ blocked: 0
   reason: "User reported: npm run build erros with that site_url, patrol and sniper jpg are ai generated shit to be replaced"
   severity: blocker
   test: 1
-  artifacts: []  # Filled by diagnosis
-  missing: []    # Filled by diagnosis
+  root_cause: "Not a code defect. Gate G10 (lib/check-seo.js) refuses an indexable build while any TODO(FACTS-NN) draft marker remains; all 13 FACTS rows in FACTS.md are still 'do potwierdzenia' (reproduced: 13 G10 lines, output moved to _site.rejected). Separately, recap images patrol.jpg (FACTS-11) and sniper.jpg (FACTS-12) are AI-generated placeholders, not clan screenshots."
+  artifacts:
+    - path: "FACTS.md"
+      issue: "FACTS-01..13 all unconfirmed"
+    - path: "src/_data/operations.js"
+      issue: "recaps FACTS-11/12 use AI-generated images patrol.jpg / sniper.jpg"
+  missing:
+    - "Owner confirms or corrects each FACTS-01..13 text, then removes its marker (per FACTS.md steps)"
+    - "Owner supplies real clan screenshots to replace patrol.jpg and sniper.jpg (or drops those two recaps)"
+  debug_session: ""
