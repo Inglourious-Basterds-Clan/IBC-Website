@@ -5,19 +5,19 @@ titles: json
 findings:
   - id: WR-01
     severity: warning
-    disposition: open
+    disposition: skipped
     title: "Live Discord badge sends every home-page visitor's IP address to Discord (GDPR), the same problem that led to removing Google Fonts"
   - id: WR-02
     severity: warning
-    disposition: open
+    disposition: fixed
     title: "Tests require the draft markers to exist, so the documented FACTS confirmation steps break `npm test`"
   - id: WR-03
     severity: warning
-    disposition: open
+    disposition: fixed
     title: "Subpage anchors scroll under the fixed header, and FAQ deep links stay collapsed"
   - id: WR-04
     severity: warning
-    disposition: open
+    disposition: fixed
     title: "CR-01 test runs the real `clean.js` against the repository root and its parent"
   - id: IN-01
     severity: info
@@ -35,19 +35,19 @@ findings:
     severity: info
     disposition: open
     title: "An exception in the G12 text helpers skips the rejection path and leaves `_site/` in place"
-open: 8
+open: 4
 total: 8
-recorded: 2026-10-13T20:15:23.620Z
+recorded: 2026-10-13T20:35:03.216Z
 ---
 
 # Phase 04: Code Review Disposition
 
 | Finding | Severity | Disposition | Source |
 |---------|----------|-------------|--------|
-| WR-01 | warning | open | - |
-| WR-02 | warning | open | - |
-| WR-03 | warning | open | - |
-| WR-04 | warning | open | - |
+| WR-01 | warning | skipped | 04-REVIEW-FIX.md |
+| WR-02 | warning | fixed | 04-REVIEW-FIX.md |
+| WR-03 | warning | fixed | 04-REVIEW-FIX.md |
+| WR-04 | warning | fixed | 04-REVIEW-FIX.md |
 | IN-01 | info | open | - |
 | IN-02 | info | open | - |
 | IN-03 | info | open | - |
