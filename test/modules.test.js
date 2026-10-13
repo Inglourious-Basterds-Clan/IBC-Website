@@ -11,7 +11,7 @@ import { build, read, attrValues, listFiles } from "./helpers.js";
 
 const jsDir = fileURLToPath(new URL("../src/js/", import.meta.url));
 const mainPath = join(jsDir, "main.js");
-const hookNames = ["menu", "scroll-spy", "lightbox", "terminal", "easter-egg"];
+const hookNames = ["menu", "scroll-spy", "lightbox", "terminal", "easter-egg", "discord-badge"];
 const globalKeys = ["document", "window", "IntersectionObserver"];
 
 afterEach(() => {
@@ -178,7 +178,7 @@ test("loaders are called in the document order of the hooks", async () => {
   assert.deepEqual(spy.calls, order);
 });
 
-test("main.js maps all five hooks to literal module imports", () => {
+test("main.js maps every hook to a literal module import", () => {
   const source = readFileSync(mainPath, "utf8");
   for (const name of hookNames) {
     assert.ok(source.includes(`import('./modules/${name}.js')`), `main.js has no literal import for ${name}`);

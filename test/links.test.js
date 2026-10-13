@@ -18,6 +18,7 @@ const allowedHosts = [
   "www.youtube.com",
   "www.facebook.com",
   "schema.org",
+  "discord.com", // live badge API URL in data-api-url (CONT-07, D-15)
 ];
 const sourceExts = [".njk", ".js", ".css", ".json", ".md", ".html"];
 const inviteDomainPattern = /discord\.gg\/[A-Za-z0-9]+/g;
