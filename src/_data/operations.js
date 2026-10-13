@@ -1,4 +1,5 @@
-// Single source of the /operacje/ content (D-13): src/operacje.njk renders it. Facts confirmed
+// Single source of the /operacje/ content (D-13): src/operacje.njk renders it and lib/images.js
+// processes each recap `file` (thumbnails, as for the gallery). Facts confirmed
 // by the clan (D-02) carry no marker. A drafted entry holds its FACTS marker in a `draft` field,
 // which the template prints as an HTML comment next to the text; confirming it = deleting the
 // `draft` line (FACTS.md). The `upcoming` block is the slot for a calendar fed by the clan's
@@ -72,4 +73,52 @@ export default {
     title: "Najbliższe misje",
     text: "Misje i gry Zeusowe ogłaszamy na Discordzie. Gry Zeusowe pojawiają się tego samego dnia, więc zajrzyj tam przed wieczorem.",
   },
+  // Entered by hand whenever the recaps change; never the build date.
+  lastUpdate: { date: "2026-10-11", draft: "TODO(FACTS-09)" },
+  // Recap cards (D-12). The page sorts them newest first by `date` (ISO "YYYY-MM-DD"), so the
+  // order here does not matter. `file` is a committed original in src/images/ (lib/images.js
+  // makes the thumbnails), `type` must equal one of the missionTypes names, `setting` reads
+  // "era · map". No member names or callsigns in the texts.
+  recaps: [
+    {
+      draft: "TODO(FACTS-10)",
+      file: "jo_1967.png",
+      date: "2026-09-20",
+      title: "Operacja Crimson Dawn",
+      setting: "Wietnam 1967 · Khe Sanh",
+      type: "Joint Operations",
+      text: "Wspólna operacja z innymi klanami w realiach wojny w Wietnamie. Pluton szturmował umocnione pozycje przeciwnika przy wsparciu lotnictwa (CAS), a najwięcej pracy wymagała koordynacja z pilotami.",
+      alt: "Pluton atakuje umocnione pozycje przeciwnika podczas wspólnej operacji w realiach Wietnamu 1967",
+    },
+    {
+      draft: "TODO(FACTS-11)",
+      file: "patrol.jpg",
+      date: "2026-10-04",
+      title: "Patrol w lasach Livonii",
+      setting: "Współczesność · Livonia",
+      type: "PvE",
+      text: "Sekcja piechoty przeczesywała zalesiony teren w poszukiwaniu stanowisk przeciwnika. Do kontaktu doszło dopiero przy drugim punkcie kontrolnym. Sekcja utrzymała szyk i wyszła z zasadzki bez strat.",
+      alt: "Sekcja piechoty w kamuflażu patroluje leśną ścieżkę o świcie",
+    },
+    {
+      draft: "TODO(FACTS-12)",
+      file: "sniper.jpg",
+      date: "2026-09-27",
+      title: "Operacja Sokole Oko",
+      setting: "Współczesność · Takistan",
+      type: "PvE",
+      text: "Zespół snajperski obserwował dolinę z górskiego stanowiska i meldował o ruchach przeciwnika. Dzięki tym meldunkom pluton zaatakował bazę we właściwym momencie.",
+      alt: "Snajper na skalnym stanowisku obserwuje bazę przeciwnika w górskiej dolinie",
+    },
+    {
+      draft: "TODO(FACTS-13)",
+      file: "op_patrol.jpg",
+      date: "2026-10-10",
+      title: "Wieczór z Zeusem: zasadzka na drodze",
+      setting: "Współczesność · Czarnoruś",
+      type: "Gra Zeusowa",
+      text: "Gra ogłoszona na Discordzie tego samego popołudnia. Zeus na bieżąco dokładał przeciwników, a oddział zabezpieczał leśną drogę i odpierał kolejne ataki.",
+      alt: "Oddział w kamuflażu zabezpiecza leśną drogę podczas gry Zeusowej",
+    },
+  ],
 };

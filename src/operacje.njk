@@ -61,6 +61,20 @@ todo: "FACTS-06"
     </div>
 
     <div class="page-block" id="relacje">
+      <h2>Ostatnie operacje</h2>
+      <p class="recaps-updated">{% if operations.lastUpdate.draft %}<!-- {{ operations.lastUpdate.draft }} -->{% endif %}Ostatnia aktualizacja: <time datetime="{{ operations.lastUpdate.date }}">{{ operations.lastUpdate.date | plDate }}</time></p>
+      <div class="recap-list">
+        {%- for r in images.recaps | sort(true, false, "date") %}
+        <article class="recap-card hud-border">{% if r.draft %}<!-- {{ r.draft }} -->{% endif %}
+          {% picture r.img, { "alt": r.alt, "loading": "lazy", "decoding": "async", "sizes": "auto, (min-width: 1240px) 380px, (min-width: 660px) 50vw, 100vw" } %}
+          <div class="recap-body">
+            <p class="recap-meta"><time datetime="{{ r.date }}">{{ r.date | plDate }}</time> · {{ r.setting }} · {{ r.type }}</p>
+            <h3>{{ r.title }}</h3>
+            <p>{{ r.text }}</p>
+          </div>
+        </article>
+        {%- endfor %}
+      </div>
     </div>
   </div>
 </section>

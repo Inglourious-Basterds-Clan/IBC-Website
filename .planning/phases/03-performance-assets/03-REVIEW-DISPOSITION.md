@@ -45,7 +45,7 @@ findings:
     title: "Three different font size caps"
   - id: IN-05
     severity: info
-    disposition: open
+    disposition: fixed
     title: "Unused originals are committed in the pipeline input folder"
   - id: IN-06
     severity: info
@@ -70,7 +70,7 @@ recorded: 2026-10-11T11:15:17.278Z
 | IN-02 | info | open | - |
 | IN-03 | info | open | - |
 | IN-04 | info | open | - |
-| IN-05 | info | open | - |
+| IN-05 | info | fixed | 04-04 |
 | IN-06 | info | open | - |
 
 Dispositions: `open` (recorded, not yet triaged), `fixed`, `skipped`, `deferred`.

@@ -6,6 +6,7 @@ import site from "./src/_data/site.js";
 import { isIndexableUrl } from "./lib/seo.js";
 import { buildPageGraph, buildSchemaGraph, jsonLd } from "./lib/schema.js";
 import { processImages } from "./lib/images.js";
+import { formatPlDate } from "./lib/dates.js";
 import { renderIcon } from "./lib/icons.js";
 import { getCssBundle, resetCssBundle } from "./lib/css.js";
 
@@ -21,6 +22,8 @@ export default function (eleventyConfig) {
   // Subpage JSON-LD (SEO-06, D-17): front matter breadcrumb -> BreadcrumbList (+ FAQPage) graph.
   eleventyConfig.addFilter("pageGraph", buildPageGraph);
   eleventyConfig.addFilter("jsonLd", jsonLd);
+  // Recap dates (CONT-04): ISO date -> "20 września 2026", formatted in UTC (Pitfall 11).
+  eleventyConfig.addFilter("plDate", formatPlDate);
 
   // Build-time images (D-01): lib/images.js encodes every variant once per process into .cache/img/.
   // The metadata is global data, so the layout (head preload) and the pages read the same object.
