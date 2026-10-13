@@ -9,6 +9,7 @@ import { processImages } from "./lib/images.js";
 import { formatPlDate } from "./lib/dates.js";
 import { renderIcon } from "./lib/icons.js";
 import { getCssBundle, resetCssBundle } from "./lib/css.js";
+import { getJsHash, resetJsHash } from "./lib/js.js";
 
 export default function (eleventyConfig) {
   // Rewrites root-relative href/src/srcset with pathPrefix and provides the htmlBaseUrl filter.
@@ -46,9 +47,16 @@ export default function (eleventyConfig) {
   // so the CSS sources are not passthrough-copied. The head links it with ?v=<cssHash>, the first
   // 10 hex characters of the bundle's sha256, so a deploy never serves a stale cached copy.
   eleventyConfig.addGlobalData("cssHash", () => getCssBundle().hash);
-  // Every build (also each --serve rebuild) bundles afresh, so npm run dev picks up CSS edits.
-  eleventyConfig.on("eleventy.before", () => resetCssBundle());
+  // Versioned JS (WR-01): every page loads /js/main.js?v=<jsHash>, a content hash of src/js, and
+  // main.js appends the same query to each module import, so a deploy never runs cached modules.
+  eleventyConfig.addGlobalData("jsHash", () => getJsHash());
+  // Every build (also each --serve rebuild) bundles and hashes afresh, so npm run dev picks up edits.
+  eleventyConfig.on("eleventy.before", () => {
+    resetCssBundle();
+    resetJsHash();
+  });
   eleventyConfig.addWatchTarget("src/css/");
+  eleventyConfig.addWatchTarget("src/js/");
 
   eleventyConfig.addPassthroughCopy({
     "src/js": "js",

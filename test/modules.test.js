@@ -181,7 +181,7 @@ test("loaders are called in the document order of the hooks", async () => {
 test("main.js maps every hook to a literal module import", () => {
   const source = readFileSync(mainPath, "utf8");
   for (const name of hookNames) {
-    assert.ok(source.includes(`import('./modules/${name}.js')`), `main.js has no literal import for ${name}`);
+    assert.ok(source.includes(`import('./modules/${name}.js' + version)`), `main.js has no literal import for ${name}`);
   }
   const imports = Array.from(source.matchAll(/import\((.)/g), (match) => match[1]);
   assert.equal(imports.length, hookNames.length, `expected ${hookNames.length} import() calls, found ${imports.length}`);
@@ -393,7 +393,7 @@ test("every page has exactly one script with a src: the module main.js", () => {
     for (const { rel, html } of pages(outDir)) {
       const scripts = Array.from(html.matchAll(/<script\b[^>]*\ssrc="[^"]*"[^>]*>/g), (match) => match[0]);
       assert.equal(scripts.length, 1, `${rel}: expected one script with a src, found ${JSON.stringify(scripts)}`);
-      assert.ok(/\stype="module"/.test(scripts[0]) && /\ssrc="\/js\/main\.js"/.test(scripts[0]), `${rel}: ${scripts[0]}`);
+      assert.ok(/\stype="module"/.test(scripts[0]) && /\ssrc="\/js\/main\.js\?v=[0-9a-f]{10}"/.test(scripts[0]), `${rel}: ${scripts[0]}`);
     }
   }
 });

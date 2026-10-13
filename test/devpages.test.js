@@ -69,7 +69,7 @@ test("(c) layout-test renders its own title and body inside the full chrome, wit
   assert.equal(count(html, "<h1"), 1, "expected exactly one <h1>");
   assert.ok(html.includes('<main id="main">'), "missing <main id=\"main\">");
   assert.ok(/<a href="#main" class="skip-link">/.test(html), "missing skip link to #main");
-  assert.ok(html.includes('src="/js/main.js"'), "missing /js/main.js");
+  assert.ok(html.includes('src="/js/main.js?v='), "missing /js/main.js");
 
   const header = block(html, "header");
   assert.ok(header.includes("hud-btn header-cta"), "missing header Discord CTA");

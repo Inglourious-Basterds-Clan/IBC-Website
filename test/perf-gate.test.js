@@ -315,7 +315,8 @@ test("P10 data-js hook with an unsafe name fails", () => {
 });
 
 test("P10 initial JS gzip over the cap fails", () => {
-  const files = { ...cleanSite(), "js/modules/lightbox.js": `/* ${noise(10000)} */\n${lightboxJs}` };
+  // Base64 noise gzips to about 0.75 B per character, so twice the cap in characters is over it.
+  const files = { ...cleanSite(), "js/modules/lightbox.js": `/* ${noise(BUDGET.initialJsGzipMaxBytes * 2)} */\n${lightboxJs}` };
   const problems = check("p10-js-too-big", files);
   assertRule(problems, "index.html", 10);
   // 404.html has no lightbox hook, so it does not pay for that module.

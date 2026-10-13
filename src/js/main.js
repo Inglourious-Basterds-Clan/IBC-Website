@@ -4,14 +4,17 @@
 // frozen loader map below, and a module specifier is never built from attribute text.
 // Literal relative specifiers resolve against this file's own URL, so they work at the
 // site root and under a path prefix alike. A page fetches only the modules it has hooks for.
+// WR-01: the build's ?v=<hash> on this file's URL is appended to each module URL, so a
+// deploy never mixes cached modules with new HTML. Hook text still only selects a key.
+const version = new URL(import.meta.url).search;
 const loaders = Object.freeze({
-  menu: () => import('./modules/menu.js'),
-  lightbox: () => import('./modules/lightbox.js'),
-  terminal: () => import('./modules/terminal.js'),
-  'scroll-spy': () => import('./modules/scroll-spy.js'),
-  'easter-egg': () => import('./modules/easter-egg.js'),
-  'discord-badge': () => import('./modules/discord-badge.js'),
-  'hash-redirect': () => import('./modules/hash-redirect.js')
+  menu: () => import('./modules/menu.js' + version),
+  lightbox: () => import('./modules/lightbox.js' + version),
+  terminal: () => import('./modules/terminal.js' + version),
+  'scroll-spy': () => import('./modules/scroll-spy.js' + version),
+  'easter-egg': () => import('./modules/easter-egg.js' + version),
+  'discord-badge': () => import('./modules/discord-badge.js' + version),
+  'hash-redirect': () => import('./modules/hash-redirect.js' + version)
 });
 
 export function initFeatures(root, featureLoaders) {

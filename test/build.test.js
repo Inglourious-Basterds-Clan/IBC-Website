@@ -76,14 +76,14 @@ test("default build emits the site", () => {
   assert.ok(listFiles(join(out, "img"), [".avif"]).length > 0, "no AVIF variant under img/");
   const html = read(out, "index.html");
   assert.match(html, stylesheetHref("/"), "stylesheet is not root-relative");
-  assert.ok(html.includes('src="/js/main.js"'), "script is not root-relative");
+  assert.ok(html.includes('src="/js/main.js?v='), "script is not root-relative");
 });
 
 test("prefix build rewrites root-relative URLs", () => {
   const out = build("build-prefix", { PATH_PREFIX: "/IBC-Website/" });
   const html = read(out, "index.html");
   assert.match(html, stylesheetHref("/IBC-Website/"), "stylesheet missing the prefix");
-  assert.ok(html.includes('src="/IBC-Website/js/main.js"'), "script missing the prefix");
+  assert.ok(html.includes('src="/IBC-Website/js/main.js?v='), "script missing the prefix");
   assert.ok(attrValues(html, "src").every((value) => value !== "."), 'empty src rewritten to "."');
 
   for (const page of allHtml(out)) {
