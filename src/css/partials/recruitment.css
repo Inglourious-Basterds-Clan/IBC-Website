@@ -129,6 +129,26 @@
   gap: 10px;
 }
 
+/* Discord button + live badge (CONT-07): the group is the card's last flex child, so
+   space-between keeps the button at the bottom */
+.recruitment-instructions .recruitment-cta-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* One non-wrapping line: the live count replaces text inside it and moves nothing (D-16) */
+.discord-badge {
+  font-family: var(--font-hud);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 /* Terminal line colours, former inline styles (D-12): the error tag and the easter-egg alert line
    use the same #ef4444 the scripts wrote inline; other tags inherit the .terminal-body accent */
 .terminal-line .tag-error {

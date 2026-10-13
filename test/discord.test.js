@@ -143,6 +143,45 @@ test("end to end: the built data-api-url becomes live member and online text", a
   assert.equal(el.online.textContent, " · 108 online");
 });
 
+/* --- BUILD OUTPUT GUARANTEES (D-14, D-16) --- */
+const stripTags = (html) => html.replace(/<[^>]*>/g, "");
+
+test("the badge reads 'Discord: N+ osób/osoby/osoba' with an empty online span", () => {
+  for (const outDir of [out.root, out.prefix]) {
+    const [badge] = badges(read(outDir, "index.html"));
+    assert.ok(stripTags(badge.inner).startsWith("Discord: "), `badge text: ${stripTags(badge.inner)}`);
+    assert.match(spanText(badge.inner, "discord-badge-members"), /^\d+\+ (?:osób|osoby|osoba)$/);
+    assert.equal(spanText(badge.inner, "discord-badge-online"), "", "an online count is baked into the HTML");
+  }
+});
+
+test("the badge sits in .recruitment-cta-group right after the Discord invite button", () => {
+  for (const outDir of [out.root, out.prefix]) {
+    const html = read(outDir, "index.html");
+    const groups = Array.from(html.matchAll(/<div class="recruitment-cta-group">([\s\S]*?)<\/p>\s*<\/div>/g), (match) => match[1]);
+    assert.equal(groups.length, 1, "expected one recruitment-cta-group holding the badge");
+    const group = groups[0];
+    const anchor = group.match(/^\s*<a\b([^>]*)>[\s\S]*?<\/a>\s*<p\b[^>]*\sdata-js="discord-badge"/);
+    assert.ok(anchor, "the badge does not directly follow the Discord anchor");
+    assert.deepEqual(attrValues(anchor[1], "href"), [site.discord.invite]);
+  }
+});
+
+test("the 20+ active members stat is unchanged next to the badge", () => {
+  for (const outDir of [out.root, out.prefix]) {
+    const html = read(outDir, "index.html");
+    assert.match(html, /<h3>20\+<\/h3>\s*<p>Aktywnych członków<\/p>/);
+    assert.ok(!/discord-badge[^"]*"[^>]*>[^<]*członk/i.test(html), "the badge claims clan members");
+  }
+});
+
+test("under the prefix build data-api-url stays the absolute, unprefixed Discord API URL", () => {
+  const [badge] = badges(read(out.prefix, "index.html"));
+  const [apiUrl] = attrValues(badge.open, "data-api-url");
+  assert.ok(apiUrl.startsWith("https://discord.com/api/v10/invites/"), apiUrl);
+  assert.ok(!apiUrl.includes("IBC-Website"), apiUrl);
+});
+
 /* --- lib/discord.js: INVITE URL --- */
 test("inviteCode reads the last path segment and rejects a missing or malformed code", () => {
   assert.equal(inviteCode("https://discord.gg/DhJwkeehJK"), "DhJwkeehJK");
