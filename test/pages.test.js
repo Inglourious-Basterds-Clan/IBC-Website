@@ -135,8 +135,13 @@ for (const [key, variant] of Object.entries(variants)) {
 
   test(`(${key} build) join page: every drafted FAQ entry carries its marker comment (CONT-06)`, () => {
     const items = new Map(faqItems(page()).map((item) => [item.id, item]));
+    // WR-02: confirming an entry (deleting its draft line, FACTS.md) leaves nothing to check here,
+    // so a fully confirmed FAQ is valid; a confirmed entry must not keep a marker comment.
     const drafted = (join.faq || []).filter((entry) => entry.draft);
-    assert.ok(drafted.length > 0, "no drafted FAQ entry: the non-D-02 answers must be marked");
+    for (const entry of (join.faq || []).filter((entry) => !entry.draft)) {
+      assert.ok(items.has(entry.id), `FAQ ${entry.id} missing from the page`);
+      assert.doesNotMatch(items.get(entry.id).raw, /<!-- TODO\(FACTS-\d+\) -->/, `confirmed FAQ ${entry.id} still carries a marker comment`);
+    }
     for (const entry of drafted) {
       assert.ok(items.has(entry.id), `FAQ ${entry.id} missing from the page`);
       assert.ok(items.get(entry.id).raw.includes(`<!-- ${entry.draft} -->`), `FAQ ${entry.id} lacks <!-- ${entry.draft} -->`);
@@ -268,8 +273,10 @@ for (const [key, variant] of Object.entries(variants)) {
 
   test(`(${key} build) operations page: drafted evening and OCAP texts carry their markers (CONT-06)`, () => {
     const evening = operationsBlock(page(), "typowy-wieczor");
-    assert.ok(operations.evening.draft, "the evening times must stay marked until confirmed");
-    assert.ok(evening.includes(`<!-- ${operations.evening.draft} -->`), `#typowy-wieczor lacks <!-- ${operations.evening.draft} -->`);
+    // WR-02: the marker is checked only while it exists; confirming FACTS-07 deletes it.
+    if (operations.evening.draft) {
+      assert.ok(evening.includes(`<!-- ${operations.evening.draft} -->`), `#typowy-wieczor lacks <!-- ${operations.evening.draft} -->`);
+    }
     for (const step of operations.evening.steps.filter((entry) => entry.draft)) {
       assert.ok(evening.includes(`<!-- ${step.draft} -->`), `step ${step.name} lacks <!-- ${step.draft} -->`);
     }
@@ -329,7 +336,7 @@ test("(unit) formatPlDate rejects invalid or non-ISO input", () => {
   }
 });
 
-test("(data) operations.recaps: 3–5 drafted entries with mission types and committed images (CONT-04, D-11)", () => {
+test("(data) operations.recaps: 3–5 entries with mission types and committed images (CONT-04, D-11)", () => {
   const recaps = operations.recaps;
   assert.ok(Array.isArray(recaps), "operations.recaps is not an array");
   assert.ok(recaps.length >= 3 && recaps.length <= 5, `operations.recaps has ${recaps.length} entries, expected 3–5`);
@@ -338,18 +345,23 @@ test("(data) operations.recaps: 3–5 drafted entries with mission types and com
   const dates = recaps.map((recap) => recap.date);
   assert.equal(new Set(dates).size, dates.length, `duplicate recap dates: ${dates.join(", ")}`);
   for (const recap of recaps) {
-    assert.match(recap.draft || "", /^TODO\(FACTS-\d+\)$/, `recap "${recap.title}" has no TODO(FACTS-NN) draft marker`);
+    // WR-02: a confirmed or newly added recap has no draft field; a present one must be well-formed.
+    if ("draft" in recap) assert.match(recap.draft, /^TODO\(FACTS-\d+\)$/, `recap "${recap.title}".draft is not a TODO(FACTS-NN) marker`);
     assert.ok(typeNames.includes(recap.type), `recap "${recap.title}" type "${recap.type}" is not one of ${typeNames.join(", ")}`);
     assert.ok(committed.includes(`src/images/${recap.file}`), `recap image ${recap.file} is not a committed original under src/images/`);
     assert.match(recap.date, /^\d{4}-\d{2}-\d{2}$/, `recap "${recap.title}" date is not ISO`);
-    assert.ok(recap.date < operations.lastUpdate.date, `recap "${recap.title}" is dated after the last update`);
+    // README "Nowa relacja" sets lastUpdate.date to today, so a recap of today's operation is valid.
+    assert.ok(recap.date <= operations.lastUpdate.date, `recap "${recap.title}" is dated after the last update`);
     for (const field of ["title", "setting", "text", "alt"]) {
       assert.equal(typeof recap[field], "string", `recap ${recap.file}.${field} is not a string`);
       assert.ok(recap[field].trim() !== "", `recap ${recap.file}.${field} is empty`);
       assert.doesNotMatch(recap[field], /TODO|FACTS-\d+/, `recap ${recap.file}.${field} holds a marker (markers belong in draft)`);
     }
   }
-  assert.match((operations.lastUpdate || {}).draft || "", /^TODO\(FACTS-\d+\)$/, "lastUpdate has no draft marker");
+  assert.ok(operations.lastUpdate, "operations.lastUpdate is missing");
+  if ("draft" in operations.lastUpdate) {
+    assert.match(operations.lastUpdate.draft, /^TODO\(FACTS-\d+\)$/, "lastUpdate.draft is not a TODO(FACTS-NN) marker");
+  }
 });
 
 // Every <article class="recap-card ..."> as { raw, datetime, meta }.
@@ -393,7 +405,11 @@ for (const [key] of Object.entries(variants)) {
       assert.ok(card.meta.includes(formatPlDate(recap.date)), `meta "${card.meta}" lacks the Polish date`);
       assert.ok(card.meta.includes(recap.setting), `meta "${card.meta}" lacks the setting`);
       assert.ok(card.meta.includes(recap.type), `meta "${card.meta}" lacks the type`);
-      assert.ok(card.raw.includes(`<!-- ${recap.draft} -->`), `recap ${recap.file} lacks <!-- ${recap.draft} -->`);
+      if (recap.draft) {
+        assert.ok(card.raw.includes(`<!-- ${recap.draft} -->`), `recap ${recap.file} lacks <!-- ${recap.draft} -->`);
+      } else {
+        assert.doesNotMatch(card.raw, /<!-- TODO\(FACTS-\d+\) -->/, `confirmed recap ${recap.file} still carries a marker comment`);
+      }
     }
   });
 
@@ -403,7 +419,9 @@ for (const [key] of Object.entries(variants)) {
     const updated = /<p class="recaps-updated">([\s\S]*?)<\/p>/.exec(html);
     assert.ok(updated, "no p.recaps-updated");
     assert.match(updated[1], new RegExp(`Ostatnia aktualizacja: <time datetime="${lastUpdate.date}">`), updated[1]);
-    assert.ok(updated[1].includes(`<!-- ${lastUpdate.draft} -->`), `p.recaps-updated lacks <!-- ${lastUpdate.draft} -->`);
+    if (lastUpdate.draft) {
+      assert.ok(updated[1].includes(`<!-- ${lastUpdate.draft} -->`), `p.recaps-updated lacks <!-- ${lastUpdate.draft} -->`);
+    }
   });
 }
 
