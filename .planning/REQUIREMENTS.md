@@ -45,9 +45,9 @@ Requirements for this milestone. Each maps to a roadmap phase.
 - [x] **CONT-02**: `/jak-dolaczyc/` has a 12–16 question Polish FAQ
 - [x] **CONT-03**: `/operacje/` shows schedule, mission types, eras and a "typowy wieczór" timeline
 - [x] **CONT-04**: `/operacje/` shows 3–5 dated operation recaps
-- [ ] **CONT-05**: Nav links to real pages, and old `#hash` links redirect to the matching new page
-- [ ] **CONT-06**: Facts drafted by Claude are marked TODO and listed in `FACTS.md`; the user confirms them before publishing
-- [ ] **CONT-07**: Live Discord badge (members/online) with a static fallback, labelled so it doesn't conflict with "20+ aktywnych członków"
+- [x] **CONT-05**: Nav links to real pages, and old `#hash` links redirect to the matching new page
+- [x] **CONT-06**: Facts drafted by Claude are marked TODO and listed in `FACTS.md`; the user confirms them before publishing
+- [x] **CONT-07**: Live Discord badge (members/online) with a static fallback, labelled so it doesn't conflict with "20+ aktywnych członków"
 
 ### Accessibility
 
@@ -128,9 +128,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CONT-02 | Phase 4 | Complete |
 | CONT-03 | Phase 4 | Complete |
 | CONT-04 | Phase 4 | Complete |
-| CONT-05 | Phase 4 | Pending |
-| CONT-06 | Phase 4 | Pending |
-| CONT-07 | Phase 4 | Pending |
+| CONT-05 | Phase 4 | Complete |
+| CONT-06 | Phase 4 | Complete |
+| CONT-07 | Phase 4 | Complete |
 | A11Y-01 | Phase 5 | Pending |
 | A11Y-02 | Phase 5 | Pending |
 | A11Y-03 | Phase 5 | Pending |

@@ -3,16 +3,16 @@ gsd_state_version: "1.0"
 current_phase: 04
 current_phase_name: Join & Operations Pages
 status: executing
-stopped_at: Completed 04-07-PLAN.md
-last_updated: "2026-10-13T18:22:57.646Z"
+stopped_at: Completed 04-08-PLAN.md
+last_updated: "2026-10-13T18:32:00.493Z"
 last_activity: 2026-10-13
 last_activity_desc: Phase 04 execution resumed (wave continue)
-state_head: eab377eac9497be74884acdec5a1e05a610843bf
+state_head: f72f9d26e9ec0cef8d1c6a1f8dcdb1eeca1e0398
 progress:
   total_phases: 5
   completed_phases: 3
   total_plans: 32
-  completed_plans: 31
+  completed_plans: 32
   percent: 60
 ---
 
@@ -28,9 +28,9 @@ See: .planning/PROJECT.md (updated 2026-10-11)
 ## Current Position
 
 Phase: 04 (Join & Operations Pages) — EXECUTING
-Plan: 5 of 8
-Status: Ready to execute
-Last activity: 2026-10-13 — Phase 04 execution resumed (wave continue)
+Plan: 8 of 8
+Status: All plans complete — ready for phase verification
+Last activity: 2026-10-13 — Completed 04-08 (WR-01 JS versioning, README, phase gate)
 
 Progress: [██████░░░░] 60%
 
@@ -86,6 +86,7 @@ Progress: [██████░░░░] 60%
 | Phase 04 P05 | 6 min | 2 tasks | 2 files |
 | Phase 04 P06 | 4 min | 2 tasks | 3 files |
 | Phase 04 P07 | 7 min | 3 tasks | 12 files |
+| Phase 04 P08 | 6 min | 2 tasks | 13 files |
 
 ## Accumulated Context
 
@@ -163,6 +164,8 @@ Recent decisions affecting current work:
 - [Phase 04]: 04-06: pages.css follows the approved UI-SPEC over plan text (PD-1 120px mobile breadcrumb clearance, PD-2/3/4/6, h1 2.2rem); CSS 4661 B gz, cap 5120 unchanged
 - [Phase 04]: 04-07: legacy #recruitment redirect follows the href of a real a[data-legacy-hash] link via location.replace; no URL or selector is built from location.hash
 - [Phase 04]: 04-07: nav is Start/O nas/Operacje/Dołącz; current subpage marked at build time (active-nav + aria-current); initial JS 6097 of 6144 B gz, check-perf caps unchanged
+- [Phase 04]: WR-01 closed: main.js loaded as /js/main.js?v=<sha256 of src/js, 10 hex> (lib/js.js) and forwards its ?v= to every module import
+- [Phase 04]: BUDGET.initialJsGzipMaxBytes raised 6144 -> 7936 (measured 6226 B gz on 2026-10-13 after versioned imports, +25 %)
 
 ### Pending Todos
 
@@ -195,6 +198,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-10-13T18:22:57.445Z
-Stopped at: Completed 04-07-PLAN.md
+Last session: 2026-10-13T18:32:00.308Z
+Stopped at: Completed 04-08-PLAN.md
 Resume file: None
