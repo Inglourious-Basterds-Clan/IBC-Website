@@ -15,6 +15,7 @@
 
   <!-- MAIN CANVAS -->
   <main id="main">
+{% if breadcrumb %}{% include "partials/breadcrumbs.njk" %}{% endif %}
 {{ content | safe }}
   </main>
 

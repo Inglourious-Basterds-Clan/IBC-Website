@@ -1,0 +1,9 @@
+{#- SEO-06, D-17: visible trail for pages whose front matter has `breadcrumb`; head.njk emits the
+    matching BreadcrumbList. An ordered list, never an unordered one: header.css and menu.js target `nav ul` (Pitfall 12).
+    Hrefs stay root-relative; HtmlBasePlugin adds the path prefix. #}
+<nav class="breadcrumbs" aria-label="Ścieżka nawigacji">
+  <ol>
+    <li><a href="/">Start</a></li>
+    <li><a href="{{ page.url }}" aria-current="page">{{ breadcrumb }}</a></li>
+  </ol>
+</nav>

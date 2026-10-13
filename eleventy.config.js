@@ -4,7 +4,7 @@ import { cpSync, mkdirSync } from "node:fs";
 import { basename, join } from "node:path";
 import site from "./src/_data/site.js";
 import { isIndexableUrl } from "./lib/seo.js";
-import { buildSchemaGraph, jsonLd } from "./lib/schema.js";
+import { buildPageGraph, buildSchemaGraph, jsonLd } from "./lib/schema.js";
 import { processImages } from "./lib/images.js";
 import { renderIcon } from "./lib/icons.js";
 import { getCssBundle, resetCssBundle } from "./lib/css.js";
@@ -18,6 +18,8 @@ export default function (eleventyConfig) {
 
   // Home-page JSON-LD (SEO-05, D-14): site -> Organization + WebSite graph -> "<"-escaped JSON.
   eleventyConfig.addFilter("schemaGraph", buildSchemaGraph);
+  // Subpage JSON-LD (SEO-06, D-17): front matter breadcrumb -> BreadcrumbList (+ FAQPage) graph.
+  eleventyConfig.addFilter("pageGraph", buildPageGraph);
   eleventyConfig.addFilter("jsonLd", jsonLd);
 
   // Build-time images (D-01): lib/images.js encodes every variant once per process into .cache/img/.
