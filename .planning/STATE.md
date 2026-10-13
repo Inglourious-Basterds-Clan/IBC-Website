@@ -4,10 +4,10 @@ current_phase: 04
 current_phase_name: Join & Operations Pages
 status: executing
 stopped_at: Completed 04-08-PLAN.md
-last_updated: "2026-10-13T20:54:00.588Z"
+last_updated: "2026-10-13T22:07:22.677Z"
 last_activity: 2026-10-13
 last_activity_desc: Phase 04 execution resumed (wave continue)
-state_head: 8f148f8760ad2e243fa6ddf04f5b9b7d086e4919
+state_head: c8f586d47c71d6d10fa085220c20adb3164cba9a
 progress:
   total_phases: 5
   completed_phases: 3
@@ -188,6 +188,7 @@ None. (2026-10-08 mobile LCP todo resolved by Phase 3: PSI mobile 100.)
 |---|-------------|------|--------|-----------|
 | 261008-vmd | Bump sharp to 0.35.5 in tools/seo-images | 2026-10-08 | 03ce0de | [261008-vmd-bump-sharp-to-0-35-5-in-tools-seo-images](./quick/261008-vmd-bump-sharp-to-0-35-5-in-tools-seo-images/) |
 | 261013-vh0 | Remove the Discord member badge (phase 04 WR-01, GDPR) | 2026-10-13 | 8f148f8 | [261013-vh0-remove-discord-member-badge](./quick/261013-vh0-remove-discord-member-badge/) |
+| 3 | Drop the two AI-image recaps (patrol.jpg, sniper.jpg) from /operacje/ | 2026-10-14 | c8f586d | — |
 
 ## Deferred Items
 
