@@ -115,8 +115,12 @@
   opacity: 0.9;
 }
 
-.recruitment-instructions .recruitment-steps {
-  margin-bottom: 25px;
+/* "Pełna instrukcja →" text link to /jak-dolaczyc/ in the HUD style (D-06) */
+.recruitment-instructions .recruitment-more {
+  display: inline-block;
+  margin-bottom: 20px;
+  font-family: var(--font-hud);
+  color: var(--accent-color);
 }
 
 .recruitment-instructions .recruitment-cta {
